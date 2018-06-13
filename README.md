@@ -8,7 +8,7 @@ Since this is my very first attempt of creating my own ioBroker adapter and also
 
 ## Requirements
 * A Nuki Smart Lock (obviously) and a Nuki (hardware or software) Bridge.
-* A running instance of ioBroker.  
+* A running instance of ioBroker.
 
 ## Changelog
 
