@@ -1,28 +1,29 @@
 {
-  "name": "iobroker.template",
-  "version": "0.6.0",
-  "description": "ioBroker template Adapter",
+  "name": "iobroker.nuki",
+  "version": "0.0.1",
+  "description": "ioBroker Nuki Adapter",
   "author": {
-    "name": "@@Author@@",
-    "email": "@@email@@"
+    "name": "smaragdschlange",
+    "email": "smaragdschlange@gmx.de"
   },
   "contributors": [
     {
-      "name": "@@Author@@",
-      "email": "@@email@@"
+      "name": "smaragdschlange",
+      "email": "smaragdschlange@gmx.de"
     }
   ],
-  "homepage": "https://github.com/ioBroker/ioBroker.template",
+  "homepage": "https://github.com/ioBroker/ioBroker.nuki",
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "template",
+    "Nuki",
+    "Smart Lock",
     "Smart Home",
     "home automation"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ioBroker/ioBroker.template"
+    "url": "https://github.com/ioBroker/ioBroker.nuki"
   },
   "dependencies": {},
   "devDependencies": {
@@ -35,7 +36,7 @@
     "test": "node node_modules/mocha/bin/mocha --exit"
   },
   "bugs": {
-    "url": "https://github.com/ioBroker/ioBroker.template/issues"
+    "url": "https://github.com/ioBroker/ioBroker.nuki/issues"
   },
   "readmeFilename": "README.md"
 }
