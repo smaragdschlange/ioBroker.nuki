@@ -1,26 +1,8 @@
 {
     "common": {
-        "name": "template",
-        "version": "0.6.0",
+        "name": "nuki",
+        "version": "0.0.1",
         "news": {
-            "0.6.0": {
-                "en": "Support of admin3",
-                "de": "Unterstützung von admin3",
-                "ru": "Поддержка admin3",
-                "pt": "Suporte de admin3",
-                "nl": "Ondersteuning van admin3",
-                "fr": "Support de admin3",
-                "it": "Supporto di admin3",
-                "es": "Soporte de admin3"
-            },
-            "0.5.0": {
-                "en": "beta version",
-                "de": "Betaversion",
-                "ru": "Бета версия",
-                "pt": "Versão beta",
-                "fr": "Version bêta",
-                "nl": "Beta versie"
-            },
             "0.0.1": {
                 "en": "initial adapter",
                 "de": "Initiale Version",
@@ -30,29 +12,23 @@
                 "nl": "Eerste release"
             }
         },
-		"title": "Javascript/Node.js based template adapter",
+		"title": "Nuki adapter",
         "titleLang": {
-            "en": "Javascript/Node.js based template adapter",
-            "de": "Javascript / Node.js basierte Vorlagenadapter",
-            "ru": "Адаптер шаблонов на основе Javascript / Node.js",
-            "pt": "Adaptador de modelo baseado em Javascript / Node.js",
-            "nl": "Javascript / Node.js gebaseerde sjabloonadapter",
-            "fr": "Javascript / Node.js basé adaptateur de modèle",
-            "it": "Adattatore modello basato su Javascript / Node.js",
-            "es": "Adaptador de plantilla basado en JavaScript / Node.js"
+            "en": "Javascript/Node.js based Nuki adapter",
+            "de": "Javascript / Node.js basiertes Nukiadapter"
         },
         "desc": {
-            "en": "ioBroker template Adapter",
-            "de": "ioBroker Template Adapter",
-            "ru": "ioBroker Template драйвер как образец",
-            "pt": "Modelo de adaptador para o ioBroker",
-            "fr": "ioBroker adaptateur modèle",
-            "nl": "ioBroker Template Adapter",
-            "it": "Adattatore modello ioBroker",
-            "es": "Adaptador de plantilla ioBroker"
+            "en": "ioBroker Nuki Adapter",
+            "de": "ioBroker Nuki Adapter",
+            "ru": "ioBroker Nuki драйвер как образец",
+            "pt": "Nuki adaptador para o ioBroker",
+            "fr": "ioBroker adaptateur Nuki",
+            "nl": "ioBroker Nuki Adapter",
+            "it": "Adattatore Nuki ioBroker",
+            "es": "Adaptador de Nuki ioBroker"
         },
         "authors": [
-            "my Name <my@email.com>"
+            "smaragdschlange <smaragdschlange@gmx.de>"
         ],
         "docs": {
             "en": "docs/en/admin.md",
@@ -66,12 +42,12 @@
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
-        "icon": "template.png",
+        "icon": "nuki-logo-black.png",
         "materialize": true,
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.template/master/admin/template.png",
-        "keywords": ["template", "vis", "GUI", "graphical", "scada"],
-        "readme": "https://github.com/ioBroker/ioBroker.template/blob/master/README.md",
+        "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo-black.png",
+        "keywords": ["nuki", "vis", "GUI", "graphical", "scada"],
+        "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
         "type": "general",
         "restartAdapters": ["vis"]
