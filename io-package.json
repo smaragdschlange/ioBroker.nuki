@@ -18,14 +18,14 @@
             "de": "Javascript / Node.js basiertes Nukiadapter"
         },
         "desc": {
-            "en": "ioBroker Nuki Adapter",
-            "de": "ioBroker Nuki Adapter",
-            "ru": "ioBroker Nuki драйвер как образец",
-            "pt": "Nuki adaptador para o ioBroker",
-            "fr": "ioBroker adaptateur Nuki",
-            "nl": "ioBroker Nuki Adapter",
-            "it": "Adattatore Nuki ioBroker",
-            "es": "Adaptador de Nuki ioBroker"
+            "en": "This adapter allows to control and monitor the Nuki Smart Lock",
+            "de": "Dieser Adapter ermöglicht die Steuerung und Überwachung des Nuki Smart Lock",
+            "ru": "Этот адаптер позволяет контролировать и контролировать Nuki Smart Lock",
+            "pt": "Este adaptador permite controlar e monitorar o Nuki Smart Lock",
+            "fr": "Cet adaptateur permet de contrôler et de surveiller le Nuki Smart Lock",
+            "nl": "Met deze adapter kunt u de Nuki Smart Lock bedienen en controleren",
+            "it": "Questo adattatore consente di controllare e monitorare Nuki Smart Lock",
+            "es": "Este adaptador permite controlar y monitorear el Nuki Smart Lock"
         },
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>"
@@ -46,17 +46,15 @@
         "materialize": true,
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo.png",
-        "keywords": ["nuki", "vis", "GUI", "graphical", "scada"],
+        "keywords": ["nuki", "smart", "lock"],
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
-        "type": "general",
+        "type": "hardware",
         "restartAdapters": ["vis"]
     },
     "native": {
-        "test1": true,
-        "test2": 42,
-        "mySelect": "auto"
-    },
+        "ip": ""
+    },  
     "objects": [
 
     ]
