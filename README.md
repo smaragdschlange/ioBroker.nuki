@@ -1,4 +1,4 @@
-![Logo](admin/nuki-logo-black.png)
+![Logo](admin/nuki-logo.png)
 # ioBroker.nuki
 =================
 
