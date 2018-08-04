@@ -5,11 +5,7 @@
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
-                "de": "Initiale Version",
-                "ru": "Первоначальный адаптер",
-                "pt": "Versão inicial",
-                "fr": "Version initiale",
-                "nl": "Eerste release"
+                "de": "Initiale Version"
             }
         },
 		"title": "Nuki adapter",
@@ -19,26 +15,14 @@
         },
         "desc": {
             "en": "This adapter allows to control and monitor the Nuki Smart Lock",
-            "de": "Dieser Adapter ermöglicht die Steuerung und Überwachung des Nuki Smart Lock",
-            "ru": "Этот адаптер позволяет контролировать и контролировать Nuki Smart Lock",
-            "pt": "Este adaptador permite controlar e monitorar o Nuki Smart Lock",
-            "fr": "Cet adaptateur permet de contrôler et de surveiller le Nuki Smart Lock",
-            "nl": "Met deze adapter kunt u de Nuki Smart Lock bedienen en controleren",
-            "it": "Questo adattatore consente di controllare e monitorare Nuki Smart Lock",
-            "es": "Este adaptador permite controlar y monitorear el Nuki Smart Lock"
+            "de": "Dieser Adapter ermöglicht die Steuerung und Überwachung des Nuki Smart Lock"
         },
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>"
         ],
         "docs": {
             "en": "docs/en/admin.md",
-            "ru": "docs/ru/admin.md",
-            "de": "docs/de/admin.md",
-            "es": "docs/es/admin.md",
-            "it": "docs/it/admin.md",
-            "fr": "docs/fr/admin.md",
-            "nl": "docs/nl/admin.md",
-            "pt": "docs/pt/admin.md"
+            "de": "docs/de/admin.md"
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
@@ -53,7 +37,7 @@
         "restartAdapters": ["vis"]
     },
     "native": {
-        "ip": ""
+        "ip": "192.168.1.50"
     },  
     "objects": [
 
