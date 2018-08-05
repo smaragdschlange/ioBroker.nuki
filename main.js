@@ -65,9 +65,9 @@ adapter.on('ready', function () {
 
 function main() {
 
-    let bridgeName = (adapter.config.name === "") ? bridgeName : adapter.config.name;
-    var bridgeIp = adapter.config.ip;
-    var bridgePort = adapter.config.port;
+    let bridgeName = (adapter.config.bridge_name === "") ? bridgeName : adapter.config.bridge_name;
+    var bridgeIp = adapter.config.bridge_ip;
+    var bridgePort = adapter.config.bridge_port;
     var bridgeToken = adapter.config.token;
     var bridgeUrl = bridgeIp + ':' + bridgePort;
     
