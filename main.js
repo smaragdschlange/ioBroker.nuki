@@ -67,7 +67,6 @@ function main() {
     var bridgeIp = adapter.config.bridge_ip;
     var bridgePort = adapter.config.bridge_port;
     var bridgeToken = adapter.config.token;
-    var bridgeUrl = bridgeIp + ':' + bridgePort;
     let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
     
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
@@ -102,7 +101,7 @@ function main() {
     if (bridgeIp != '192.168.1.0') {
         request(
             {
-                url: bridgeUrl + '/list?token='+ bridgeToken,
+                url: bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken,
                 json: true
             },
             function (error, response, content) {
