@@ -1,11 +1,15 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
                 "de": "Initiale Version"
+            },
+            "0.0.2": {
+                "en": "added input parameters",
+                "de": "Eingabeparameter hinzugefügt"
             }
         },
 		"title": "Nuki adapter",
@@ -37,7 +41,9 @@
         "restartAdapters": ["vis"]
     },
     "native": {
-        "ip": "192.168.1.50"
+        "bridge_name": "Nuki bridge",
+        "bridge_ip": "192.168.1.50",
+        "bridge_port": "8080"
     },  
     "objects": [
 
