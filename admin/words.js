@@ -4,11 +4,11 @@
 
 systemDictionary = {
     "Auto":                                                 {"en": "Auto",                                                  "de": "Auto"},
-    "Manual":                                               {"en": "Manual",                                                "de": "Manual"},
-    "Nuki adapter settings":                                {"en": "Nuki adapter settings",                                 "de": "Nuki Adaptereinstellungen"},
-    "Name of the Nuki bridge":                              {"en": "Name of the Nuki bridge",                               "de": "Name der Nuki bridge"},
-    "Nuki bridge IP":                                       {"en": "IP adress of the Nuki Bridge",                          "de": "IP-Adresse der Nuki Bridge"},
-    "Nuki bridge port":                                     {"en": "Port of the Nuki Bridge",                               "de": "Port der Nuki Bridge"},
-    "Token":                                                {"en": "Token",                                                 "de": "Token"},
-    "on save adapter restarts with new config immediately": {"en": "on save adapter restarts with new config immediately",  "de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet."}
+    "Manual":                                               {"en": "Manual",                                                "de": "Manuell"},
+    "settings":                                             {"en": "Nuki adapter settings",                                 "de": "Nuki Adaptereinstellungen"},
+    "name":                                                 {"en": "Name of the Nuki bridge",                               "de": "Name der Nuki bridge"},
+    "ip":                                                   {"en": "IP address",                                            "de": "IP-Adresse"},
+    "port":                                                 {"en": "Port",                                                  "de": "Port"},
+    "token":                                                {"en": "Token",                                                 "de": "Token"},
+    "on save adapter restarts with new config immediately": {"en": "on save adapter restarts with new config immediately",  "de": "Beim Speichern der Einstellungen wird der Adapter sofort neu gestartet."}
 };

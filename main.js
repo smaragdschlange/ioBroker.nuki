@@ -3,32 +3,6 @@
  * nuki adapter
  *
  *
- *  file io-package.json comments:
- *
- *  {
- *      "common": {
- *          "name":         "nuki",                     // name has to be set and has to be equal to adapters folder name and main file name excluding extension
- *          "version":      "0.0.1",                    // use "Semantic Versioning"! see http://semver.org/
- *          "title":        "Node.js Nuki Adapter",     // Adapter title shown in User Interfaces
- *          "authors":  [                               // Array of authord
- *              "name <smaragdschlange@gmx.de>"
- *          ]
- *          "desc":         "Nuki adapter",             // Adapter description shown in User Interfaces. Can be a language object {de:"...",ru:"..."} or a string
- *          "platform":     "Javascript/Node.js",       // possible values "javascript", "javascript/Node.js" - more coming
- *          "mode":         "daemon",                   // possible values "daemon", "schedule", "subscribe"
- *          "materialize":  true,                       // support of admin3
- *          "schedule":     "0 0 * * *"                 // cron-style schedule. Only needed if mode=schedule
- *          "loglevel":     "info"                      // Adapters Log Level
- *      },
- *      "native": {                                     // the native object is available via adapter.config in your adapters code - use it for configuration
- *          "test1": true,
- *          "test2": 42,
- *          "mySelect": "auto"
- *      }
- *  }
- *
- */
-
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 'use strict';
@@ -40,6 +14,8 @@ var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
+
+var getLockList = require('getLockList');
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -89,12 +65,18 @@ adapter.on('ready', function () {
 
 function main() {
 
+    let bridgeName = (adapter.config.name === "") ? bridgeName : adapter.config.name;
+    var bridgeIp = adapter.config.ip;
+    var bridgePort = adapter.config.port;
+    var bridgeToken = adapter.config.token;
+    var bridgeUrl = bridgeIp + ':' + bridgePort;
+    
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
     // adapter.config:
-    adapter.log.info('config test1: '    + adapter.config.test1);
-    adapter.log.info('config test1: '    + adapter.config.test2);
-    adapter.log.info('config mySelect: ' + adapter.config.mySelect);
-
+    adapter.log.debug('config Nuki bridge name: '   + bridgeName);
+    adapter.log.debug('config IP address: '         + bridgeIp);
+    adapter.log.debug('config port: '               + bridgePort);
+    adapter.log.debug('config token: '              + bridgeToken);
 
     /**
      *
@@ -105,6 +87,53 @@ function main() {
      *      Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
      *
      */
+
+    adapter.setObjectNotExists(bridgeUrl + '.name', {
+        type: 'state',
+            common: {
+                name: 'name',
+                type: 'string',
+                role: 'text'
+            },
+        native: {}
+    });
+
+    adapter.setState(bridgeUrl + '.name', {val: bridgeName, ack: true});
+
+    getLockList(
+        {
+            url: bridgeUrl + '/list?token='+ bridgeToken,
+            json: true
+        },
+        function (error, response, content) {
+            adapter.log.debug('Lock list requested');
+
+            if (!error && response.statusCode == 200) {
+
+                if (content && content.hasOwnProperty('nukiId')) {
+                    for (var lockId in content) {
+                        var obj = content.nukiId[lockId];
+
+                        adapter.setObjectNotExists(bridgeUrl + '.' + obj.value_type, {
+                            type: 'state',
+                            common: {
+                                name: obj.value_type,
+                                type: 'number',
+                                role: 'value'
+                            },
+                            native: {}
+                        });
+                        adapter.setState(bridgeUrl + '.' + obj.value_type, {val: obj.value, ack: true});
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
 
     adapter.setObject('testVariable', {
         type: 'state',

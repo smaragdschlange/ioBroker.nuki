@@ -1,9 +1,10 @@
 {
   "Auto": "Auto",
-  "Manual": "Manual",
-  "My select": "Mein Auswahl",
-  "on save adapter restarts with new config immediately": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",
-  "template adapter settings": "Beispiel",
-  "test1": "Test 1",
-  "test2": "Test 2"
+  "Manual": "Manuell",
+  "settings": "Nuki Adaptereinstellungen",
+  "name": "Name der Nuki Bridge",
+  "ip": "IP-Adresse",
+  "port": "Port",
+  "token": "Token",
+  "on save adapter restarts with new config immediately": "Beim Speichern der Einstellungen wird der Adapter sofort neu gestartet."
 }

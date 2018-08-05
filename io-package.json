@@ -41,9 +41,10 @@
         "restartAdapters": ["vis"]
     },
     "native": {
-        "bridge_name": "Nuki bridge",
-        "bridge_ip": "192.168.1.50",
-        "bridge_port": "8080"
+        "name": "Nuki bridge",
+        "ip": "192.168.1.50",
+        "port": "8080",
+        "token": ""
     },  
     "objects": [
 
