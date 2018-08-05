@@ -8,14 +8,13 @@
 'use strict';
 
 // you have to require the utils module and call adapter function
-var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
+var utils = require(__dirname + '/lib/utils'); // Get common adapter utils
+var request = require('request');
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
-
-var getLockList = require('getLockList');
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -100,7 +99,7 @@ function main() {
 
     adapter.setState(bridgeUrl + '.name', {val: bridgeName, ack: true});
 
-    getLockList(
+    request(
         {
             url: bridgeUrl + '/list?token='+ bridgeToken,
             json: true
