@@ -8,6 +8,7 @@ systemDictionary = {
     "settings":                                             {"en": "Nuki adapter settings",                                 "de": "Nuki Adaptereinstellungen"},
     "name":                                                 {"en": "Name of the Nuki bridge",                               "de": "Name der Nuki bridge"},
     "ip":                                                   {"en": "IP address",                                            "de": "IP-Adresse"},
+    "ipeg":                                                 {"en": "e.g. 192.168.1.50",                                     "de": "z.B. 192.168.1.50"},
     "port":                                                 {"en": "Port",                                                  "de": "Port"},
     "token":                                                {"en": "Token",                                                 "de": "Token"},
     "on save adapter restarts with new config immediately": {"en": "on save adapter restarts with new config immediately",  "de": "Beim Speichern der Einstellungen wird der Adapter sofort neu gestartet."}

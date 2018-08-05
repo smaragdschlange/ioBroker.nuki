@@ -98,15 +98,14 @@ function main() {
 
     adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
 
-    if (bridgeIp != '192.168.1.0') {
+    if (bridgeIp != '') {
         request(
             {
                 url: bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken,
                 json: true
-            },
+            },  
             function (error, response, content) {
                 adapter.log.info('Lock list requested');
-                adapter.log.debug('Lock list requested' + url)
 
                 if (!error && response.statusCode == 200) {
 

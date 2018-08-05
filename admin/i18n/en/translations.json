@@ -4,6 +4,7 @@
   "settings": "Nuki adapter settings",
   "name": "name of the Nuki bridge",
   "ip": "IP address",
+  "ipeg": "e.g. 192.168.1.50",
   "port": "port",
   "token": "token",
   "on save adapter restarts with new config immediately": "On save adapter restarts with new config immediately."
