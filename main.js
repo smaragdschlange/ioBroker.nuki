@@ -64,11 +64,11 @@ adapter.on('ready', function () {
 
 function main() {
 
-    let bridgeName = (adapter.config.bridge_name === "") ? bridgeName : adapter.config.bridge_name;
     var bridgeIp = adapter.config.bridge_ip;
     var bridgePort = adapter.config.bridge_port;
     var bridgeToken = adapter.config.token;
     var bridgeUrl = bridgeIp + ':' + bridgePort;
+    let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
     
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
     // adapter.config:
@@ -87,7 +87,7 @@ function main() {
      *
      */
 
-    adapter.setObjectNotExists(bridgeUrl + '.name', {
+    adapter.setObjectNotExists(bridgeName + '.name', {
         type: 'state',
             common: {
                 name: 'name',
@@ -97,7 +97,7 @@ function main() {
         native: {}
     });
 
-    adapter.setState(bridgeUrl + '.name', {val: bridgeName, ack: true});
+    adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
 
     request(
         {
@@ -110,19 +110,19 @@ function main() {
             if (!error && response.statusCode == 200) {
 
                 if (content && content.hasOwnProperty('nukiId')) {
-                    for (var lockId in content) {
-                        var obj = content.nukiId[lockId];
+                    for (var nukilock in content) {
+                        var obj = content[nukilock];
 
-                        adapter.setObjectNotExists(bridgeUrl + '.' + obj.value_type, {
+                        adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
                             type: 'state',
                             common: {
-                                name: obj.value_type,
+                                name: obj.nukiId,
                                 type: 'number',
                                 role: 'value'
                             },
                             native: {}
                         });
-                        adapter.setState(bridgeUrl + '.' + obj.value_type, {val: obj.value, ack: true});
+                        adapter.setState(bridgeName + '.' + obj.nukiId, {val: obj.name, ack: true});
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
@@ -133,16 +133,6 @@ function main() {
             }
         }
     )
-
-    adapter.setObject('testVariable', {
-        type: 'state',
-        common: {
-            name: 'testVariable',
-            type: 'boolean',
-            role: 'indicator'
-        },
-        native: {}
-    });
 
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');
@@ -156,7 +146,7 @@ function main() {
      */
 
     // the variable testVariable is set to true as command (ack=false)
-    adapter.setState('testVariable', true);
+    /*adapter.setState('testVariable', true);
 
     // same thing, but the value is flagged "ack"
     // ack should be always set to true if the value is received from or acknowledged from the target system
@@ -174,7 +164,7 @@ function main() {
 
     adapter.checkGroup('admin', 'admin', function (res) {
         console.log('check group user admin group admin: ' + res);
-    });
+    });*/
 
 
 
