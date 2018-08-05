@@ -72,10 +72,10 @@ function main() {
     
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
     // adapter.config:
-    adapter.log.debug('config Nuki bridge name: '   + bridgeName);
-    adapter.log.debug('config IP address: '         + bridgeIp);
-    adapter.log.debug('config port: '               + bridgePort);
-    adapter.log.debug('config token: '              + bridgeToken);
+    adapter.log.info('config Nuki bridge name: '   + bridgeName);
+    adapter.log.info('config IP address: '         + bridgeIp);
+    adapter.log.info('config port: '               + bridgePort);
+    adapter.log.info('config token: '              + bridgeToken);
 
     /**
      *
@@ -99,40 +99,43 @@ function main() {
 
     adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
 
-    request(
-        {
-            url: bridgeUrl + '/list?token='+ bridgeToken,
-            json: true
-        },
-        function (error, response, content) {
-            adapter.log.debug('Lock list requested');
+    if (bridgeIp != '192.168.1.0') {
+        request(
+            {
+                url: bridgeUrl + '/list?token='+ bridgeToken,
+                json: true
+            },
+            function (error, response, content) {
+                adapter.log.info('Lock list requested');
+                adapter.log.debug('Lock list requested' + url)
 
-            if (!error && response.statusCode == 200) {
+                if (!error && response.statusCode == 200) {
 
-                if (content && content.hasOwnProperty('nukiId')) {
-                    for (var nukilock in content) {
-                        var obj = content[nukilock];
+                    if (content && content.hasOwnProperty('nukiId')) {
+                        for (var nukilock in content) {
+                            var obj = content[nukilock];
 
-                        adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
-                            type: 'state',
-                            common: {
-                                name: obj.nukiId,
-                                type: 'number',
-                                role: 'value'
-                            },
-                            native: {}
-                        });
-                        adapter.setState(bridgeName + '.' + obj.nukiId, {val: obj.name, ack: true});
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
+                                type: 'state',
+                                common: {
+                                    name: obj.nukiId,
+                                    type: 'number',
+                                    role: 'value'
+                                },
+                                native: {}
+                            });
+                            adapter.setState(bridgeName + '.' + obj.nukiId, {val: obj.name, ack: true});
+                        }
+                    } else {
+                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
                     }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                }
 
-            } else {
-                adapter.log.error(error);
+                } else {
+                    adapter.log.error(error);
+                }
             }
-        }
-    )
+        )
+    }
 
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');

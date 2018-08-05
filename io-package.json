@@ -42,7 +42,7 @@
     },
     "native": {
         "bridge_name": "Nuki bridge",
-        "bridge_ip": "192.168.1.50",
+        "bridge_ip": "192.168.1.0",
         "bridge_port": "8080",
         "token": ""
     },  
