@@ -69,49 +69,49 @@ function main() {
     var bridgeToken = adapter.config.token;
     let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
     var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
-    
-    // The adapters config (in the instance object everything under the attribute "native") is accessible via
-    // adapter.config:
-    adapter.log.info('config Nuki bridge name: '   + bridgeName);
-    adapter.log.info('config IP address: '         + bridgeIp);
-    adapter.log.info('config port: '               + bridgePort);
-    adapter.log.info('config token: '              + bridgeToken);
+ 
+    if (bridgeIp != '') {   
+        // The adapters config (in the instance object everything under the attribute "native") is accessible via
+        // adapter.config:
+        adapter.log.info('config Nuki bridge name: '   + bridgeName);
+        adapter.log.info('config IP address: '         + bridgeIp);
+        adapter.log.info('config port: '               + bridgePort);
+        adapter.log.info('config token: '              + bridgeToken);
 
-    /**
-     *
-     *      For every state in the system there has to be also an object of type state
-     *
-     *      Here a simple template for a boolean variable named "testVariable"
-     *
-     *      Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-     *
-     */
+        /**
+         *
+         *      For every state in the system there has to be also an object of type state
+         *
+         *      Here a simple template for a boolean variable named "testVariable"
+         *
+         *      Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
+         *
+         */
 
-    adapter.setObjectNotExists(bridgeName + '.name', {
-        type: 'state',
-            common: {
-                name: 'name',
-                type: 'string',
-                role: 'text'
-            },
-        native: {}
-    });
+        adapter.setObjectNotExists(bridgeName + '.name', {
+            type: 'state',
+                common: {
+                    name: 'name',
+                    type: 'string',
+                    role: 'text'
+                },
+            native: {}
+        });
 
-    adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
+        adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
 
-    if (bridgeIp != '') {
         request(
             {
                 url: lockListUrl,
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.info('Lock list requested');
-                adapter.log.debug(lockListUrl);
+                adapter.log.info('Lock list requested: ' + lockListUrl);
 
                 if (!error && response.statusCode == 200) {
 
-                    if (content && content.hasOwnProperty('nukiId')) {
+                    // if (content && content.hasOwnProperty('nukiId')) {
+                    if (content) {
                         for (var nukilock in content) {
                             var obj = content[nukilock];
 
