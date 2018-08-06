@@ -103,7 +103,6 @@ function main() {
         request(
             {
                 url: lockListUrl,
-                // url: 'http://192.168.178.66:8080/list?token=6ln4f0',
                 json: true
             },  
             function (error, response, content) {

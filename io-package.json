@@ -14,8 +14,8 @@
         },
 		"title": "Nuki adapter",
         "titleLang": {
-            "en": "Javascript/Node.js based Nuki adapter",
-            "de": "Javascript / Node.js basiertes Nukiadapter"
+            "en": "Nuki Smart Lock adapter",
+            "de": "Nuki Smart Lock Adapter"
         },
         "desc": {
             "en": "This adapter allows to control and monitor the Nuki Smart Lock",

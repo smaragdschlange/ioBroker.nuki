@@ -15,6 +15,9 @@ Since this is my very first attempt of creating my own ioBroker adapter and also
 ### 0.0.1
 * (smaragdschlange) initial release
 
+### 0.0.2
+* (smaragdschlange) added input parameters
+
 ## License
 The MIT License (MIT)
 
