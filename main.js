@@ -68,7 +68,7 @@ function main() {
     var bridgePort = adapter.config.bridge_port;
     var bridgeToken = adapter.config.token;
     let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
-    var lockListUrl = bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
+    var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
     
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
     // adapter.config:
