@@ -68,6 +68,7 @@ function main() {
     var bridgePort = adapter.config.bridge_port;
     var bridgeToken = adapter.config.token;
     let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+    var lockListUrl = bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
     
     // The adapters config (in the instance object everything under the attribute "native") is accessible via
     // adapter.config:
@@ -101,8 +102,8 @@ function main() {
     if (bridgeIp != '') {
         request(
             {
-                /*url: bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken,*/
-                url: 'http://192.168.178.66:8080/list?token=6ln4f0',
+                url: lockListUrl,
+                // url: 'http://192.168.178.66:8080/list?token=6ln4f0',
                 json: true
             },  
             function (error, response, content) {
