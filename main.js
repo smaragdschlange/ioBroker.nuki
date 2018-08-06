@@ -107,6 +107,7 @@ function main() {
             },  
             function (error, response, content) {
                 adapter.log.info('Lock list requested');
+                adapter.log.debug(lockListUrl);
 
                 if (!error && response.statusCode == 200) {
 
