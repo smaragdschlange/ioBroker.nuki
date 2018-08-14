@@ -88,17 +88,17 @@ function main() {
          *
          */
 
-        adapter.setObjectNotExists(bridgeName + '.name', {
-            type: 'state',
-                common: {
-                    name: 'name',
-                    type: 'string',
-                    role: 'text'
-                },
-            native: {}
-        });
+        // adapter.setObjectNotExists(bridgeName + '.name', {
+        //     type: 'state',
+        //         common: {
+        //             name: 'name',
+        //             type: 'string',
+        //             role: 'text'
+        //         },
+        //     native: {}
+        // });
 
-        adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
+        // adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
 
         request(
             {
@@ -111,20 +111,67 @@ function main() {
                 if (!error && response.statusCode == 200) {
 
                     // if (content && content.hasOwnProperty('nukiId')) {
-                    if (content) {
+                    if (content && content[0].hasOwnProperty('nukiId')) { 
+                    // if (content) {
                         for (var nukilock in content) {
                             var obj = content[nukilock];
 
                             adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
+                                type: 'device',
+                                common: {
+                                    name: obj.name
+                                },
+                                native: {}
+                            });
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.state', {
                                 type: 'state',
                                 common: {
-                                    name: obj.nukiId,
+                                    name: 'Status',
                                     type: 'number',
                                     role: 'value'
                                 },
                                 native: {}
                             });
-                            adapter.setState(bridgeName + '.' + obj.nukiId, {val: obj.name, ack: true});
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.state', {val: obj.lastKnownState.state, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.stateName', {
+                                type: 'state',
+                                common: {
+                                    name: 'Statustext',
+                                    type: 'string',
+                                    role: 'text'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.stateName', {val: obj.lastKnownState.stateName, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.batteryCritical', {
+                                type: 'state',
+                                common: {
+                                    name: 'Batterie schwach',
+                                    type: 'boolean',
+                                    role: 'value'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.batteryCritical', {val: obj.lastKnownState.batteryCritical, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.timestamp', {
+                                type: 'state',
+                                common: {
+                                    name: 'Statustext',
+                                    type: 'string',
+                                    role: 'time'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.timestamp', {val: obj.lastKnownState.timestamp, ack: true});
+
                         }
                     } else {
                         adapter.log.warn('Response has no valid content. Check IP address and try again.');
