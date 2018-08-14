@@ -111,8 +111,8 @@ function main() {
                 if (!error && response.statusCode == 200) {
 
                     // if (content && content.hasOwnProperty('nukiId')) {
-                    if (content && content[0].hasOwnProperty('nukiId')) { 
-                    // if (content) {
+                    // if (content && content[0].hasOwnProperty('nukiId')) { 
+                    if (content) {
                         for (var nukilock in content) {
                             var obj = content[nukilock];
 
