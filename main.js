@@ -8,37 +8,18 @@
 'use strict';
 
 // you have to require the utils module and call adapter function
-var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
-var express    = require('express');        // call express
-var request    = require('request');
+var utils = require(__dirname + '/lib/utils'); // Get common adapter utils
+var request = require('request');
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
 
-// global config variables
-var bridgeIp = adapter.config.bridge_address;
-var bridgePort = adapter.config.bridge_port;
-var bridgeToken = adapter.config.token;
-let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
-var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
- 
-// REST server
-var webServer  = null;
-var app        = null;
-var router     = null;
-var timer      = null;
-
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
         adapter.log.info('cleaned everything up...');
-        if (webServer) {
-            webServer.close();
-            webServer = null;
-        }
-        if (timer) clearInterval(timer);
         callback();
     } catch (e) {
         callback();
@@ -83,6 +64,12 @@ adapter.on('ready', function () {
 
 function main() {
 
+    var bridgeIp = adapter.config.bridge_ip;
+    var bridgePort = adapter.config.bridge_port;
+    var bridgeToken = adapter.config.token;
+    let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+    var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
+ 
     if (bridgeIp != '') {   
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // adapter.config:
@@ -126,13 +113,65 @@ function main() {
                     // if (content && content.hasOwnProperty('nukiId')) {
                     // if (content && content[0].hasOwnProperty('nukiId')) { 
                     if (content) {
-
-                        // initWebServer(adapter.config);
-
                         for (var nukilock in content) {
                             var obj = content[nukilock];
 
-                            set_states(obj);
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
+                                type: 'device',
+                                common: {
+                                    name: obj.name
+                                },
+                                native: {}
+                            });
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.state', {
+                                type: 'state',
+                                common: {
+                                    name: 'Status',
+                                    type: 'number',
+                                    role: 'value'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.state', {val: obj.lastKnownState.state, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.stateName', {
+                                type: 'state',
+                                common: {
+                                    name: 'Statustext',
+                                    type: 'string',
+                                    role: 'text'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.stateName', {val: obj.lastKnownState.stateName, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.batteryCritical', {
+                                type: 'state',
+                                common: {
+                                    name: 'Batterie schwach',
+                                    type: 'boolean',
+                                    role: 'indicator.lowbat'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.batteryCritical', {val: obj.lastKnownState.batteryCritical, ack: true});
+
+                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.timestamp', {
+                                type: 'state',
+                                common: {
+                                    name: 'Statustext',
+                                    type: 'string',
+                                    role: 'time'
+                                },
+                                native: {}
+                            });
+                            
+                            adapter.setState(bridgeName + '.' + obj.nukiId + '.timestamp', {val: obj.lastKnownState.timestamp, ack: true});
+
                         }
                     } else {
                         adapter.log.warn('Response has no valid content. Check IP address and try again.');
@@ -158,139 +197,19 @@ function main() {
 
     // the variable testVariable is set to true as command (ack=false)
     /*adapter.setState('testVariable', true);
-
     // same thing, but the value is flagged "ack"
     // ack should be always set to true if the value is received from or acknowledged from the target system
     adapter.setState('testVariable', {val: true, ack: true});
-
     // same thing, but the state is deleted after 30s (getState will return null afterwards)
     adapter.setState('testVariable', {val: true, ack: true, expire: 30});
-
-
-
     // examples for the checkPassword/checkGroup functions
     adapter.checkPassword('admin', 'iobroker', function (res) {
         console.log('check user admin pw ioboker: ' + res);
     });
-
     adapter.checkGroup('admin', 'admin', function (res) {
         console.log('check group user admin group admin: ' + res);
     });*/
 
+
+
 }
-
-function set_states(_nukilock){
-
-    var path = bridgeName + '.' + _nukilock;
-
-    adapter.setObjectNotExists(path.nukiId, {
-        type: 'device',
-        common: {
-            name: _nukilock.name
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(path.nukiId + '.state', {
-        type: 'state',
-        common: {
-            name: 'Status',
-            type: 'number',
-            role: 'value'
-        },
-        native: {}
-    });
-    
-    adapter.setState(path.nukiId + '.state', {val: _nukilock.lastKnownState.state, ack: true});
-    // adapter.subscribeStates(path.nukiId + '.state');
-
-    adapter.setObjectNotExists(path.nukiId + '.stateName', {
-        type: 'state',
-        common: {
-            name: 'Statustext',
-            type: 'string',
-            role: 'text'
-        },
-        native: {}
-    });
-    
-    adapter.setState(path.nukiId + '.stateName', {val: _nukilock.lastKnownState.stateName, ack: true});
-
-    adapter.setObjectNotExists(path.nukiId + '.batteryCritical', {
-        type: 'state',
-        common: {
-            name: 'Batterie schwach',
-            type: 'boolean',
-            role: 'value'
-        },
-        native: {}
-    });
-    
-    adapter.setState(path.nukiId + '.batteryCritical', {val: _nukilock.lastKnownState.batteryCritical, ack: true});
-    // adapter.subscribeStates(path.nukiId + '.batteryCritical');
-
-    adapter.setObjectNotExists(path.nukiId + '.timestamp', {
-        type: 'state',
-        common: {
-            name: 'Statustext',
-            type: 'string',
-            role: 'time'
-        },
-        native: {}
-    });
-    
-    adapter.setState(path.nukiId + '.timestamp', {val: _nukilock.lastKnownState.timestamp, ack: true});
-    
-}
-
-// function initWebServer(_settings) {
-//     app    = express();
-//     router = express.Router();
-
-//     // install authentication
-//     // app.get('/', function (req, res) {
-//     //     if (_settings.auth) {
-//     //         var b64auth = (req.headers.authorization || '').split(' ')[1] || '';
-//     //         var loginPass = new Buffer(b64auth, 'base64').toString().split(':');
-//     //         var login     = loginPass[0];
-//     //         var password  = loginPass[1];
-
-//     //         // Check in ioBroker user and password
-//     //         adapter.checkPassword(login, password, function (result) {
-//     //             if (!result) {
-//     //                 adapter.log.error('Wrong user or password: ' + login);
-//     //                 res.set('WWW-Authenticate', 'Basic realm="nope"');
-//     //                 res.status(401).send('You shall not pass.');
-//     //             } else {
-//     //                 req.user = login;
-//     //             }
-//     //         });
-//     //     } else {
-//     //         req.user = _settings.defaultUser;
-//     //     }
-//     // });
-
-//     // add route cases
-//     addRoutes(router);
-
-//     // REGISTER OUR ROUTES -------------------------------
-//     // all of our routes will be prefixed with /api
-//     app.use('/api', router);
-
-//     if (_settings.port) {
-//         webServer = LE.createServer(app, adapter.config, adapter.config.certificates, adapter.config.leConfig, adapter.log);
-
-//         adapter.getPort(_settings.port, function (port) {
-//             if (port != _settings.port && !adapter.config.findNextPort) {
-//                 adapter.log.error('port ' + _settings.port + ' already in use');
-//                 process.exit(1);
-//             }
-//             webServer.listen(port, _settings.bind, function() {
-//                 adapter.log.info('Server listening on http' + (_settings.secure ? 's' : '') + '://' + _settings.bind + ':' + port);
-//             });
-//         });
-//     } else {
-//         adapter.log.error('port missing');
-//         process.exit(1);
-//     }
-// }
