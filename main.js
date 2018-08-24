@@ -18,7 +18,7 @@ var request    = require('request');
 var adapter = new utils.Adapter('nuki');
 
 // global config variables
-var bridgeIp = adapter.config.bridge_ip;
+var bridgeIp = adapter.config.bridge_address;
 var bridgePort = adapter.config.bridge_port;
 var bridgeToken = adapter.config.token;
 let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
