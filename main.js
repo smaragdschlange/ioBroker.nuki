@@ -90,6 +90,18 @@ function initNukiStates(_obj){
         common: {
             name: 'Status',
             type: 'number',
+            states: {
+                '0': 'uncalibrated',
+                '1': 'locked',
+                '2': 'unlocking',
+                '3': 'unlocked',
+                '4': 'locking',
+                '5': 'unlatched',
+                '6': 'unlocked (lock n go)',
+                '7': 'unlatching',
+                '254': 'motor blocked',
+                '255': 'undefined',
+            },
             role: 'value'
         },
         native: {}
