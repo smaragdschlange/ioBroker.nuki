@@ -148,7 +148,7 @@ function setLockState(_nukiId, _nukiState) {
     adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
     adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
     adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
-    adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
+    // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
 
     if (_nukiState.hasOwnProperty('timestamp')) {
         adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
