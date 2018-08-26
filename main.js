@@ -48,13 +48,10 @@ adapter.on('stateChange', function (id, state) {
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
-        adapter.log.info('ack is not set!');
-    } else if (state) {
         if (state.val != 0) {
             setLockAction(nukiId, state.val);
         } 
     }
-    getLockState(nukiId);
 });
 
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
@@ -148,7 +145,7 @@ function setLockState(_nukiId, _nukiState) {
     adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
     adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
     adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
-    // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
+    adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
 
     if (_nukiState.hasOwnProperty('timestamp')) {
         adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
@@ -202,6 +199,7 @@ function setLockAction(_nukiId, _action) {
                         adapter.log.warn('lock action ' + _action + ' not successfully set!');
                     } else {
                         adapter.log.info('lock action ' + _action + ' set successfully');
+                        getLockState(nukiId);
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
