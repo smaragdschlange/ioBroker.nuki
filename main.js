@@ -199,7 +199,7 @@ function setLockAction(_nukiId, _action) {
                         adapter.log.warn('lock action ' + _action + ' not successfully set!');
                     } else {
                         adapter.log.info('lock action ' + _action + ' set successfully');
-                        getLockState(nukiId);
+                        getLockState(_nukiId);
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
