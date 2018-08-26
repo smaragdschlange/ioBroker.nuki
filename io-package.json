@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.0.2",
+        "version": "0.0.4",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -10,6 +10,14 @@
             "0.0.2": {
                 "en": "added input parameters",
                 "de": "Eingabeparameter hinzugefügt"
+            },
+            "0.0.3": {
+                "en": "bug fixes and restructure",
+                "de": "Fehlerbehebung und Restruktuierung"
+            },
+            "0.0.4": {
+                "en": "added input parameter for lock actions",
+                "de": "Eingabeparameter für Lock-Aktion hinzugefügt"
             }
         },
 		"title": "Nuki adapter",

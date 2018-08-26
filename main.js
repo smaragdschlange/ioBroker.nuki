@@ -16,6 +16,12 @@ var request = require('request');
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
 
+// Global variables
+var bridgeIp;
+var bridgePort;
+var bridgeToken;
+var bridgeName;
+
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
@@ -34,13 +40,21 @@ adapter.on('objectChange', function (id, obj) {
 
 // is called if a subscribed state changes
 adapter.on('stateChange', function (id, state) {
+    var path = id.split('.',5);
+    var nukiId = path[3];
+
     // Warning, state can be null if it was deleted
     adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
         adapter.log.info('ack is not set!');
+    } else if (state) {
+        if (state.val != 0) {
+            setLockAction(nukiId, state.val);
+        } 
     }
+    getLockState(nukiId);
 });
 
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
@@ -62,160 +76,194 @@ adapter.on('ready', function () {
     main();
 });
 
-function main() {
+function initNukiStates(_obj){
+    var nukiState = _obj.lastKnownState;
+    var nukiPath = bridgeName + '.' + _obj.nukiId;
 
-    var bridgeIp = adapter.config.bridge_ip;
-    var bridgePort = adapter.config.bridge_port;
-    var bridgeToken = adapter.config.token;
-    let bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+    adapter.setObjectNotExists(nukiPath, {
+        type: 'channel',
+        common: {
+            name: _obj.name
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(nukiPath + '.state', {
+        type: 'state',
+        common: {
+            name: 'Status',
+            type: 'number',
+            role: 'value'
+        },
+        native: {}
+    });
+    
+    adapter.setObjectNotExists(nukiPath + '.stateName', {
+        type: 'state',
+        common: {
+            name: 'Statustext',
+            type: 'string',
+            role: 'text'
+        },
+        native: {}
+    });
+    
+    adapter.setObjectNotExists(nukiPath + '.batteryCritical', {
+        type: 'state',
+        common: {
+            name: 'Batterie schwach',
+            type: 'boolean',
+            role: 'indicator.lowbat'
+        },
+        native: {}
+    });
+    
+    adapter.setObjectNotExists(nukiPath + '.timestamp', {
+        type: 'state',
+        common: {
+            name: 'Zuletzt aktualisiert',
+            type: 'string',
+            role: 'time'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(nukiPath + '.lockAction', {
+        type: 'state',
+        common: {
+            name: 'Aktion',
+            type: 'number',
+            role: 'level'
+        },
+        native: {}
+    });
+
+    adapter.subscribeStates(nukiPath + '.lockAction');
+    setLockState(_obj.nukiId, nukiState);
+}
+
+function setLockState(_nukiId, _nukiState) {
+    var nukiPath = bridgeName + '.' + _nukiId;
+
+    adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
+    adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
+    adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
+    adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
+
+    if (_nukiState.hasOwnProperty('timestamp')) {
+        adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
+    } else {
+        adapter.setState(nukiPath + '.timestamp', {val: Date.timestamp, ack: true});
+    }
+}
+
+function getLockState(_nukiId) {
+    var lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&token=' + bridgeToken;
+
+    request(
+        {
+            url: lockStateUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.debug('lock state requested: ' + lockStateUrl);
+
+            if (!error && response.statusCode == 200) {
+                if (content && content.hasOwnProperty('success')) {
+                    if (content.success) {
+                        setLockState(_nukiId, content);
+                    } else {
+                        adapter.log.warn('Lock state has not been retrieved. Check if lock is connected to bridge and try again.');
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
+}
+
+function setLockAction(_nukiId, _action) {
+    var lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
+
+    request(
+        {
+            url: lockActionUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.debug('lock action requested: ' + lockActionUrl);
+
+            if (!error && response.statusCode == 200) {
+                if (content && content.hasOwnProperty('success')) {
+                    if (!content.success) {
+                        adapter.log.warn('lock action ' + _action + ' not successfully set!');
+                    } else {
+                        adapter.log.info('lock action ' + _action + ' set successfully');
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
+}
+
+function getLockList() {
     var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
- 
+
+    request(
+        {
+            url: lockListUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.info('Lock list requested: ' + lockListUrl);
+
+            if (!error && response.statusCode == 200) {
+                if (content) {
+
+                    adapter.setObjectNotExists(bridgeName, {
+                        type: 'device',
+                        common: {
+                            name: bridgeIp
+                        },
+                        native: {}
+                    });
+                    
+                    for (var nukilock in content) {
+                        var obj = content[nukilock];
+
+                        initNukiStates(obj);
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
+}
+
+function main() {
+    bridgeIp = adapter.config.bridge_ip;
+    bridgePort = adapter.config.bridge_port;
+    bridgeToken = adapter.config.token;
+    bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+
     if (bridgeIp != '') {   
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // adapter.config:
-        adapter.log.info('config Nuki bridge name: '   + bridgeName);
-        adapter.log.info('config IP address: '         + bridgeIp);
-        adapter.log.info('config port: '               + bridgePort);
-        adapter.log.info('config token: '              + bridgeToken);
+        adapter.log.debug('config Nuki bridge name: '   + bridgeName);
+        adapter.log.debug('config IP address: '         + bridgeIp);
+        adapter.log.debug('config port: '               + bridgePort);
+        adapter.log.debug('config token: '              + bridgeToken);
 
-        /**
-         *
-         *      For every state in the system there has to be also an object of type state
-         *
-         *      Here a simple template for a boolean variable named "testVariable"
-         *
-         *      Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-         *
-         */
-
-        // adapter.setObjectNotExists(bridgeName + '.name', {
-        //     type: 'state',
-        //         common: {
-        //             name: 'name',
-        //             type: 'string',
-        //             role: 'text'
-        //         },
-        //     native: {}
-        // });
-
-        // adapter.setState(bridgeName + '.name', {val: bridgeName, ack: true});
-
-        request(
-            {
-                url: lockListUrl,
-                json: true
-            },  
-            function (error, response, content) {
-                adapter.log.info('Lock list requested: ' + lockListUrl);
-
-                if (!error && response.statusCode == 200) {
-
-                    // if (content && content.hasOwnProperty('nukiId')) {
-                    // if (content && content[0].hasOwnProperty('nukiId')) { 
-                    if (content) {
-                        for (var nukilock in content) {
-                            var obj = content[nukilock];
-
-                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId, {
-                                type: 'device',
-                                common: {
-                                    name: obj.name
-                                },
-                                native: {}
-                            });
-
-                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.state', {
-                                type: 'state',
-                                common: {
-                                    name: 'Status',
-                                    type: 'number',
-                                    role: 'value'
-                                },
-                                native: {}
-                            });
-                            
-                            adapter.setState(bridgeName + '.' + obj.nukiId + '.state', {val: obj.lastKnownState.state, ack: true});
-
-                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.stateName', {
-                                type: 'state',
-                                common: {
-                                    name: 'Statustext',
-                                    type: 'string',
-                                    role: 'text'
-                                },
-                                native: {}
-                            });
-                            
-                            adapter.setState(bridgeName + '.' + obj.nukiId + '.stateName', {val: obj.lastKnownState.stateName, ack: true});
-
-                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.batteryCritical', {
-                                type: 'state',
-                                common: {
-                                    name: 'Batterie schwach',
-                                    type: 'boolean',
-                                    role: 'indicator.lowbat'
-                                },
-                                native: {}
-                            });
-                            
-                            adapter.setState(bridgeName + '.' + obj.nukiId + '.batteryCritical', {val: obj.lastKnownState.batteryCritical, ack: true});
-
-                            adapter.setObjectNotExists(bridgeName + '.' + obj.nukiId + '.timestamp', {
-                                type: 'state',
-                                common: {
-                                    name: 'Statustext',
-                                    type: 'string',
-                                    role: 'time'
-                                },
-                                native: {}
-                            });
-                            
-                            adapter.setState(bridgeName + '.' + obj.nukiId + '.timestamp', {val: obj.lastKnownState.timestamp, ack: true});
-
-                        }
-                    } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                    }
-
-                } else {
-                    adapter.log.error(error);
-                }
-            }
-        )
+        getLockList();
     }
-
-    // in this template all states changes inside the adapters namespace are subscribed
-    adapter.subscribeStates('*');
-
-
-    /**
-     *   setState examples
-     *
-     *   you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-     *
-     */
-
-    // the variable testVariable is set to true as command (ack=false)
-    /*adapter.setState('testVariable', true);
-
-    // same thing, but the value is flagged "ack"
-    // ack should be always set to true if the value is received from or acknowledged from the target system
-    adapter.setState('testVariable', {val: true, ack: true});
-
-    // same thing, but the state is deleted after 30s (getState will return null afterwards)
-    adapter.setState('testVariable', {val: true, ack: true, expire: 30});
-
-
-
-    // examples for the checkPassword/checkGroup functions
-    adapter.checkPassword('admin', 'iobroker', function (res) {
-        console.log('check user admin pw ioboker: ' + res);
-    });
-
-    adapter.checkGroup('admin', 'admin', function (res) {
-        console.log('check group user admin group admin: ' + res);
-    });*/
-
-
-
 }
