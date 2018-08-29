@@ -21,6 +21,11 @@ var bridgeIp;
 var bridgePort;
 var bridgeToken;
 var bridgeName;
+var hostCb;
+var hostPort;
+
+var ipInfo = require('ip');
+var sysIp = ipInfo.address();
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -220,11 +225,10 @@ function getLockList() {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.info('Lock list requested: ' + lockListUrl);
+            adapter.log.debug('Lock list requested: ' + lockListUrl);
 
             if (!error && response.statusCode == 200) {
                 if (content) {
-
                     adapter.setObjectNotExists(bridgeName, {
                         type: 'device',
                         common: {
@@ -248,11 +252,118 @@ function getLockList() {
     )
 }
 
+function checkCallback() {
+    var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
+    var cbUrl = 'http://' + sysIp + ':' + hostPort + '/nuki/callback';
+    var cbExists = '';
+
+    request(
+        {
+            url: cbListUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.info('Callback list requested: ' + cbListUrl);
+
+            if (!error && response.statusCode == 200) {
+                if (content && content.hasOwnProperty('callbacks')) {
+                    for (var row in content.callbacks) {
+                        var cbId = content.callbacks[row];
+                        if (cbId.url == cbUrl) {
+                            cbExists = 'x';
+                            if (hostCb == false) {
+                                removeCallback(cbId.id);
+                            }
+                        } 
+                    }
+                    if (hostCb == true) {
+                        if (cbExists == 'x') {
+                                adapter.log.info('Callback allready set: ' + cbUrl);
+                        } else if (cbId == '3') {
+                            adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
+                        } else {
+                            setCallback(cbUrl);
+                        }
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
+}
+
+function removeCallback(_id) {
+    var callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&token=' + bridgeToken;
+
+    if (hostCb == false) {
+        request(
+            {
+                url: callbackRemoveUrl,
+                json: true
+            },  
+            function (error, response, content) {
+                adapter.log.info('Callback removal requested: ' + callbackRemoveUrl);
+
+                if (!error && response.statusCode == 200) {
+                    if (content && content.hasOwnProperty('success')) {
+                        if (content.success) {
+                            adapter.log.info('Callback-ID successfully removed: ' + _id);
+                        } else {
+                            adapter.log.warn('Callback-ID could not be removed: ' + _id);
+                        }
+                    } else {
+                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                    }
+                } else {
+                    adapter.log.error(error);
+                }
+            }
+        ) 
+    }
+}
+
+function setCallback(_url) {
+    var callbackString = _url.replace(':', '%3A');
+    callbackString = callbackString.replace('/', '%2F');
+    var callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&token=' + bridgeToken;
+    
+    if (hostCb == true) {
+        request(
+            {
+                url: callbackAddUrl,
+                json: true
+            },  
+            function (error, response, content) {
+                adapter.log.info('Callback requested: ' + callbackAddUrl);
+
+                if (!error && response.statusCode == 200) {
+                    if (content && content.hasOwnProperty('success')) {
+                        if (content.success) {
+                            adapter.log.info('Callback successfully set: ' + _url);
+                        } else {
+                            adapter.log.warn('Callback could not be set: ' + _url);
+                        }
+                    } else {
+                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                    }
+                } else {
+                    adapter.log.error(error);
+                }
+            }
+        ) 
+    }
+}
+
 function main() {
     bridgeIp = adapter.config.bridge_ip;
     bridgePort = adapter.config.bridge_port;
     bridgeToken = adapter.config.token;
     bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+    hostPort = adapter.config.host_port;
+    hostCb = adapter.config.host_cb;
 
     if (bridgeIp != '') {   
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
@@ -263,5 +374,9 @@ function main() {
         adapter.log.debug('config token: '              + bridgeToken);
 
         getLockList();
+        // wait for 3 seconds for the service to be ready
+        setTimeout(function() {
+            checkCallback();
+        }, 3000); 
     }
 }

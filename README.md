@@ -24,11 +24,11 @@ Additionally, the channels provide an input parameter which enables basic contro
 
 Valid input values are:
 
-    * 1 (unlock)
-    * 2 (lock)
-    * 3 (unlatch)
-    * 4 (lock ‘n’ go)
-    * 5 (lock ‘n’ go with unlatch)
+    1 (unlock)
+    2 (lock)
+    3 (unlatch)
+    4 (lock ‘n’ go)
+    5 (lock ‘n’ go with unlatch)
 
 ## Additional information
 How to get your bridges token:
@@ -54,6 +54,9 @@ How to get your bridges token:
 
 ### 0.0.4
 * (smaragdschlange) added input parameter for lock actions
+
+### 0.0.5
+* (smaragdschlange) added support for nuki bridge callback (web server still to be added)
 
 ## License
 The MIT License (MIT)
