@@ -58,6 +58,9 @@ How to get your bridges token:
 ### 0.0.5
 * (smaragdschlange) added support for nuki bridge callback (web server still to be added)
 
+### 0.0.6
+* (smaragdschlange) additional states/actions and improved compatibility (callback still not completely working)
+
 ## License
 The MIT License (MIT)
 

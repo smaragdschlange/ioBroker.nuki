@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.0.5",
+        "version": "0.0.6",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -22,6 +22,10 @@
             "0.0.5": {
                 "en": "added support for nuki bridge callback (web server still to be added)",
                 "de": "Unterstützung von Callback der Nuki Bridge hinzugefügt (Webserver muss noch ergänzt werden)"
+            },
+            "0.0.6": {
+                "en": "additional states/actions and improved compatibility (callback still not completely working)",
+                "de": "Zusätzliche Status/Aktionen und verbesserte Kompatibilität (Callback funktioniert derzeit noch nicht ganz)"
             }
         },
 		"title": "Nuki adapter",
