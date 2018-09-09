@@ -61,6 +61,10 @@ How to get your bridges token:
 ### 0.0.6
 * (smaragdschlange) additional states/actions and improved compatibility (callback still not completely working)
 
+### 0.1.0
+* (smaragdschlange) callback finally working
+* (smaragdschlange) added another State
+
 ## License
 The MIT License (MIT)
 

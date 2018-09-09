@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.0.6",
+        "version": "0.1.0",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -26,6 +26,10 @@
             "0.0.6": {
                 "en": "additional states/actions and improved compatibility (callback still not completely working)",
                 "de": "Zusätzliche Status/Aktionen und verbesserte Kompatibilität (Callback funktioniert derzeit noch nicht ganz)"
+            },
+        "0.1.0": {
+                "en": "callback finally working, added another State",
+                "de": "Callback funktioniert nun endlich, ein weiterer Status hinzugefügt"
             }
         },
 		"title": "Nuki adapter",

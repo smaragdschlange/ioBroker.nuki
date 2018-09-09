@@ -1,6 +1,6 @@
 {
   "name": "iobroker.nuki",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "ioBroker Nuki Adapter",
   "author": {
     "name": "smaragdschlange",
@@ -25,7 +25,12 @@
     "type": "git",
     "url": "https://github.com/smaragdschlange/ioBroker.nuki"
   },
-  "dependencies": {},
+  "dependencies": {
+    "request": "^2.85.0",	
+    "express": "^4.16.3",
+    "body-parser": "^1.18.2",
+    "ip": "^1.1.0"
+  },
   "devDependencies": {
     "gulp": "^3.9.1",
     "mocha": "^4.1.0",

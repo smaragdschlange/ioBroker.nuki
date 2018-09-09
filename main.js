@@ -10,20 +10,19 @@
 // you have to require the utils module and call adapter function
 var utils       = require(__dirname + '/lib/utils'); // Get common adapter utils
 var express     = require('express');        // call express
-var jsonParser  = require("body-parser");
+var bodyParser  = require("body-parser");
 var request     = require('request');
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
-var LE      = require(utils.controllerDir + '/lib/letsencrypt.js');
 
 // REST server
-var webServer  = null;
-var app        = null;
-var router     = null;
-var timer      = null;
+var app     = express();
+var timer   = null;
+var ipInfo  = require('ip');
+var hostIp  = ipInfo.address();
 
 // Global variables
 var bridgeIp    = null;
@@ -33,16 +32,17 @@ var bridgeName  = null;
 var hostCb      = null;
 var hostPort    = null;
 
-var ipInfo = require('ip');
-var hostIp  = ipInfo.address();
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
+    adapter.log.info('cleaned everything up...');
     try {
-        adapter.log.info('cleaned everything up...');
-        if (webServer) {
-            webServer.close();
-            webServer = null;
+        setTimeout(function() {
+            checkCallback(false);
+        }, 1000); 
+        if (app) {
+            app.close();
+            app = null;
         }
         if (timer) clearInterval(timer);
         callback();
@@ -54,7 +54,7 @@ adapter.on('unload', function (callback) {
 // is called if a subscribed object changes
 adapter.on('objectChange', function (id, obj) {
     // Warning, obj can be null if it was deleted
-    adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
+    adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
 });
 
 // is called if a subscribed state changes
@@ -64,7 +64,7 @@ adapter.on('stateChange', function (id, state) {
     var actionState = path[4];
 
     // Warning, state can be null if it was deleted
-    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+    adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
@@ -91,17 +91,6 @@ adapter.on('stateChange', function (id, state) {
                 setLockAction(nukiId, '2');
             }
         }
-        // if (actionState == 'lockAction') {
-        //     if (state.val == true) {
-        //         setLockAction(nukiId, '1');
-        //     } else {
-        //         setLockAction(nukiId, '2');
-        //     }
-        // } else if (actionState == 'openAction') {
-        //     if (state.val == true) {
-        //         setLockAction(nukiId, '3');
-        //     }
-        // }
     }
 });
 
@@ -136,10 +125,10 @@ function initNukiStates(_obj){
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.state', {
+    adapter.setObjectNotExists(nukiPath + '.lockState', {
         type: 'state',
         common: {
-            name: 'Status',
+            name: 'Nuki abgeschlossen',
             type: 'boolean',
             write: false,
             role: 'sensor.lock'   
@@ -147,15 +136,38 @@ function initNukiStates(_obj){
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.stateName', {
+    adapter.setObjectNotExists(nukiPath + '.state', {
         type: 'state',
         common: {
-            name: 'Statustext',
-            type: 'string',
-            role: 'text'
+            name: 'Status',
+            type: 'number',
+            write: false,
+            states: {
+                '0': 'uncalibrated',
+                '1': 'locked',
+                '2': 'unlocking',
+                '3': 'unlocked',
+                '4': 'locking',
+                '5': 'unlatched',
+                '6': 'unlocked (lock n go)',
+                '7': 'unlatching',
+                '254': 'motor blocked',
+                '255': 'undefined',
+            },
+            role: 'value'
         },
         native: {}
     });
+
+    // adapter.setObjectNotExists(nukiPath + '.stateName', {
+    //     type: 'state',
+    //     common: {
+    //         name: 'Statustext',
+    //         type: 'string',
+    //         role: 'text'
+    //     },
+    //     native: {}
+    // });
     
     adapter.setObjectNotExists(nukiPath + '.batteryCritical', {
         type: 'state',
@@ -176,6 +188,24 @@ function initNukiStates(_obj){
         },
         native: {}
     });
+
+    // adapter.setObjectNotExists(nukiPath + '.lockAction', {
+    //     type: 'state',
+    //     common: {
+    //         name: 'Aktion',
+    //         type: 'number',
+    //         states: {
+    //             '0': '',
+    //             '1': 'unlock',
+    //             '2': 'lock',
+    //             '3': 'unlatch',
+    //             '4': 'lock‘n’go',
+    //             '5': 'lock‘n’go with unlatch',
+    //         },
+    //         role: 'value'
+    //     },
+    //     native: {}
+    // });
 
     adapter.setObjectNotExists(nukiPath + '.lockAction', {
         type: 'state',
@@ -235,7 +265,7 @@ function setLockState(_nukiId, _nukiState) {
         case 1:
             // fall through
         case 4:
-            adapter.setState(nukiPath + '.state', {val: false, ack: true});
+            adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: false, ack: true});
             break;
         case 2:
@@ -247,22 +277,25 @@ function setLockState(_nukiId, _nukiState) {
         case 6:
             // fall through
         case 7:
-            adapter.setState(nukiPath + '.state', {val: true, ack: true});
+            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
+            // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
             break;
         default:
-            adapter.setState(nukiPath + '.state', {val: true, ack: true});
+            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
+            // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
             break;
     } 
-
-    adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
+    
+    adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
+    // adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
     adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
 
     if (_nukiState.hasOwnProperty('timestamp')) {
         adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
     } else {
-        adapter.setState(nukiPath + '.timestamp', {val: Date.timestamp, ack: true});
+        adapter.setState(nukiPath + '.timestamp', {val: Date.now().timestamp, ack: true});
     }
 }
 
@@ -375,83 +408,35 @@ function getLockList(_init) {
     )
 }
 
-function addRoutes(_router) {
-    // test route to make sure everything is working (accessed at GET http://localhost:host_port/api)
-    _router.get('/', function (req, res) {
-        res.json({message: 'Welcome to our Nuki callback REST api!'});
+function initServer(_ip, _port) {
+    app.use(bodyParser.json()); // support json encoded bodies
+    app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+    // routes will go here
+    app.get('/api/:key', function(req, res) {
+        res.send('Hello ' + req.params.key + ' ;-)');
     });
 
-    _router.route('/nuki/callback')
-        .get(function (req, res) {
-            res.json({message: 'Callback erkannt'});
-            getLockList(false);
-            // getLockList(false);
-            // adapter.log.info(req.output);
-            // adapter.log.info(req.outputCallbacks);
-            // adapter.log.info(JSON.stringify(req.json));
-            // if (hasBody(req)) {
-            //     adapter.log.info('Callback-Body erkannt!');
-            // }
-            // adapter.log.info(req.output);
-            // if (req.body.hasOwnProperty('nukiId')) {
-            //     adapter.log.debug('Callback-Body erkannt!');
-            //     setLockState(req.body.nukiId, req.body);
-            // }
-        })
-        // // set states from (accessed at GET http://localhost:host_port/api/nuki/callback)
-        // .post(function (req, res) {
-        //     res.json({message: 'Callback erkannt (post)'});
-        //     adapter.log.info(JSON.stringify(req.body));
-        //     if (req.body.hasOwnProperty('nukiId')) {
-        //         adapter.log.info('Callback-Body erkannt!');
-        //         setLockState(req.body.nukiId, req.body);
-        //     }
-        // });
-}
+    // POST parameters sent with 
+    app.post('/api/nuki', function(req, res) {
+        var nukiId = req.body.nukiId;
+        var state = req.body.state;
+        var stateName = req.body.stateName;
+        var batteryCritical = req.body.batteryCritical;
+        var nukiState = { "state": state, "stateName": stateName,
+                            "batteryCritical": batteryCritical };
 
-function initWebServer() {
-    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki/callback';
-    app    = express();
-    router = express.Router();
-
-    // no authentication possible
-    app.get('/', function (req, res) {
-        req.user = 'admin';
+        setLockState(nukiId, nukiState);
     });
 
-    // // add route 
-    addRoutes(router);
-
-    // // REGISTER OUR ROUTES -------------------------------
-    // all of our routes will be prefixed with /api
-    app.use('/api', router);
-    // app.use(jsonParser.json({extended : true}));
-    // app.post(cbUrl, function(request, response) {
-    //     adapter.log.info(JSON.stringify(request.body));
-    // });
-
-    if (hostPort) {
-        // app.listen(hostPort);
-        webServer = LE.createServer(app, adapter.config, '', '', adapter.log);
-
-        adapter.getPort(hostPort, function (port) {
-            if (port != hostPort) {
-                adapter.log.error('port ' + hostPort + ' already in use');
-                process.exit(1);
-            }
-            webServer.listen(hostPort, hostIp, function() {
-                adapter.log.info('Server listening on http://' + hostIp + ':' + hostPort);
-            });
-        });
-    } else {
-        adapter.log.error('port missing');
-        process.exit(1);
-    }
+    // start the server
+    app.listen(_port, _ip);
+    adapter.log.info('Server listening to http://' + _ip + ':' + _port);
 }
 
-function checkCallback() {
+function checkCallback(_hostCb) {
     var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
-    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki/callback';
+    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki';
     var cbExists = '';
 
     request(
@@ -460,7 +445,7 @@ function checkCallback() {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.info('Callback list requested: ' + cbListUrl);
+            adapter.log.debug('Callback list requested: ' + cbListUrl);
 
             if (!error && response.statusCode == 200) {
                 if (content && content.hasOwnProperty('callbacks')) {
@@ -468,20 +453,22 @@ function checkCallback() {
                         var cbId = content.callbacks[row];
                         if (cbId.url == cbUrl) {
                             cbExists = 'x';
-                            if (hostCb == false) {
+                            if (_hostCb == false) {
                                 removeCallback(cbId.id);
+                                adapter.log.info('Callback should be removed: ' + cbUrl);
                             }
                         } 
                     }
-                    if (hostCb == true) {
+                    if (_hostCb == true) {
                         if (cbExists == 'x') {
                                 adapter.log.info('Callback allready set: ' + cbUrl);
-                                initWebServer();
+
+                                initServer(hostIp, hostPort);
                         } else if (cbId == '3') {
                             adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
                         } else {
+                            initServer(hostIp, hostPort);
                             setCallback(cbUrl);
-                            initWebServer();
                         }
                     }
                 } else {
@@ -504,7 +491,7 @@ function removeCallback(_id) {
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.info('Callback removal requested: ' + callbackRemoveUrl);
+                adapter.log.debug('Callback removal requested: ' + callbackRemoveUrl);
 
                 if (!error && response.statusCode == 200) {
                     if (content && content.hasOwnProperty('success')) {
@@ -536,7 +523,7 @@ function setCallback(_url) {
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.info('Callback requested: ' + callbackAddUrl);
+                adapter.log.debug('Callback requested: ' + callbackAddUrl);
 
                 if (!error && response.statusCode == 200) {
                     if (content && content.hasOwnProperty('success')) {
@@ -575,7 +562,7 @@ function main() {
         getLockList(true);
         // wait for 3 seconds for the service to be ready
         setTimeout(function() {
-            checkCallback();
+            checkCallback(hostCb);
         }, 3000); 
     }
 }
