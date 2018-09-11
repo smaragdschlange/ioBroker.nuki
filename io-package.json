@@ -27,15 +27,19 @@
                 "en": "additional states/actions and improved compatibility (callback still not completely working)",
                 "de": "Zusätzliche Status/Aktionen und verbesserte Kompatibilität (Callback funktioniert derzeit noch nicht ganz)"
             },
-        "0.1.0": {
+            "0.1.0": {
                 "en": "callback finally working, added another State",
                 "de": "Callback funktioniert nun endlich, ein weiterer Status hinzugefügt"
+            },
+            "0.1.1": {
+                "en": "callback will be removed when instance is unloading",
+                "de": "Callback wird nun gelöscht, wenn die Instanz beendet wird"
             }
         },
-		"title": "Nuki adapter",
+		"title": "Nuki Smart Lock",
         "titleLang": {
-            "en": "Nuki Smart Lock adapter",
-            "de": "Nuki Smart Lock Adapter"
+            "en": "Nuki Smart Lock",
+            "de": "Nuki Smart Lock"
         },
         "desc": {
             "en": "This adapter allows to control and monitor the Nuki Smart Lock",
@@ -57,8 +61,7 @@
         "keywords": ["nuki", "smart", "lock"],
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
-        "type": "hardware",
-        "restartAdapters": ["vis"]
+        "type": "hardware"
     },
     "native": {
         "bridge_name": "Nuki bridge",

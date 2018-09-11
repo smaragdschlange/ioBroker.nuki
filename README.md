@@ -11,24 +11,30 @@ Since this is my very first attempt of creating my own ioBroker adapter and also
 * A running instance of ioBroker.
 
 ## Usage
-Each instance of the Nuki adapter represents a Nuki bridge. When creating an instance, simply enter name (optional), IP address, port and token of your Nuki bridge. After saving an instance there will be created a bridge device with a channel for each Nuki lock that is connected to the specified Nuki bridge. The channels provide the current state of the Nuki lock as output parameters:
+Each instance of the Nuki adapter represents a Nuki bridge. When creating an instance, simply enter IP address, port and token of your Nuki bridge. The name is optional and will be generated automatically if left empty. The checkbox "use callback" and the value "callback port in ioBroker" are optional and can be set in order to make use of the callback function of the Nuki. After saving an instance there will be created a bridge device with a channel for each Nuki lock that is connected to the specified Nuki bridge. The channels provide the current state of the Nuki lock as output parameters:
 
-* state: Current (numeric) lock state
-* stateName: Current lock state as string
 * batteryCritical: Indicator for low battery
+* lockState: Indicator whether Nuki is locked
+* state: Current (numeric) lock state (Nuki native)
 * timestamp: Last updated
 
-Additionally, the channels provide an input parameter which enables basic control of the Nuki lock:
+Additionally, the channels provide input parameters which enable basic control of the Nuki lock:
 
-* lockAction
+* action: Numeric action code for setting the Nuki state (Nuki native)
 
 Valid input values are:
 
+    0 (no action)
     1 (unlock)
     2 (lock)
     3 (unlatch)
     4 (lock ‘n’ go)
     5 (lock ‘n’ go with unlatch)
+
+* lockAction: Switch for locking / unlocking the Nuki (true = unlock; false = lock)
+* openAction: Button for unlatching the Nuki
+* openLocknGoAction: Button for unlatching and after some seconds locking the Nuki
+* unlockLocknGoAction: Button for unlocking and after some seconds locking the Nuki
 
 ## Additional information
 How to get your bridges token:
@@ -40,6 +46,16 @@ How to get your bridges token:
     "token": “token123”,
     "success": true
     }
+Callback function:
+
+If the callback function is being used, the adapter will try to automatically set the callback on the Nuki bridge when the instance is being saved. When the instance is unloaded the callback will be deleted again. All Nuki states will be kept up-to-date by the Nuki bridge while callback is activated.
+Callbacks can be set and removed from any browser with following urls:
+
+Set:
+* http://< bridge_ip >:< bridge_port >/callback/add?url=http%3A%2F%2F< host_ip >%3A< host_port >%2Fapi%2Fnuki&token=< bridgeToken >
+
+Remove:
+* http://< bridge_ip >:< bridge_port >/callback/remove?id=< callback_id >&token=< bridgeToken >
 
 ## Changelog
 
@@ -64,6 +80,9 @@ How to get your bridges token:
 ### 0.1.0
 * (smaragdschlange) callback finally working
 * (smaragdschlange) added another State
+
+### 0.1.1
+* (smaragdschlange) callback will be removed when instance is unloading
 
 ## License
 The MIT License (MIT)

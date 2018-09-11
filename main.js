@@ -30,22 +30,22 @@ var bridgePort  = null;
 var bridgeToken = null;
 var bridgeName  = null;
 var hostCb      = null;
+var callbackId  = '4';
 var hostPort    = null;
 
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
-    adapter.log.info('cleaned everything up...');
     try {
-        setTimeout(function() {
-            checkCallback(false);
-        }, 1000); 
-        if (app) {
-            app.close();
-            app = null;
+        if (callbackId != '4') {
+            hostCb = false;
+            removeCallback(callbackId);
         }
         if (timer) clearInterval(timer);
-        callback();
+        adapter.log.info('cleaned everything up...');
+        setTimeout(function() {
+            callback();
+        }, 3000); 
     } catch (e) {
         callback();
     }
@@ -128,7 +128,7 @@ function initNukiStates(_obj){
     adapter.setObjectNotExists(nukiPath + '.lockState', {
         type: 'state',
         common: {
-            name: 'Nuki abgeschlossen',
+            name: 'Nuki aufgeschlossen',
             type: 'boolean',
             write: false,
             role: 'sensor.lock'   
@@ -189,23 +189,23 @@ function initNukiStates(_obj){
         native: {}
     });
 
-    // adapter.setObjectNotExists(nukiPath + '.lockAction', {
-    //     type: 'state',
-    //     common: {
-    //         name: 'Aktion',
-    //         type: 'number',
-    //         states: {
-    //             '0': '',
-    //             '1': 'unlock',
-    //             '2': 'lock',
-    //             '3': 'unlatch',
-    //             '4': 'lock‘n’go',
-    //             '5': 'lock‘n’go with unlatch',
-    //         },
-    //         role: 'value'
-    //     },
-    //     native: {}
-    // });
+    adapter.setObjectNotExists(nukiPath + '.action', {
+        type: 'state',
+        common: {
+            name: 'Aktion',
+            type: 'number',
+            states: {
+                '0': '',
+                '1': 'unlock',
+                '2': 'lock',
+                '3': 'unlatch',
+                '4': 'lock‘n’go',
+                '5': 'lock‘n’go with unlatch',
+            },
+            role: 'value'
+        },
+        native: {}
+    });
 
     adapter.setObjectNotExists(nukiPath + '.lockAction', {
         type: 'state',
@@ -279,12 +279,12 @@ function setLockState(_nukiId, _nukiState) {
         case 7:
             adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
+            adapter.setState(nukiPath + '.action', {val: 0, ack: true});
             break;
         default:
             adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            // adapter.setState(nukiPath + '.lockAction', {val: 0, ack: true});
+            adapter.setState(nukiPath + '.action', {val: 0, ack: true});
             break;
     } 
     
@@ -438,6 +438,7 @@ function checkCallback(_hostCb) {
     var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
     var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki';
     var cbExists = '';
+    var cbId = null;
 
     request(
         {
@@ -450,25 +451,32 @@ function checkCallback(_hostCb) {
             if (!error && response.statusCode == 200) {
                 if (content && content.hasOwnProperty('callbacks')) {
                     for (var row in content.callbacks) {
-                        var cbId = content.callbacks[row];
+                        cbId = content.callbacks[row];
                         if (cbId.url == cbUrl) {
                             cbExists = 'x';
                             if (_hostCb == false) {
+                                adapter.log.debug('Callback should be removed: ' + cbUrl);
                                 removeCallback(cbId.id);
-                                adapter.log.info('Callback should be removed: ' + cbUrl);
                             }
                         } 
                     }
                     if (_hostCb == true) {
+                        if (cbId) {
+                            callbackId = cbId.id;
+                        } else {
+                            callbackId = '0';
+                        }
                         if (cbExists == 'x') {
                                 adapter.log.info('Callback allready set: ' + cbUrl);
-
                                 initServer(hostIp, hostPort);
-                        } else if (cbId == '3') {
-                            adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
                         } else {
-                            initServer(hostIp, hostPort);
-                            setCallback(cbUrl);
+                            if (callbackId == '3') {
+                                callbackId = '4';
+                                adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
+                            } else {
+                                initServer(hostIp, hostPort);
+                                setCallback(cbUrl);
+                            }
                         }
                     }
                 } else {
@@ -497,6 +505,7 @@ function removeCallback(_id) {
                     if (content && content.hasOwnProperty('success')) {
                         if (content.success) {
                             adapter.log.info('Callback-ID successfully removed: ' + _id);
+                            callbackId = 4;
                         } else {
                             adapter.log.warn('Callback-ID could not be removed: ' + _id);
                         }
