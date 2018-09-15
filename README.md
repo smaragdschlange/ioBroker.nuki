@@ -84,6 +84,10 @@ Remove:
 ### 0.1.1
 * (smaragdschlange) callback will be removed when instance is unloading
 
+### 0.1.2
+* (smaragdschlange) minor bugfixes
+* (smaragdschlange) added delay before each Nuki request to avoid null responses
+
 ## License
 The MIT License (MIT)
 

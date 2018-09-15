@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -34,6 +34,10 @@
             "0.1.1": {
                 "en": "callback will be removed when instance is unloading",
                 "de": "Callback wird nun gelöscht, wenn die Instanz beendet wird"
+            },
+            "0.1.2": {
+                "en": "minor bugfixes. Added delay before Nuki requests to avoid null responses",
+                "de": "Kleinere Fehlerkorrekturen. Verzögerung vor jeder Nuki-Abfrage hinzugefügt, um fehlerhafte (NULL-) Rückmeldungen zu vermeiden"
             }
         },
 		"title": "Nuki Smart Lock",

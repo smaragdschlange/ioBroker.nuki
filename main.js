@@ -32,6 +32,7 @@ var bridgeName  = null;
 var hostCb      = null;
 var callbackId  = '4';
 var hostPort    = null;
+var timeOut     = 3000;
 
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
@@ -45,7 +46,7 @@ adapter.on('unload', function (callback) {
         adapter.log.info('cleaned everything up...');
         setTimeout(function() {
             callback();
-        }, 3000); 
+        }, timeOut); 
     } catch (e) {
         callback();
     }
@@ -68,27 +69,31 @@ adapter.on('stateChange', function (id, state) {
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
-        if (state.val == true) {
-            switch (actionState) {
-                case 'lockAction':
-                    setLockAction(nukiId, '1');
-                    break;
-                case 'openAction':
-                    setLockAction(nukiId, '3');
-                    break;
-                case 'unlockLocknGoAction':
-                    setLockAction(nukiId, '4');
-                    break;
-                case 'openLocknGoAction':
-                    setLockAction(nukiId, '5');
-                    break;
-                default:
-                    adapter.log.warn('unrecognized actionState (' + actionState + ')');
-                    break;
-            }
+        if (actionState == 'action') {
+            setLockAction(nukiId, state.val);
         } else {
-            if (actionState == 'lockAction') {
-                setLockAction(nukiId, '2');
+            if (state.val == false) {
+                if (actionState == 'lockAction') {
+                    setLockAction(nukiId, '2');
+                }
+            } else {
+                switch (actionState) {
+                    case 'lockAction':
+                        setLockAction(nukiId, '1');
+                        break;
+                    case 'openAction':
+                        setLockAction(nukiId, '3');
+                        break;
+                    case 'unlockLocknGoAction':
+                        setLockAction(nukiId, '4');
+                        break;
+                    case 'openLocknGoAction':
+                        setLockAction(nukiId, '5');
+                        break;
+                    default:
+                        adapter.log.warn('unrecognized actionState (' + actionState + ')');
+                        break;
+                }
             }
         }
     }
@@ -255,6 +260,7 @@ function initNukiStates(_obj){
     });
 
     adapter.subscribeStates(nukiPath + '.*Action');
+    adapter.subscribeStates(nukiPath + '.action');
     setLockState(_obj.nukiId, nukiState);
 }
 
@@ -267,6 +273,9 @@ function setLockState(_nukiId, _nukiState) {
         case 4:
             adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: false, ack: true});
+            setTimeout(function() {
+                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+            }, timeOut);
             break;
         case 2:
             // fall through
@@ -279,7 +288,9 @@ function setLockState(_nukiId, _nukiState) {
         case 7:
             adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
             adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+            setTimeout(function() {
+                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+            }, timeOut);
             break;
         default:
             adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
@@ -295,7 +306,7 @@ function setLockState(_nukiId, _nukiState) {
     if (_nukiState.hasOwnProperty('timestamp')) {
         adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
     } else {
-        adapter.setState(nukiPath + '.timestamp', {val: Date.now().timestamp, ack: true});
+        adapter.setState(nukiPath + '.timestamp', {val: Date.now().toISOString(), ack: true});
     }
 }
 
@@ -371,8 +382,13 @@ function setLockAction(_nukiId, _action) {
                     if (!content.success) {
                         adapter.log.warn('lock action ' + _action + ' not successfully set!');
                     } else {
-                        adapter.log.info('lock action ' + _action + ' set successfully');
-                        getLockState(_nukiId);
+                        adapter.log.info('lock action ' + _action + ' set successfully');   
+                        if (hostCb == false) {                  
+                            // delay before request
+                            setTimeout(function() {
+                                getLockState(_nukiId);
+                            }, timeOut);
+                        }
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
@@ -456,7 +472,10 @@ function checkCallback(_hostCb) {
                             cbExists = 'x';
                             if (_hostCb == false) {
                                 adapter.log.debug('Callback should be removed: ' + cbUrl);
-                                removeCallback(cbId.id);
+                                // delay after request
+                                setTimeout(function() {
+                                    removeCallback(cbId.id);
+                                }, timeOut);
                             }
                         } 
                     }
@@ -475,7 +494,10 @@ function checkCallback(_hostCb) {
                                 adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
                             } else {
                                 initServer(hostIp, hostPort);
-                                setCallback(cbUrl);
+                                // delay after request
+                                setTimeout(function() {
+                                    setCallback(cbUrl);
+                                }, timeOut);
                             }
                         }
                     }
@@ -516,7 +538,7 @@ function removeCallback(_id) {
                     adapter.log.error(error);
                 }
             }
-        ) 
+        )
     }
 }
 
@@ -568,10 +590,12 @@ function main() {
         adapter.log.debug('config port: '               + bridgePort);
         adapter.log.debug('config token: '              + bridgeToken);
 
+        // get all Nuki devices on bridge
         getLockList(true);
-        // wait for 3 seconds for the service to be ready
+        // delay before request
         setTimeout(function() {
+            // check for callbacks on Nuki bridge
             checkCallback(hostCb);
-        }, 3000); 
+        }, timeOut);
     }
 }
