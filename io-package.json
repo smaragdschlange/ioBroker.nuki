@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "0.1.2",
+        "version": "0.1.3",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -38,6 +38,10 @@
             "0.1.2": {
                 "en": "minor bugfixes. Added delay before Nuki requests to avoid null responses",
                 "de": "Kleinere Fehlerkorrekturen. Verzögerung vor jeder Nuki-Abfrage hinzugefügt, um fehlerhafte (NULL-) Rückmeldungen zu vermeiden"
+            },
+            "0.1.3": {
+                "en": "timestamp bug fixed",
+                "de": "Fehler beim Timestamp korrigiert"
             }
         },
 		"title": "Nuki Smart Lock",

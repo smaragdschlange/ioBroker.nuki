@@ -88,6 +88,9 @@ Remove:
 * (smaragdschlange) minor bugfixes
 * (smaragdschlange) added delay before each Nuki request to avoid null responses
 
+### 0.1.3
+* (smaragdschlange) timestamp bug fixed
+
 ## License
 The MIT License (MIT)
 

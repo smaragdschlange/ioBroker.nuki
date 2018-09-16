@@ -17,6 +17,7 @@ var request     = require('request');
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = new utils.Adapter('nuki');
+adapter.useFormatDate = true;   // load from ;system.config the global date format
 
 // REST server
 var app     = express();
@@ -189,7 +190,7 @@ function initNukiStates(_obj){
         common: {
             name: 'Zuletzt aktualisiert',
             type: 'string',
-            role: 'time'
+            role: 'date'
         },
         native: {}
     });
@@ -266,6 +267,7 @@ function initNukiStates(_obj){
 
 function setLockState(_nukiId, _nukiState) {
     var nukiPath = bridgeName + '.' + _nukiId;
+    let timeStamp = null;
 
     switch(_nukiState.state) {
         case 1:
@@ -306,7 +308,8 @@ function setLockState(_nukiId, _nukiState) {
     if (_nukiState.hasOwnProperty('timestamp')) {
         adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
     } else {
-        adapter.setState(nukiPath + '.timestamp', {val: Date.now().toISOString(), ack: true});
+        timeStamp = new Date();
+        adapter.setState(nukiPath + '.timestamp', {val: timeStamp, ack: true});
     }
 }
 
@@ -439,9 +442,9 @@ function initServer(_ip, _port) {
         var state = req.body.state;
         var stateName = req.body.stateName;
         var batteryCritical = req.body.batteryCritical;
-        var nukiState = { "state": state, "stateName": stateName,
-                            "batteryCritical": batteryCritical };
+        var nukiState = { "state": state, "stateName": stateName, "batteryCritical": batteryCritical };
 
+        adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
         setLockState(nukiId, nukiState);
     });
 
