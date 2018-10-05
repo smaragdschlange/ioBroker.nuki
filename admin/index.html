@@ -28,6 +28,23 @@
 
 <!-- you have to define 2 functions in the global scope: -->
 <script type="text/javascript">
+    
+    // function showHideSettings() {
+    //     if ($('#autoupd').prop('checked')) {
+    //         $('#interval').show();
+    //         $('#interval').val('10');
+    //     } else {
+    //         $('#interval').hide();
+    //         $('#interval').val('');
+    //     }
+    //     if ($('#host_cb').prop('checked')) {
+    //         $('#host_port').show();
+    //         $('#host_port').val('9092');
+    //     } else {
+    //         $('#host_port').hide();
+    //         $('#host_port').val('');
+    //     }
+    // }
 
     // the function loadSettings has to exist ...
     function load(settings, onChange) {
@@ -51,6 +68,13 @@
             }
         });
         onChange(false);
+        
+        $('#host_cb').change(function () {
+            showHideSettings();
+        });
+        $('#autoupd').change(function () {
+            showHideSettings();
+        });
     }
 
     // ... and the function save has to exist.
@@ -82,6 +106,8 @@
         <span><label for="bridge_ip" class="translate">ip</label></span><input class="value" id="bridge_ip"/><br>
         <span><label for="bridge_port" class="translate">nuki_port</label></span><input class="value" id="bridge_port"/><br>
         <span><label for="token" class="translate">token</label></span><input class="value" id="token"/><br>
+        <span><label for="autoupd" class="translate">autoupdate</label></span><input class="value" id="autoupd" type="checkbox"/><br>
+        <span><label for="interval" class="translate">interval</label></span><input class="value" id="interval"/><br>
         <span><label for="host_cb" class="translate">host_cb</label></span><input class="value" id="host_cb" type="checkbox"/><br>
         <span><label for="host_port" class="translate">host_port</label></span><input class="value" id="host_port"/><br>
     </p>

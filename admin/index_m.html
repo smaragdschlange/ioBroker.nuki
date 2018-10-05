@@ -23,11 +23,103 @@
 <!-- you have to define 2 functions in the global scope: -->
 <script type="text/javascript">
 
+    function showHideSettings() {
+        if ($('#autoupd').prop('checked')) {
+            $('._interval').show();
+        } else {
+            $('._interval').hide();
+        }
+        if ($('#host_cb').prop('checked')) {
+            $('._host_port').show();
+        } else {
+            $('._host_port').hide();
+        }
+    }
+
+    // function getNukiBridges() {
+        // const https = require('https');
+
+        // https.get('https://api.nuki.io/discover/bridges', (resp) => {
+        // let data = '';
+
+        // // A chunk of data has been recieved.
+        // resp.on('data', (chunk) => {
+        //     data += chunk;
+        // });
+
+        // // The whole response has been received. Print out the result.
+        // resp.on('end', () => {
+        //     console.log(JSON.parse(data).explanation);
+        // });
+
+        // }).on("error", (err) => {
+        // console.log("Error: " + err.message);
+        // });
+
+        // const request = require('request');
+
+        // request('https://api.nuki.io/discover/bridges', { json: true }, (err, res, body) => {
+            // if (err) { return console.log(err); }
+            // console.log(body.url);
+            // console.log(body.explanation);
+        // });
+
+        // const https = require('https');
+
+        // https.get('https://api.nuki.io/discover/bridges', (res) => {
+        //     const { statusCode } = res;
+            // const contentType = res.headers['content-type'];
+
+            // let error;
+            // if (statusCode !== 200) {
+            //     error = new Error('Request Failed.\n' + `Status Code: ${statusCode}`);
+            // } else if (!/^application\/json/.test(contentType)) {
+            //     error = new Error('Invalid content-type.\n' + `Expected application/json but received ${contentType}`);
+            // }
+            // if (error) {
+            //     console.error(error.message);
+            //     // consume response data to free up memory
+            //     res.resume();
+            //     return;
+            // }
+
+            // getIps();
+
+            // res.setEncoding('utf8');
+            // let rawData = '';
+            // res.on('data', (chunk) => { rawData += chunk; });
+            // res.on('end', () => {
+            //     try {
+            //         const parsedData = JSON.parse(rawData);
+            //         console.log(parsedData);
+            //     } catch (e) {
+            //         console.error(e.message);
+            //     }
+            // });
+        // }).on('error', (e) => {
+            // console.error(`Got error: ${e.message}`);
+        // });
+    // }
+
+    // function getIps() {
+        // sendTo(null, 'listSerial', null, function (list) {
+        //     if (!list || !list.result) {
+        //         return;
+        //     }
+        //     list = list.result;
+            // var element = $('#bridge_ip');
+        //     for (var j = 0; j < list.length; j++) {
+                // element.append('<option value="192.168.178.65">192.168.178.65</option>');
+        //     }
+        //     $('#serialport.value').val(settings.serialport).select();
+        // });
+    // }
+
     // the function loadSettings has to exist ...
     function load(settings, onChange) {
         // example: select elements with id=key and class=value and insert value
-       if (!settings) return;
-        $('.value').each(function () {            
+        if (!settings) return;
+            $('.value').each(function () {            
             var $key = $(this);
             var id = $key.attr('id');
             if ($key.attr('type') === 'checkbox') {
@@ -44,8 +136,19 @@
                 });
             }
         });
+
+        // getNukiBridges();
+        showHideSettings();
+
         onChange(false);
         M.updateTextFields();  // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
+
+        $('#host_cb').change(function () {
+            showHideSettings();
+        });
+        $('#autoupd').change(function () {
+            showHideSettings();
+        });
     }
 
     // ... and the function save has to exist.
@@ -88,6 +191,10 @@
                     <label for="bridge_ip" class="translate">ip</label>
                     <span for="bridge_ip" class="translate">ipeg</span>
                 </div>
+                <!-- <div class="input-field col s12 m6 l4">
+                    <select class="value" id="bridge_ip" type="text" ></select>
+                    <label for="bridge_ip" class="translate">ip</label>
+                </div> -->
                 <div class="input-field col s12 m6 l4">
                     <input class="value" type="number" id="bridge_port"/>
                     <label for="bridge_port" class="translate">nuki_port</label>
@@ -102,9 +209,23 @@
                     <input class="value" type="checkbox" id="host_cb"/>
                     <label for="host_cb" class="translate">host_cb</label>
                 </div>
+            </div>
+            <div class="row _host_port">
                 <div class="input-field col s12 m6 l4">
                     <input class="value" type="number" id="host_port"/>
                     <label for="host_port" class="translate">host_port</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m4">
+                    <input class="value" type="checkbox" id="autoupd"/>
+                    <label for="autoupd" class="translate">autoupd</label>
+                </div>
+            </div>
+            <div class="row _interval">
+                <div class="input-field col s12 m6 l4">
+                    <input class="value" type="number" id="interval"/>
+                    <label for="interval" class="translate">interval</label>
                 </div>
             </div>
             <div class="row">

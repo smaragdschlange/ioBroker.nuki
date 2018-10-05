@@ -7,6 +7,8 @@
   "ipeg": "z.B. 192.168.1.50",
   "nuki_port": "Port der Nuki Bridge",
   "token": "Token",
+  "autoupd": "Periodische Statusaktualisierungen",
+  "interval": "Aktualisierungsintervall (in Minuten)",
   "host_cb": "Benutze Callback",
   "host_port": "Callback-Port in ioBroker",
   "on save adapter restarts with new config immediately": "Beim Speichern der Einstellungen wird der Adapter sofort neu gestartet."

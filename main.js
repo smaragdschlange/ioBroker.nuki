@@ -26,10 +26,12 @@ var ipInfo  = require('ip');
 var hostIp  = ipInfo.address();
 
 // Global variables
+var bridgeId    = null;
 var bridgeIp    = null;
 var bridgePort  = null;
 var bridgeToken = null;
 var bridgeName  = null;
+var interval    = null;
 var hostCb      = null;
 var callbackId  = '4';
 var hostPort    = null;
@@ -116,15 +118,87 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-    main();
+    if (bridgeIp != '') {
+        getBridgeList();
+    }
+    // delay before request
+    setTimeout(function() {
+        main();
+    }, timeOut);
 });
 
-function initNukiStates(_obj){
+function initBridgeStates(_obj, _name, _token) {
+    bridgeId    = _obj.bridgeId;
+    bridgeIp    = _obj.ip;
+    bridgePort  = _obj.port;
+
+    adapter.setObjectNotExists(_obj.bridgeId, {
+        type: 'device',
+        common: {
+            name: _name
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.bridgeId + '.info', {
+        type: 'channel',
+        common: {
+            name: 'Info'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeIp', {
+        type: 'state',
+        common: {
+            name: 'IP-Adresse',
+            type: 'string',
+            write: false,
+            role: 'info.ip'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgePort', {
+        type: 'state',
+        common: {
+            name: 'Port',
+            type: 'number',
+            write: false,
+            role: 'info.port'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeToken', {
+        type: 'state',
+        common: {
+            name: 'Token',
+            type: 'string',
+            write: false,
+            role: 'text'
+        },
+        native: {}
+    });
+
+    setBridgeState(_obj, _token)
+}
+
+function initNukiStates(_obj) {
     var nukiState = _obj.lastKnownState;
-    var nukiPath = bridgeName + '.' + _obj.nukiId;
+    // var nukiPath = bridgeName + '.' + _obj.nukiId;
+    var nukiPath = bridgeId + '.' + _obj.nukiId;
+
+    // adapter.setObjectNotExists(nukiPath, {
+    //     type: 'channel',
+    //     common: {
+    //         name: _obj.name
+    //     },
+    //     native: {}
+    // });
 
     adapter.setObjectNotExists(nukiPath, {
-        type: 'channel',
+        type: 'device',
         common: {
             name: _obj.name
         },
@@ -180,6 +254,7 @@ function initNukiStates(_obj){
         common: {
             name: 'Batterie schwach',
             type: 'boolean',
+            write: false,
             role: 'indicator.lowbat'
         },
         native: {}
@@ -190,6 +265,7 @@ function initNukiStates(_obj){
         common: {
             name: 'Zuletzt aktualisiert',
             type: 'string',
+            write: false,
             role: 'date'
         },
         native: {}
@@ -260,15 +336,25 @@ function initNukiStates(_obj){
         native: {}
     });
 
-    adapter.subscribeStates(nukiPath + '.*Action');
+    // adapter.subscribeStates(nukiPath + '.*Action');
     adapter.subscribeStates(nukiPath + '.action');
     setLockState(_obj.nukiId, nukiState);
 }
 
+function setBridgeState(_obj, _token) {
+    adapter.setState(_obj.bridgeId + '.info.bridgeIp', _obj.ip, true);
+    adapter.setState(_obj.bridgeId + '.info.bridgePort', _obj.port, true);
+    adapter.setState(_obj.bridgeId + '.info.bridgeToken', _token, true);
+}
+
 function setLockState(_nukiId, _nukiState) {
-    var nukiPath = bridgeName + '.' + _nukiId;
+    // var nukiPath = bridgeName + '.' + _nukiId;
+    var nukiPath = bridgeId + '.' + _nukiId;
     let timeStamp = null;
 
+    // adapter.setState(bridgeId + '.info.bridgeIp', bridgeIp, true);
+    // adapter.setState(bridgeId + '.info.bridgePort', bridgePort, true);
+    
     switch(_nukiState.state) {
         case 1:
             // fall through
@@ -318,13 +404,13 @@ function updateAllLockStates(_content, _init) {
     var obj       = null;
 
     if (_init) {
-        adapter.setObjectNotExists(bridgeName, {
-            type: 'device',
-            common: {
-                name: bridgeIp
-            },
-            native: {}
-        });
+        // adapter.setObjectNotExists(bridgeName, {
+        //     type: 'device',
+        //     common: {
+        //         name: bridgeIp
+        //     },
+        //     native: {}
+        // });
         
         for (var nukilock in _content) {
             obj = _content[nukilock];
@@ -391,10 +477,60 @@ function setLockAction(_nukiId, _action) {
                             setTimeout(function() {
                                 getLockState(_nukiId);
                             }, timeOut);
+                        } else {
+
                         }
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                }
+            } else {
+                adapter.log.error(error);
+            }
+        }
+    )
+}
+
+function getBridgeList() {
+    var bridgeListUrl = 'https://api.nuki.io/discover/bridges';
+    var obj = null;
+
+    request(
+        {
+            url: bridgeListUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.debug('Bridge list requested: ' + bridgeListUrl);
+
+            if (!error && response.statusCode == 200) {
+                if (content && content.hasOwnProperty('errorCode')) {
+                    if (content.errorCode == 0) {
+                        for (var bridge in content.bridges) {
+                            obj = content.bridges[bridge];
+                            if (obj) {
+                                if (obj.ip == '0.0.0.0') {
+                                    adapter.log.warn('bridgeID ' + obj.bridgeId + ': discovery is disabled via "/configAuth" or through the Nuki App. No auto discovery possible.');
+                                } else if (obj.ip == adapter.config.bridge_ip) {
+                                    if (obj.port == adapter.config.bridge_port) {
+                                        adapter.log.info('found bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
+                                    } else {
+                                        adapter.log.warn('found bridge (ID: ' + obj.bridgeId + '; IP: ' + obj.bridgeId + ') has different port than specified! (specified: ' + 
+                                            adapter.config.bridge_port + '; actual: ' + obj.port);
+                                    }
+                                    initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
+                                } else {
+                                    adapter.log.info('found additional bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
+                                }
+                            } else {
+                                adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
+                            }
+                        }
+                    } else {
+                        adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
+                    }
+                } else {
+                    adapter.log.warn('Response has no valid content. Check if bridge ist pluged in and active and try again.');
                 }
             } else {
                 adapter.log.error(error);
@@ -412,7 +548,7 @@ function getLockList(_init) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.debug('Lock list requested: ' + lockListUrl);
+            adapter.log.info('Lock list requested: ' + lockListUrl);
 
             if (!error && response.statusCode == 200) {
                 if (content) {
@@ -425,6 +561,13 @@ function getLockList(_init) {
             }
         }
     )
+    if (_init) {
+        // delay before request
+        setTimeout(function() {
+            // check for callbacks on Nuki bridge
+            checkCallback(hostCb);
+        }, timeOut);
+    }
 }
 
 function initServer(_ip, _port) {
@@ -582,10 +725,11 @@ function main() {
     bridgePort = adapter.config.bridge_port;
     bridgeToken = adapter.config.token;
     bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+    interval = adapter.config.interval * 60000;
     hostPort = adapter.config.host_port;
     hostCb = adapter.config.host_cb;
 
-    if (bridgeIp != '') {   
+    if (bridgeIp != '') {
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // adapter.config:
         adapter.log.debug('config Nuki bridge name: '   + bridgeName);
@@ -595,10 +739,10 @@ function main() {
 
         // get all Nuki devices on bridge
         getLockList(true);
-        // delay before request
-        setTimeout(function() {
-            // check for callbacks on Nuki bridge
-            checkCallback(hostCb);
-        }, timeOut);
+        if (adapter.config.autoupd) {
+            adapter.log.debug('timer set: ' + interval + ' milliseconds');
+            // update all states every x milliseconds
+            timer = setInterval(getLockList, interval);
+        }
     }
 }

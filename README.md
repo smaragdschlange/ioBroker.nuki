@@ -59,37 +59,41 @@ Remove:
 
 ## Changelog
 
-### 0.0.1
-* (smaragdschlange) initial release
+### 0.2.0
+* (smaragdschlange) periodic state updates added
+* (smaragdschlange) restructure objects
 
-### 0.0.2
-* (smaragdschlange) added input parameters
-
-### 0.0.3
-* (smaragdschlange) bug fixes and restructure
-
-### 0.0.4
-* (smaragdschlange) added input parameter for lock actions
-
-### 0.0.5
-* (smaragdschlange) added support for nuki bridge callback (web server still to be added)
-
-### 0.0.6
-* (smaragdschlange) additional states/actions and improved compatibility (callback still not completely working)
-
-### 0.1.0
-* (smaragdschlange) callback finally working
-* (smaragdschlange) added another State
-
-### 0.1.1
-* (smaragdschlange) callback will be removed when instance is unloading
+### 0.1.3
+* (smaragdschlange) timestamp bug fixed
 
 ### 0.1.2
 * (smaragdschlange) minor bugfixes
 * (smaragdschlange) added delay before each Nuki request to avoid null responses
 
-### 0.1.3
-* (smaragdschlange) timestamp bug fixed
+### 0.1.1
+* (smaragdschlange) callback will be removed when instance is unloading
+
+### 0.1.0
+* (smaragdschlange) callback finally working
+* (smaragdschlange) added another State
+
+### 0.0.6
+* (smaragdschlange) additional states/actions and improved compatibility (callback still not completely working)
+
+### 0.0.5
+* (smaragdschlange) added support for nuki bridge callback (web server still to be added)
+
+### 0.0.4
+* (smaragdschlange) added input parameter for lock actions
+
+### 0.0.3
+* (smaragdschlange) bug fixes and restructure
+
+### 0.0.2
+* (smaragdschlange) added input parameters
+
+### 0.0.1
+* (smaragdschlange) initial release
 
 ## License
 The MIT License (MIT)

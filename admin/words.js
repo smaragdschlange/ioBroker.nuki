@@ -11,6 +11,8 @@ systemDictionary = {
     "ipeg":                                                 {"en": "e.g. 192.168.1.50",                                     "de": "z.B. 192.168.1.50"},
     "nuki_port":                                            {"en": "Port of the Nuki bridge",                               "de": "Port der Nuki Bridge"},
     "token":                                                {"en": "Token",                                                 "de": "Token"},
+    "autoupd":                                              {"en": "Periodic state updates",                                "de": "Periodische Statusaktualisierungen"},
+    "interval":                                             {"en": "Update interval (in minutes)",                          "de": "Aktualisierungsintervall (in Minuten)"},
     "host_cb":                                              {"en": "Use Callback",                                          "de": "Benutze Callback"},
     "host_port":                                            {"en": "Callback port in ioBroker",                             "de": "Callback-Port in ioBroker"},
     "on save adapter restarts with new config immediately": {"en": "on save adapter restarts with new config immediately",  "de": "Beim Speichern der Einstellungen wird der Adapter sofort neu gestartet."}
