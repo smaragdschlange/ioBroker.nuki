@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -50,6 +50,10 @@
             "1.0.0": {
                 "en": "initial release on npm",
                 "de": "Initialer Release auf npm"
+            },
+            "1.0.1": {
+                "en": "version synch",
+                "de": "Version synchronisiert"
             }
         },
 		"title": "Nuki Smart Lock",

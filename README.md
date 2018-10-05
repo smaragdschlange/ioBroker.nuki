@@ -59,6 +59,9 @@ Remove:
 
 ## Changelog
 
+### 1.0.1
+* (smaragdschlange) version synch
+
 ### 1.0.0
 * (smaragdschlange) initial release on npm
 
