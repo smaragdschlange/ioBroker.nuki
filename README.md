@@ -59,6 +59,9 @@ Remove:
 
 ## Changelog
 
+### 1.0.0
+* (smaragdschlange) initial release on npm
+
 ### 0.2.0
 * (smaragdschlange) periodic state updates added
 * (smaragdschlange) restructure objects
