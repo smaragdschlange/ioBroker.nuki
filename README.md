@@ -4,8 +4,6 @@
 
 This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using the API of the Nuki Bridge.
 
-Since this is my very first attempt of creating my own ioBroker adapter and also my premiere for using GitHub I will move slowly in order to learn how to do this. So please don't be impatient.
-
 ## Requirements
 * A Nuki Smart Lock (obviously) and a Nuki (hardware or software) Bridge.
 * A running instance of ioBroker.
@@ -57,7 +55,13 @@ Set:
 Remove:
 * http://< bridge_ip >:< bridge_port >/callback/remove?id=< callback_id >&token=< bridgeToken >
 
+## Update
+When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all instances of the old version before installing the new version. Please be aware that version changes bigger than on patch level (-> change of only the last digit) could always contain changes to data points e.g. 0.1.3 to 0.2.0
+
 ## Changelog
+
+### 1.0.2
+* (smaragdschlange) bug fix: action buttons were not working properly
 
 ### 1.0.1
 * (smaragdschlange) version synch

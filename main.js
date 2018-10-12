@@ -336,7 +336,7 @@ function initNukiStates(_obj) {
         native: {}
     });
 
-    // adapter.subscribeStates(nukiPath + '.*Action');
+    adapter.subscribeStates(nukiPath + '.*Action');
     adapter.subscribeStates(nukiPath + '.action');
     setLockState(_obj.nukiId, nukiState);
 }

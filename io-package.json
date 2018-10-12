@@ -1,59 +1,15 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "news": {
-            "0.0.1": {
-                "en": "initial adapter",
-                "de": "Initiale Version"
-            },
-            "0.0.2": {
-                "en": "added input parameters",
-                "de": "Eingabeparameter hinzugefügt"
-            },
-            "0.0.3": {
-                "en": "bug fixes and restructure",
-                "de": "Fehlerbehebung und Restruktuierung"
-            },
-            "0.0.4": {
-                "en": "added input parameter for lock actions",
-                "de": "Eingabeparameter für Lock-Aktion hinzugefügt"
-            },
-            "0.0.5": {
-                "en": "added support for nuki bridge callback (web server still to be added)",
-                "de": "Unterstützung von Callback der Nuki Bridge hinzugefügt (Webserver muss noch ergänzt werden)"
-            },
-            "0.0.6": {
-                "en": "additional states/actions and improved compatibility (callback still not completely working)",
-                "de": "Zusätzliche Status/Aktionen und verbesserte Kompatibilität (Callback funktioniert derzeit noch nicht ganz)"
-            },
-            "0.1.0": {
-                "en": "callback finally working, added another State",
-                "de": "Callback funktioniert nun endlich, ein weiterer Status hinzugefügt"
-            },
-            "0.1.1": {
-                "en": "callback will be removed when instance is unloading",
-                "de": "Callback wird nun gelöscht, wenn die Instanz beendet wird"
-            },
-            "0.1.2": {
-                "en": "minor bugfixes. Added delay before Nuki requests to avoid null responses",
-                "de": "Kleinere Fehlerkorrekturen. Verzögerung vor jeder Nuki-Abfrage hinzugefügt, um fehlerhafte (NULL-) Rückmeldungen zu vermeiden"
-            },
             "0.1.3": {
                 "en": "timestamp bug fixed",
                 "de": "Fehler beim Timestamp korrigiert"
             },
-            "0.2.0": {
+            "1.0.2": {
                 "en": "periodic state updates added and restructure objects",
                 "de": "Regelmäßige Statusaktualisierungen hinzugefügt und Objekte neu angeordnet"
-            },
-            "1.0.0": {
-                "en": "initial release on npm",
-                "de": "Initialer Release auf npm"
-            },
-            "1.0.1": {
-                "en": "version synch",
-                "de": "Version synchronisiert"
             }
         },
 		"title": "Nuki Smart Lock",
