@@ -60,7 +60,7 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
-### 1.0.2
+### 1.0.3
 * (smaragdschlange) bug fix: action buttons were not working properly
 
 ### 1.0.1

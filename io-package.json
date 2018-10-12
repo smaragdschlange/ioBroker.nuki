@@ -1,13 +1,13 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "news": {
             "0.1.3": {
                 "en": "timestamp bug fixed",
                 "de": "Fehler beim Timestamp korrigiert"
             },
-            "1.0.2": {
+            "1.0.3": {
                 "en": "periodic state updates added and restructure objects",
                 "de": "Regelmäßige Statusaktualisierungen hinzugefügt und Objekte neu angeordnet"
             }
