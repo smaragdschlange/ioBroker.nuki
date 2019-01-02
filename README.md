@@ -14,6 +14,9 @@ This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https:
 
 **Table of contents**
 1. [Installation](#installation)
+   1. [Get a API token](#get-a-api-token)
+   2. [Callback function](#callback-function)
+   3. [States](#states)
 2. [Smart Home / Alexa integration using ioBroker.javascript](#smart-home--alexa-integration-using-iobrokerjavascript)
 3. [Changelog](#changelog)
 4. [Licence](#license)
@@ -88,6 +91,7 @@ Coming soon..
 * (zefau) Support for multiple bridges
 * (zefau) Support for discovery within admin panel
 * (zefau) Additional states for bridges and better separation between software / hardware bridge
+
 Note: When updating to 1.1.0 it is recommended to delete all instances of the old version before installing the new version.
 
 ### 1.0.3
@@ -102,6 +106,7 @@ Note: When updating to 1.1.0 it is recommended to delete all instances of the ol
 ### 0.2.0
 * (smaragdschlange) periodic state updates added
 * (smaragdschlange) restructure objects
+
 Note: When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all instances of the old version before installing the new version. Please be aware that version changes bigger than on patch level (-> change of only the last digit) could always contain changes to data points e.g. 0.1.3 to 0.2.0
 
 ### 0.1.3
