@@ -1,748 +1,400 @@
-/**
- *
- * nuki adapter
- *
- *
-/* jshint -W097 */// jshint strict:false
-/*jslint node: true */
 'use strict';
+const utils = require(__dirname + '/lib/utils'); // Get common adapter utils
+const adapter = utils.Adapter('nuki2');
 
-// you have to require the utils module and call adapter function
-var utils       = require(__dirname + '/lib/utils'); // Get common adapter utils
-var express     = require('express');        // call express
-var bodyParser  = require("body-parser");
-var request     = require('request');
+const _request = require('request');
+const _http = require('express')();
+const _parser = require('body-parser');
+const _ip = require('ip');
 
-// you have to call the adapter function and pass a options object
-// name has to be set and has to be equal to adapters folder name and main file name excluding extension
-// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
-var adapter = new utils.Adapter('nuki');
-adapter.useFormatDate = true;   // load from ;system.config the global date format
+/*
+ * internal libraries
+ */
+const Library = require(__dirname + '/lib/library.js');
+const Nuki = require('nuki-bridge-api');
 
-// REST server
-var app     = express();
-var timer   = null;
-var ipInfo  = require('ip');
-var hostIp  = ipInfo.address();
+/*
+ * variables initiation
+ */
+var library = new Library(adapter);
 
-// Global variables
-var bridgeId    = null;
-var bridgeIp    = null;
-var bridgePort  = null;
-var bridgeToken = null;
-var bridgeName  = null;
-var interval    = null;
-var hostCb      = null;
-var callbackId  = '4';
-var hostPort    = null;
-var timeOut     = 3000;
+const LOCK_STATES = Object.assign({}, ...Object.values(Nuki.lockState).map(function (n, index) {if (Number.isInteger(n)) return {[n]: Object.keys(Nuki.lockState)[index]}}));
+const LOCK_ACTIONS = Object.assign({0: 'NO ACTION'}, ...Object.values(Nuki.lockAction).map(function (n, index) {if (Number.isInteger(n)) return {[n]: Object.keys(Nuki.lockAction)[index]}}));
+var bridges = {}, doors = {};
+var callback = false, refresh = null;
 
+var NODES = {};
+NODES.BRIDGE = [
+	{'state': 'bridgeType', 'description': 'Type of bridge', 'status': 'bridgeType', 'type': 'number', 'role': 'value', 'common': {'states': {'1': 'Hardware Bridge', '2': 'Software Bridge'}}},
+	{'state': 'bridgeId', 'description': 'ID of the bridge / server', 'status': 'ids.serverId', 'role': 'value'},
+	{'state': 'bridgeIp', 'description': 'IP address of the bridge', 'status': 'ip', 'role': 'info.ip'},
+	{'state': 'bridgePort', 'description': 'Port of the bridge', 'status': 'port', 'role': 'info.port'},
+	{'state': 'hardwareId', 'description': 'ID of the hardware bridge', 'status': 'ids.hardwareId', 'role': 'value'},
+	
+	{'state': 'uptime', 'description': 'Uptime of the bridge in seconds', 'status': 'uptime', 'role': 'value'},
+	{'state': 'refreshed', 'description': 'Timestamp of last update', 'status': 'currentTime', 'role': 'date'},
+	{'state': '_connected', 'description': 'Flag indicating whether or not the bridge is connected to the Nuki server', 'status': 'serverConnected', 'type': 'boolean', 'role': 'indicator.reachable'},
+	
+	{'state': 'versFirmware', 'description': 'Version of the bridges firmware (hardware bridge only)', 'status': 'versions.firmwareVersion', 'role': 'text'},
+	{'state': 'versWifi', 'description': 'Version of the WiFi modules firmwarehardware bridge only', 'status': 'versions.wifiFirmwareVersion', 'role': 'text'},
+	{'state': 'versApp', 'description': 'Version of the bridge appsoftware bridge only', 'status': 'versions.appVersion', 'role': 'text'},
+];
 
-// is called when adapter shuts down - callback has to be called under any circumstances!
-adapter.on('unload', function (callback) {
-    try {
-        if (callbackId != '4') {
-            hostCb = false;
-            removeCallback(callbackId);
-        }
-        if (timer) clearInterval(timer);
-        adapter.log.info('cleaned everything up...');
-        setTimeout(function() {
-            callback();
-        }, timeOut); 
-    } catch (e) {
+NODES.LOCK = [
+	{'state': 'id', 'description': 'ID of the Nuki', 'status': 'nukiId', 'role': 'value'},
+	{'state': 'name', 'description': 'Name of the Nuki', 'status': 'name', 'role': 'text'},
+	{'state': 'bridge', 'description': 'Bridge of the Nuki', 'status': 'bridge', 'role': 'text'},
+	{'state': 'action', 'description': 'Trigger an action on %name%', 'action': true, 'type': 'number', 'role': 'value', 'common': {'write': true, 'states': LOCK_ACTIONS}},
+	
+	// STATUS
+	{'state': 'status', 'description': 'Current status of %name%', 'role': 'channel'},
+	{'state': 'status.batteryCritical', 'description': 'States critical battery level', 'status': 'lastKnownState.batteryCritical', 'role': 'indicator.lowbat', 'type': 'boolean'},
+	{'state': 'status.refreshed', 'description': 'Timestamp of last update', 'status': 'lastKnownState.timestamp', 'role': 'date'},
+	{'state': 'status.state', 'description': 'Current lock-state of the Nuki', 'status': 'lastKnownState.state', 'type': 'number', 'role': 'value', 'common': {'states': LOCK_STATES}},
+	{'state': 'status.locked', 'description': 'Indication if door is locked', 'status': 'lastKnownState.state', 'type': 'boolean', 'role': 'sensor.lock', 'common': {'states': {0: false, 1: true, 2: false, 3: false, 4: true, 5: false, 6: false, 7: false, 254: false, 255: false}}},
+];
+
+/*
+ * ADAPTER UNLOAD
+ *
+ */
+adapter.on('unload', function(callback)
+{
+    try
+	{
+        adapter.log.info('Adapter stopped und unloaded.');
+		if (refresh) clearInterval(refresh);
+        callback();
+    }
+	catch(e)
+	{
         callback();
     }
 });
 
-// is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
+/*
+ * ADAPTER READY
+ *
+ */
+adapter.on('ready', function()
+{
+	// check if bridges have been defined
+	if (adapter.config.bridges === undefined || adapter.config.bridges.length == 0)
+	{
+		adapter.log.warn('No bridges have been defined in settings so far.');
+		return;
+	}
+	
+	// go through bridges
+	adapter.config.bridges.forEach(function(device, i)
+	{
+		// check if Bridge is enabled in settings
+		if (!device.active)
+		{
+			adapter.log.info('Bridge ' + (device.bridge_name ? 'with name ' + device.bridge_name : (device.bridge_id ? 'with ID ' + device.bridge_id : 'with index ' + i)) + ' is disabled in adapter settings. Thus, ignored.');
+			return;
+		}
+		
+		// check if API settings are set
+		if (!device.bridge_ip || !device.bridge_token)
+		{
+			adapter.log.warn('IP or API token missing for bridge ' + (device.bridge_name ? 'with name ' + device.bridge_name : (device.bridge_id ? 'with ID ' + device.bridge_id : 'with index ' + i)) + '! Please go to settings and fill in IP and the API token first!');
+			return;
+		}
+		
+		// check for enabled callback
+		if (device.bridge_callback)
+			callback = true;
+		
+		// initialize Nuki Bridge class
+		var bridge = {
+			'data': device,
+			'instance': new Nuki.Bridge(device.bridge_ip, device.bridge_port || 8080, device.bridge_token)
+		};
+		
+		// get bridge info
+		getBridgeInfo(bridge);
+	});
+	
+	// periodically refresh settings
+	if (adapter.config.refresh !== undefined && adapter.config.refresh > 10)
+		refresh = setInterval(function() {for (var key in bridges) {getBridgeInfo(bridges[key])}}, Math.round(parseInt(adapter.config.refresh)*1000));
+	
+	// attach server to listen (@see https://stackoverflow.com/questions/9304888/how-to-get-data-passed-from-a-form-in-express-node-js/38763341#38763341)
+	if (callback)
+	{
+		adapter.config.port = adapter.config.port !== undefined && adapter.config.port > 1024 && adapter.config.port <= 65535 ? adapter.config.port : 51988;
+		adapter.log.info('Listening for Nuki events on port ' + adapter.config.port + '.');
+		
+		_http.use(_parser.json());
+		_http.use(_parser.urlencoded({extended: false}));
+		
+		_http.post('/nuki-api-bridge', function(req, res)
+		{
+			adapter.log.debug('Received payload via callback: ' + JSON.stringify(req.body));
+			var payload;
+			try
+			{
+				payload = req.body;
+				updateDoor({'nukiId': payload.nukiId, 'lastKnownState': {'state': payload.state, 'batteryCritical': payload.batteryCritical, 'timestamp': new Date()}});
+			}
+			catch(e)
+			{
+				adapter.log.warn(e.message);
+			}
+		});
+		
+		_http.listen(adapter.config.port);
+	}
 });
 
-// is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
-    var path = id.split('.',5);
-    var nukiId = path[3];
-    var actionState = path[4];
-
-    // Warning, state can be null if it was deleted
-    adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
-
-    // you can use the ack flag to detect if it is status (true) or command (false)
-    if (state && !state.ack) {
-        if (actionState == 'action') {
-            setLockAction(nukiId, state.val);
-        } else {
-            if (state.val == false) {
-                if (actionState == 'lockAction') {
-                    setLockAction(nukiId, '2');
-                }
-            } else {
-                switch (actionState) {
-                    case 'lockAction':
-                        setLockAction(nukiId, '1');
-                        break;
-                    case 'openAction':
-                        setLockAction(nukiId, '3');
-                        break;
-                    case 'unlockLocknGoAction':
-                        setLockAction(nukiId, '4');
-                        break;
-                    case 'openLocknGoAction':
-                        setLockAction(nukiId, '5');
-                        break;
-                    default:
-                        adapter.log.warn('unrecognized actionState (' + actionState + ')');
-                        break;
-                }
-            }
-        }
-    }
+/*
+ * STATE CHANGE
+ *
+ */
+adapter.on('stateChange', function(node, object)
+{
+	adapter.log.debug('State of ' + node + ' has changed ' + JSON.stringify(object) + '.');
+	var state = node.substr(node.lastIndexOf('.')+1);
+	var action = object !== undefined && object !== null ? object.val : 0;
+	
+	if (state === 'action' && Number.isInteger(action) && action > 0 && object.ack !== true)
+	{
+		adapter.getObject(node, function(err, node)
+		{
+			var nukiId = node.common.nukiId || false;
+			if (err !== null || !nukiId)
+			{
+				adapter.log.warn('Error triggering action -' + LOCK_ACTIONS[action] + '- on the Nuki: ' + err.message);
+				return;
+			}
+			
+			// retrieve Nuki and apply action
+			adapter.log.info('Triggered action -' + LOCK_ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '.');
+			
+			var nuki = doors[nukiId].instance;
+			nuki.lockAction(action)
+				.then(function()
+				{
+					adapter.log.info('Successfully triggered action -' + LOCK_ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '.');
+					library._setValue(node, 0);
+				})
+				.catch(function(e)
+				{
+					adapter.log.warn('Error triggering action -' + LOCK_ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '. See debug log for details.');
+					adapter.log.debug(e.message);
+				});
+		});
+	}
 });
 
-// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', function (obj) {
-    if (typeof obj === 'object' && obj.message) {
-        if (obj.command === 'send') {
-            // e.g. send email or pushover or whatever
-            console.log('send command');
-
-            // Send response in callback if required
-            if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-        }
-    }
+/*
+ * HANDLE MESSAGES
+ *
+ */
+adapter.on('message', function(msg)
+{
+	adapter.log.debug('Message: ' + JSON.stringify(msg));
+	
+	switch(msg.command)
+	{
+		case 'getBridgeId':
+			adapter.log.debug('Discover bridges..');
+			//library.msg(msg.from, msg.command, {result: true, data: {password: library.encrypt(adapter.config.encryptionKey, msg.message.cleartext)}}, msg.callback);
+			break;
+			
+		case 'discover':
+			adapter.log.info('Discovering bridges..');
+			
+			_request('https://api.nuki.io/discover/bridges', { json: true }, function(err, res, body)
+			{
+				if (err)
+				{
+					adapter.log.warn('Error while discovering Bridges: ' + err.message);
+					library.msg(msg.from, msg.command, {result: false, error: err.message}, msg.callback);
+				}
+				else
+				{
+					var bridges = body.bridges;
+					adapter.log.info('Bridges discovered: ' + bridges.length);
+					adapter.log.debug(JSON.stringify(bridges));
+					
+					library.msg(msg.from, msg.command, {result: true, bridges: bridges}, msg.callback);
+				}
+			});
+			break;
+	}
 });
 
-// is called when databases are connected and adapter received configuration.
-// start here!
-adapter.on('ready', function () {
-    if (bridgeIp != '') {
-        getBridgeList();
-    }
-    // delay before request
-    setTimeout(function() {
-        main();
-    }, timeOut);
-});
-
-function initBridgeStates(_obj, _name, _token) {
-    bridgeId    = _obj.bridgeId;
-    bridgeIp    = _obj.ip;
-    bridgePort  = _obj.port;
-
-    adapter.setObjectNotExists(_obj.bridgeId, {
-        type: 'device',
-        common: {
-            name: _name
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(_obj.bridgeId + '.info', {
-        type: 'channel',
-        common: {
-            name: 'Info'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeIp', {
-        type: 'state',
-        common: {
-            name: 'IP-Adresse',
-            type: 'string',
-            write: false,
-            role: 'info.ip'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgePort', {
-        type: 'state',
-        common: {
-            name: 'Port',
-            type: 'number',
-            write: false,
-            role: 'info.port'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeToken', {
-        type: 'state',
-        common: {
-            name: 'Token',
-            type: 'string',
-            write: false,
-            role: 'text'
-        },
-        native: {}
-    });
-
-    setBridgeState(_obj, _token)
+/**
+ * Retrieve Nuki's.
+ *
+ */
+function getBridgeInfo(bridge)
+{
+	// get nuki's
+	adapter.log.info('Retrieving Nuki\'s from Bridge ' + bridge.data.bridge_ip + '..');
+	bridge.instance.list().then(function gotNukis(nukis)
+	{
+		nukis.forEach(function(nuki)
+		{
+			// create Nuki
+			nuki.bridge = bridge.data.bridge_id !== '' ? bridge.data.bridge_id : undefined;
+			updateDoor(nuki);
+			
+			// attach callback (NOTE: https is not supported according to API documentation)
+			if (bridge.data.bridge_callback)
+			{
+				nuki.nuki.addCallback(_ip.address(), adapter.config.port)
+					.then(function(res)
+					{
+						adapter.log.info('Callback attached to Nuki ' + nuki.name + '.');
+					})
+					.catch(function(e)
+					{
+						if (e.error.message === 'callback already added')
+							adapter.log.info('Callback already attached to Nuki ' + nuki.name + '.');
+						
+						else
+						{
+							adapter.log.warn('Callback not attached due to error. See debug log for details.');
+							adapter.log.debug(e.message);
+						}
+					});
+			}
+		});
+	})
+	.catch(function(e)
+	{
+		adapter.log.warn('Connection settings for bridge incorret' + (bridge.data.bridge_name ? ' with name ' + bridge.data.bridge_name : (bridge.data.bridge_id ? ' with ID ' + bridge.data.bridge_id : (bridge.data.bridge_ip ? ' with ip ' + bridge.data.bridge_ip : ''))) + '! No connection established.');
+		adapter.log.debug(e.message);
+	});
+	
+	// get bride info
+	bridge.instance.info().then(function gotInfo(info)
+	{
+		//
+		info.ip = bridge.data.bridge_ip;
+		info.port = bridge.data.bridge_port || 8080;
+		
+		// get bridge ID if not given
+		if (bridge.data.bridge_id === undefined || bridge.data.bridge_id === '')
+		{
+			adapter.log.debug('Adding missing Bridge ID for bridge with IP ' + bridge.data.bridge_ip + '.');
+			bridge.data.bridge_id = info.ids.serverId;
+			
+			// update bridge ID in configuration
+			adapter.getForeignObject('system.adapter.' + adapter.namespace, function(err, obj)
+			{
+				obj.native.bridges.forEach(function(entry, i)
+				{
+					if (entry.bridge_ip === bridge.data.bridge_ip)
+					{
+						obj.native.bridges[i].bridge_id = bridge.data.bridge_id;
+						adapter.setForeignObject(obj._id, obj);
+					}
+				});
+			});
+		}
+		
+		// index bridge
+		if (bridges[bridge.data.bridge_id] === undefined)
+			bridges[bridge.data.bridge_id] = bridge;
+		
+		// create bridge
+		var device = 'bridge__' + (bridge.data.bridge_name ? bridge.data.bridge_name.replace(/ /gi, '_').toLowerCase() : bridge.data.bridge_id);
+		adapter.createDevice(device, {name: 'Bridge (' + bridge.data.bridge_ip + ')'}, {}, function(err)
+		{
+			NODES.BRIDGE.forEach(function(node)
+			{
+				node.node = device + '.' + node.state;
+				setInformation(node, info);
+			});
+		});
+	})
+	.catch(function(e) {adapter.log.debug(e.message)});
 }
 
-function initNukiStates(_obj) {
-    var nukiState = _obj.lastKnownState;
-    // var nukiPath = bridgeName + '.' + _obj.nukiId;
-    var nukiPath = bridgeId + '.' + _obj.nukiId;
-
-    // adapter.setObjectNotExists(nukiPath, {
-    //     type: 'channel',
-    //     common: {
-    //         name: _obj.name
-    //     },
-    //     native: {}
-    // });
-
-    adapter.setObjectNotExists(nukiPath, {
-        type: 'device',
-        common: {
-            name: _obj.name
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.lockState', {
-        type: 'state',
-        common: {
-            name: 'Nuki aufgeschlossen',
-            type: 'boolean',
-            write: false,
-            role: 'sensor.lock'   
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.state', {
-        type: 'state',
-        common: {
-            name: 'Status',
-            type: 'number',
-            write: false,
-            states: {
-                '0': 'uncalibrated',
-                '1': 'locked',
-                '2': 'unlocking',
-                '3': 'unlocked',
-                '4': 'locking',
-                '5': 'unlatched',
-                '6': 'unlocked (lock n go)',
-                '7': 'unlatching',
-                '254': 'motor blocked',
-                '255': 'undefined',
-            },
-            role: 'value'
-        },
-        native: {}
-    });
-
-    // adapter.setObjectNotExists(nukiPath + '.stateName', {
-    //     type: 'state',
-    //     common: {
-    //         name: 'Statustext',
-    //         type: 'string',
-    //         role: 'text'
-    //     },
-    //     native: {}
-    // });
-    
-    adapter.setObjectNotExists(nukiPath + '.batteryCritical', {
-        type: 'state',
-        common: {
-            name: 'Batterie schwach',
-            type: 'boolean',
-            write: false,
-            role: 'indicator.lowbat'
-        },
-        native: {}
-    });
-    
-    adapter.setObjectNotExists(nukiPath + '.timestamp', {
-        type: 'state',
-        common: {
-            name: 'Zuletzt aktualisiert',
-            type: 'string',
-            write: false,
-            role: 'date'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.action', {
-        type: 'state',
-        common: {
-            name: 'Aktion',
-            type: 'number',
-            states: {
-                '0': '',
-                '1': 'unlock',
-                '2': 'lock',
-                '3': 'unlatch',
-                '4': 'lock‘n’go',
-                '5': 'lock‘n’go with unlatch',
-            },
-            role: 'value'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.lockAction', {
-        type: 'state',
-        common: {
-            name: 'Tür auf-/abschließen',
-            type: 'boolean',
-            write: true,
-            role: 'switch.lock.door'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.openAction', {
-        type: 'state', 
-        common: {
-            name:  'Tür öffnen',
-            type:  'boolean',
-            write: true,
-            read:  false,
-            role:  'button.open.door'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.unlockLocknGoAction', {
-        type: 'state', 
-        common: {
-            name:  'Tür aufschließen (lock‘n’go)',
-            type:  'boolean',
-            write: true,
-            read:  false,
-            role:  'button.open.door'
-        },
-        native: {}
-    });
-
-    adapter.setObjectNotExists(nukiPath + '.openLocknGoAction', {
-        type: 'state', 
-        common: {
-            name:  'Tür öffnen (lock‘n’go)',
-            type:  'boolean',
-            write: true,
-            read:  false,
-            role:  'button.open.door'
-        },
-        native: {}
-    });
-
-    adapter.subscribeStates(nukiPath + '.*Action');
-    adapter.subscribeStates(nukiPath + '.action');
-    setLockState(_obj.nukiId, nukiState);
+/**
+ * Update states of Nuki Door based on payload.
+ *
+ */
+function updateDoor(payload)
+{
+	// index Nuki
+	var device;
+	if (doors[payload.nukiId] === undefined)
+	{
+		device = 'door__' + payload.name.toLowerCase().replace(/ /gi, '_');
+		doors[payload.nukiId] = {device: device, name: payload.name, state: payload.lastKnownState.state, bridge: payload.bridge, instance: payload.nuki};
+	}
+	
+	// retrieve Nuki name
+	else
+		device = doors[payload.nukiId].device;
+	
+	// create / update device
+	adapter.createDevice(adapter.namespace + '.' + device, {name: payload.name}, {}, function(err)
+	{
+		NODES.LOCK.forEach(function(node)
+		{
+			node.node = device + '.' + node.state;
+			node.description = node.description.replace(/%id%/gi, payload.nukiId).replace(/%name%/gi, payload.name);
+			setInformation(node, payload);
+		});
+	});
 }
 
-function setBridgeState(_obj, _token) {
-    adapter.setState(_obj.bridgeId + '.info.bridgeIp', _obj.ip, true);
-    adapter.setState(_obj.bridgeId + '.info.bridgePort', _obj.port, true);
-    adapter.setState(_obj.bridgeId + '.info.bridgeToken', _token, true);
-}
-
-function setLockState(_nukiId, _nukiState) {
-    // var nukiPath = bridgeName + '.' + _nukiId;
-    var nukiPath = bridgeId + '.' + _nukiId;
-    let timeStamp = null;
-
-    // adapter.setState(bridgeId + '.info.bridgeIp', bridgeIp, true);
-    // adapter.setState(bridgeId + '.info.bridgePort', bridgePort, true);
-    
-    switch(_nukiState.state) {
-        case 1:
-            // fall through
-        case 4:
-            adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: false, ack: true});
-            setTimeout(function() {
-                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            }, timeOut);
-            break;
-        case 2:
-            // fall through
-        case 3:
-            // fall through
-        case 5:
-            // fall through
-        case 6:
-            // fall through
-        case 7:
-            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            setTimeout(function() {
-                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            }, timeOut);
-            break;
-        default:
-            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            break;
-    } 
-    
-    adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
-    // adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
-    adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
-
-    if (_nukiState.hasOwnProperty('timestamp')) {
-        adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
-    } else {
-        timeStamp = new Date();
-        adapter.setState(nukiPath + '.timestamp', {val: timeStamp, ack: true});
-    }
-}
-
-function updateAllLockStates(_content, _init) {
-    var nukiState = null;
-    var obj       = null;
-
-    if (_init) {
-        // adapter.setObjectNotExists(bridgeName, {
-        //     type: 'device',
-        //     common: {
-        //         name: bridgeIp
-        //     },
-        //     native: {}
-        // });
-        
-        for (var nukilock in _content) {
-            obj = _content[nukilock];
-
-            initNukiStates(obj);
-        }
-    } else {
-        for (var nukilock in _content) {
-            obj = _content[nukilock];
-            nukiState = obj.lastKnownState;
-
-            setLockState(obj.nukiId, nukiState);
-        }
-    }
-}
-
-function getLockState(_nukiId) {
-    var lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&token=' + bridgeToken;
-
-    request(
-        {
-            url: lockStateUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.debug('lock state requested: ' + lockStateUrl);
-
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('success')) {
-                    if (content.success) {
-                        setLockState(_nukiId, content);
-                    } else {
-                        adapter.log.warn('Lock state has not been retrieved. Check if lock is connected to bridge and try again.');
-                    }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                }
-            } else {
-                adapter.log.error(error);
-            }
-        }
-    )
-}
-
-function setLockAction(_nukiId, _action) {
-    var lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
-
-    request(
-        {
-            url: lockActionUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.debug('lock action requested: ' + lockActionUrl);
-
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('success')) {
-                    if (!content.success) {
-                        adapter.log.warn('lock action ' + _action + ' not successfully set!');
-                    } else {
-                        adapter.log.info('lock action ' + _action + ' set successfully');   
-                        if (hostCb == false) {                  
-                            // delay before request
-                            setTimeout(function() {
-                                getLockState(_nukiId);
-                            }, timeOut);
-                        } else {
-
-                        }
-                    }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                }
-            } else {
-                adapter.log.error(error);
-            }
-        }
-    )
-}
-
-function getBridgeList() {
-    var bridgeListUrl = 'https://api.nuki.io/discover/bridges';
-    var obj = null;
-
-    request(
-        {
-            url: bridgeListUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.debug('Bridge list requested: ' + bridgeListUrl);
-
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('errorCode')) {
-                    if (content.errorCode == 0) {
-                        for (var bridge in content.bridges) {
-                            obj = content.bridges[bridge];
-                            if (obj) {
-                                if (obj.ip == '0.0.0.0') {
-                                    adapter.log.warn('bridgeID ' + obj.bridgeId + ': discovery is disabled via "/configAuth" or through the Nuki App. No auto discovery possible.');
-                                } else if (obj.ip == adapter.config.bridge_ip) {
-                                    if (obj.port == adapter.config.bridge_port) {
-                                        adapter.log.info('found bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
-                                    } else {
-                                        adapter.log.warn('found bridge (ID: ' + obj.bridgeId + '; IP: ' + obj.bridgeId + ') has different port than specified! (specified: ' + 
-                                            adapter.config.bridge_port + '; actual: ' + obj.port);
-                                    }
-                                    initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
-                                } else {
-                                    adapter.log.info('found additional bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
-                                }
-                            } else {
-                                adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
-                            }
-                        }
-                    } else {
-                        adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
-                    }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check if bridge ist pluged in and active and try again.');
-                }
-            } else {
-                adapter.log.error(error);
-            }
-        }
-    )
-}
-
-function getLockList(_init) {
-    var lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
-
-    request(
-        {
-            url: lockListUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.info('Lock list requested: ' + lockListUrl);
-
-            if (!error && response.statusCode == 200) {
-                if (content) {
-                    updateAllLockStates(content, _init);
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                }
-            } else {
-                adapter.log.error(error);
-            }
-        }
-    )
-    if (_init) {
-        // delay before request
-        setTimeout(function() {
-            // check for callbacks on Nuki bridge
-            checkCallback(hostCb);
-        }, timeOut);
-    }
-}
-
-function initServer(_ip, _port) {
-    app.use(bodyParser.json()); // support json encoded bodies
-    app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
-    // routes will go here
-    app.get('/api/:key', function(req, res) {
-        res.send('Hello ' + req.params.key + ' ;-)');
-    });
-
-    // POST parameters sent with 
-    app.post('/api/nuki', function(req, res) {
-        var nukiId = req.body.nukiId;
-        var state = req.body.state;
-        var stateName = req.body.stateName;
-        var batteryCritical = req.body.batteryCritical;
-        var nukiState = { "state": state, "stateName": stateName, "batteryCritical": batteryCritical };
-
-        adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
-        setLockState(nukiId, nukiState);
-    });
-
-    // start the server
-    app.listen(_port, _ip);
-    adapter.log.info('Server listening to http://' + _ip + ':' + _port);
-}
-
-function checkCallback(_hostCb) {
-    var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
-    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki';
-    var cbExists = '';
-    var cbId = null;
-
-    request(
-        {
-            url: cbListUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.debug('Callback list requested: ' + cbListUrl);
-
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('callbacks')) {
-                    for (var row in content.callbacks) {
-                        cbId = content.callbacks[row];
-                        if (cbId.url == cbUrl) {
-                            cbExists = 'x';
-                            if (_hostCb == false) {
-                                adapter.log.debug('Callback should be removed: ' + cbUrl);
-                                // delay after request
-                                setTimeout(function() {
-                                    removeCallback(cbId.id);
-                                }, timeOut);
-                            }
-                        } 
-                    }
-                    if (_hostCb == true) {
-                        if (cbId) {
-                            callbackId = cbId.id;
-                        } else {
-                            callbackId = '0';
-                        }
-                        if (cbExists == 'x') {
-                                adapter.log.info('Callback allready set: ' + cbUrl);
-                                initServer(hostIp, hostPort);
-                        } else {
-                            if (callbackId == '3') {
-                                callbackId = '4';
-                                adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
-                            } else {
-                                initServer(hostIp, hostPort);
-                                // delay after request
-                                setTimeout(function() {
-                                    setCallback(cbUrl);
-                                }, timeOut);
-                            }
-                        }
-                    }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                }
-            } else {
-                adapter.log.error(error);
-            }
-        }
-    )
-}
-
-function removeCallback(_id) {
-    var callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&token=' + bridgeToken;
-
-    if (hostCb == false) {
-        request(
-            {
-                url: callbackRemoveUrl,
-                json: true
-            },  
-            function (error, response, content) {
-                adapter.log.debug('Callback removal requested: ' + callbackRemoveUrl);
-
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (content.success) {
-                            adapter.log.info('Callback-ID successfully removed: ' + _id);
-                            callbackId = 4;
-                        } else {
-                            adapter.log.warn('Callback-ID could not be removed: ' + _id);
-                        }
-                    } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                    }
-                } else {
-                    adapter.log.error(error);
-                }
-            }
-        )
-    }
-}
-
-function setCallback(_url) {
-    var callbackString = _url.replace(':', '%3A');
-    callbackString = callbackString.replace('/', '%2F');
-    var callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&token=' + bridgeToken;
-    
-    if (hostCb == true) {
-        request(
-            {
-                url: callbackAddUrl,
-                json: true
-            },  
-            function (error, response, content) {
-                adapter.log.debug('Callback requested: ' + callbackAddUrl);
-
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (content.success) {
-                            adapter.log.info('Callback successfully set: ' + _url);
-                        } else {
-                            adapter.log.warn('Callback could not be set: ' + _url);
-                        }
-                    } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
-                    }
-                } else {
-                    adapter.log.error(error);
-                }
-            }
-        ) 
-    }
-}
-
-function main() {
-    bridgeIp = adapter.config.bridge_ip;
-    bridgePort = adapter.config.bridge_port;
-    bridgeToken = adapter.config.token;
-    bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
-    interval = adapter.config.interval * 60000;
-    hostPort = adapter.config.host_port;
-    hostCb = adapter.config.host_cb;
-
-    if (bridgeIp != '') {
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // adapter.config:
-        adapter.log.debug('config Nuki bridge name: '   + bridgeName);
-        adapter.log.debug('config IP address: '         + bridgeIp);
-        adapter.log.debug('config port: '               + bridgePort);
-        adapter.log.debug('config token: '              + bridgeToken);
-
-        // get all Nuki devices on bridge
-        getLockList(true);
-        if (adapter.config.autoupd) {
-            adapter.log.debug('timer set: ' + interval + ' milliseconds');
-            // update all states every x milliseconds
-            timer = setInterval(getLockList, interval);
-        }
-    }
+/**
+ * Set information based on payload.
+ *
+ */
+function setInformation(node, payload)
+{
+	var tmp, status, index;
+	try
+	{
+		// action
+		if (node.action !== undefined)
+		{
+			node.common.nukiId = payload.nukiId;
+			library.set(node, 0);
+			adapter.subscribeStates(node.node); // attach state listener
+		}
+		
+		// status
+		else if (node.status !== undefined)
+		{
+			tmp = Object.assign({}, payload);
+			status = node.status;
+			
+			// go through response
+			while (status.indexOf('.') > -1)
+			{
+				try
+				{
+					index = status.substr(0, status.indexOf('.'));
+					status = status.substr(status.indexOf('.')+1);
+					tmp = tmp[index];
+				}
+				catch(err) {adapter.log.debug(err.message);}
+			}
+			
+			// write value
+			if (tmp[status] !== undefined)
+				library.set(node, node.type === 'boolean' && Number.isInteger(tmp[status]) ? (tmp[status] === 1) : tmp[status]);
+		}
+		
+		// only state creation
+		else
+		{
+			adapter.getState(node.node, function(err, res)
+			{
+				if ((err !== null || !res) && (node.node !== undefined && node.description !== undefined))
+					library.set(node, '');
+			});
+		}
+		
+	}
+	catch(err) {adapter.log.error(JSON.stringify(err.message))}
 }
