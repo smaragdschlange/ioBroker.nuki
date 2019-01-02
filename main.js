@@ -18,8 +18,8 @@ const Nuki = require('nuki-bridge-api');
  */
 var library = new Library(adapter);
 
-const LOCK_STATES = Object.assign({}, ...Object.values(Nuki.lockState).map(function (n, index) {if (Number.isInteger(n)) return {[n]: Object.keys(Nuki.lockState)[index]}}));
-const LOCK_ACTIONS = Object.assign({0: 'NO ACTION'}, ...Object.values(Nuki.lockAction).map(function (n, index) {if (Number.isInteger(n)) return {[n]: Object.keys(Nuki.lockAction)[index]}}));
+const LOCK_STATES = [0: "UNCALIBRATED", 1: "LOCKED", 2: "UNLOCKING", 3: "UNLOCKED"​, 4: "LOCKING"​, 5: "UNLATCHED"​, 6: "UNLOCKED_LOCK_N_GO"​, 7: "UNLATCHING"​, 254: "MOTOR_BLOCKED" , 255: "UNDEFINED"];
+const LOCK_ACTIONS = [0: "NO ACTION", 1: "UNLOCK", 2: "LOCK", 3: "UNLATCH", 4: "LOCK_N_GO", 5: "LOCK_N_GO_WITH_UNLATCH"];
 var bridges = {}, doors = {};
 var callback = false, refresh = null;
 
