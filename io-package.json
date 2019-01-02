@@ -27,7 +27,7 @@
         },
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>",
-            "Zefau <zefau@mailbox.org>",
+            "Zefau <zefau@mailbox.org>"
         ],
         "docs": "README.md",
         "platform": "Javascript/Node.js",
