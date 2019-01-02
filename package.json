@@ -1,6 +1,6 @@
 {
   "name": "iobroker.nuki",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "ioBroker Nuki Adapter",
   "author": {
     "name": "smaragdschlange",
@@ -10,6 +10,10 @@
     {
       "name": "smaragdschlange",
       "email": "smaragdschlange@gmx.de"
+    },
+    {
+      "name": "Zefau",
+      "email": "zefau@mailbox.org"
     }
   ],
   "homepage": "https://github.com/smaragdschlange/ioBroker.nuki",
@@ -26,6 +30,7 @@
     "url": "https://github.com/smaragdschlange/ioBroker.nuki"
   },
   "dependencies": {
+    "nuki-bridge-api": "^1.2.0",
     "request": "^2.85.0",	
     "express": "^4.16.3",
     "body-parser": "^1.18.2",
