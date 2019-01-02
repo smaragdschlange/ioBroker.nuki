@@ -1,7 +1,5 @@
 ![Logo](admin/nuki.png)
 # ioBroker.nuki
-=================
-
 This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using the [API of the Nuki Bridge](https://developer.nuki.io/page/nuki-bridge-http-api-170/4/#heading--introduction).
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
@@ -10,64 +8,91 @@ This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https:
 
 [![NPM](https://nodei.co/npm/iobroker.nuki.png?downloads=true)](https://nodei.co/npm/iobroker.nuki/)
 
-
-## Requirements
+**Requirements**
 * A Nuki Smart Lock (obviously) and a Nuki (hardware or software) Bridge.
 * A running instance of ioBroker.
 
-
-## Usage
-Each instance of the Nuki adapter represents a Nuki bridge. When creating an instance, simply enter IP address, port and token of your Nuki bridge. The name is optional and will be generated automatically if left empty. The checkbox "use callback" and the value "callback port in ioBroker" are optional and can be set in order to make use of the callback function of the Nuki. After saving an instance there will be created a bridge device with a channel for each Nuki lock that is connected to the specified Nuki bridge. The channels provide the current state of the Nuki lock as output parameters:
-
-* batteryCritical: Indicator for low battery
-* lockState: Indicator whether Nuki is locked
-* state: Current (numeric) lock state (Nuki native)
-* timestamp: Last updated
-
-Additionally, the channels provide input parameters which enable basic control of the Nuki lock:
-
-* action: Numeric action code for setting the Nuki state (Nuki native)
-
-Valid input values are:
-
-    0 (no action)
-    1 (unlock)
-    2 (lock)
-    3 (unlatch)
-    4 (lock ‘n’ go)
-    5 (lock ‘n’ go with unlatch)
-
-* lockAction: Switch for locking / unlocking the Nuki (true = unlock; false = lock)
-* openAction: Button for unlatching the Nuki
-* openLocknGoAction: Button for unlatching and after some seconds locking the Nuki
-* unlockLocknGoAction: Button for unlocking and after some seconds locking the Nuki
+**Table of contents**
+1. [Setup instructions (Quick Setup)](https://github.com/Zefau/ioBroker.nello#quick-setup)
+2. [Setup instructions (Advanced Setup)](https://github.com/Zefau/ioBroker.nello#advanced-setup)
+3. [Smart Home / Alexa integration using ioBroker.javascript](https://github.com/Zefau/ioBroker.nello#smart-home--alexa-integration-using-iobrokerjavascript)
+   1. [Open door using Alexa](https://github.com/Zefau/ioBroker.nello#open-door-using-alexa)
+   2. [Let Alexa inform you about door ring](https://github.com/Zefau/ioBroker.nello#let-alexa-inform-you-about-door-ring)
+4. [Changelog](https://github.com/Zefau/ioBroker.nello#changelog)
+5. [Licence](https://github.com/Zefau/ioBroker.nello#license)
 
 
-## Additional information
+
+## Installation
+### Get a API token
 How to get your bridges token:
 
-* Call http://< bridge_ip >:< bridge_port >/auth from any browser in your LAN -> bridge turns on its LED
-* Press the button of the bridge within 30 seconds
-* Result of the browser call should be something like this:
+1. Call ```http://<bridge_ip>:<bridge_port>/auth``` from any browser in your network
+2. The bridge turns on its LED
+2. Press the button of the bridge within 30 seconds
+3. Result of the browser call should be something like this: ```
     {
     "token": “token123”,
     "success": true
-    }
-Callback function:
+    }```
 
-If the callback function is being used, the adapter will try to automatically set the callback on the Nuki bridge when the instance is being saved. When the instance is unloaded the callback will be deleted again. All Nuki states will be kept up-to-date by the Nuki bridge while callback is activated.
-Callbacks can be set and removed from any browser with following urls:
+### Callback function
+If the callback function is being used, the adapter will try to automatically set the callback on the Nuki bridge when the instance is being saved. All Nuki states will be kept up-to-date by the Nuki bridge while callback is activated.
+Callbacks can also be set and removed manually from any browser with following URLs:
 
-Set:
-* http://< bridge_ip >:< bridge_port >/callback/add?url=http%3A%2F%2F< host_ip >%3A< host_port >%2Fapi%2Fnuki&token=< bridgeToken >
+* set Callback: ```http://<bridge_ip>:<bridge_port>/callback/add?url=http%3A%2F%2F<host_ip>%3A<host_port>%2Fapi%2Fnuki&token=<bridgeToken>```
+* remove Callback: ```http://<bridge_ip>:<bridge_port>/callback/remove?id=<callback_id>&token=<bridgeToken>```
+* list all Callbacks: ```http://<bridge_ip>:<bridge_port>/callback/list?token=<bridgeToken>```
 
-Remove:
-* http://< bridge_ip >:< bridge_port >/callback/remove?id=< callback_id >&token=< bridgeToken >
+### States
+If you successfully setup ioBroker.nuki, the following channels and states are created:
 
-## Update
-When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all instances of the old version before installing the new version. Please be aware that version changes bigger than on patch level (-> change of only the last digit) could always contain changes to data points e.g. 0.1.3 to 0.2.0
+#### Bridges
+A bridge will be created as device with the name pattern ```bridge__<name of bridge>```. The following channels / states will be created in each bridge:
+
+| Channel | State | Description |
+|:------- |:----- |:----------- |
+| - | \_connected | Flag indicating whether or not the bridge is connected to the Nuki server |
+| - | bridgeId | ID of the bridge / server |
+| - | bridgeIp | IP address of the bridge |
+| - | bridgePort | Port of the bridge |
+| - | bridgeType | Type of bridge |
+| - | hardwareId | ID of the hardware bridge (hardware bridge only) |
+| - | refreshed | Timestamp of last update |
+| - | uptime | Uptime of the bridge in seconds |
+| - | versFirmware | Version of the bridges firmware (hardware bridge only) |
+| - | versWifi | Version of the WiFi modules firmware (hardware bridge only) |
+| - | versApp | Version of the bridge app (software bridge only) |
+
+#### Locks
+A lock will be created as device with the name pattern ```door__<name of door>```. The following channels / states will be created in each bridge:
+
+| Channel | State | Description |
+|:------- |:----- |:----------- |
+| - | action | Trigger an action on Home Door |
+| - | bridge | Bridge of the Nuki |
+| - | id | ID of the Nuki |
+| - | name | Name of the Nuki |
+| status | batteryCritical | States critical battery level |
+| status | locked | Indication if door is locked |
+| status | refreshed | Timestamp of last update |
+| status | state | Current lock-state of the Nuki |
+
+
+## Smart Home / Alexa integration using ioBroker.javascript
+Some examples of a possible integration within your smart home.
+
+### Lock door at 10pm in the evening
+Coming soon..
+
 
 ## Changelog
+
+### 1.1.0
+* (zefau) Support for multiple bridges
+* (zefau) Support for discovery within admin panel
+* (zefau) Additional states for bridges and better separation between software / hardware bridge
+Note: When updating to 1.1.0 it is recommended to delete all instances of the old version before installing the new version.
 
 ### 1.0.3
 * (smaragdschlange) bug fix: action buttons were not working properly
@@ -81,6 +106,7 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 ### 0.2.0
 * (smaragdschlange) periodic state updates added
 * (smaragdschlange) restructure objects
+Note: When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all instances of the old version before installing the new version. Please be aware that version changes bigger than on patch level (-> change of only the last digit) could always contain changes to data points e.g. 0.1.3 to 0.2.0
 
 ### 0.1.3
 * (smaragdschlange) timestamp bug fixed
@@ -113,6 +139,7 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 
 ### 0.0.1
 * (smaragdschlange) initial release
+
 
 ## License
 The MIT License (MIT)
