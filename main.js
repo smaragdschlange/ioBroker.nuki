@@ -329,7 +329,7 @@ function updateDoor(payload)
 		device = doors[payload.nukiId].device;
 	
 	// create / update device
-	adapter.createDevice(adapter.namespace + '.' + device, {name: payload.name}, {}, function(err)
+	adapter.createDevice(device, {name: payload.name}, {}, function(err)
 	{
 		NODES.LOCK.forEach(function(node)
 		{
