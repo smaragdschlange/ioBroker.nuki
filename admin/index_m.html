@@ -1,240 +1,252 @@
 <html>
 <head>
-<!-- these 4 files always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
-<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+	<!-- these 4 files always have to be included -->
+	<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+	<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
 
-<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
 
-<!-- these files always have to be included -->
-<script type="text/javascript" src="../../js/translate.js"></script>
-<script type="text/javascript" src="../../lib/js/materialize.js"></script>
-<script type="text/javascript" src="../../js/adapter-settings.js"></script>
-<script type="text/javascript" src="words.js"></script>
- <style>
-  .m .col .s    elect-wrapper+label {
-   top: -26px;  
-  }
-     .m span{
-         font-size: 0.9em;
-     }
- </style>
-<!-- you have to define 2 functions in the global scope: -->
-<script type="text/javascript">
-
-    function showHideSettings() {
-        if ($('#autoupd').prop('checked')) {
-            $('._interval').show();
-        } else {
-            $('._interval').hide();
-        }
-        if ($('#host_cb').prop('checked')) {
-            $('._host_port').show();
-        } else {
-            $('._host_port').hide();
-        }
-    }
-
-    // function getNukiBridges() {
-        // const https = require('https');
-
-        // https.get('https://api.nuki.io/discover/bridges', (resp) => {
-        // let data = '';
-
-        // // A chunk of data has been recieved.
-        // resp.on('data', (chunk) => {
-        //     data += chunk;
-        // });
-
-        // // The whole response has been received. Print out the result.
-        // resp.on('end', () => {
-        //     console.log(JSON.parse(data).explanation);
-        // });
-
-        // }).on("error", (err) => {
-        // console.log("Error: " + err.message);
-        // });
-
-        // const request = require('request');
-
-        // request('https://api.nuki.io/discover/bridges', { json: true }, (err, res, body) => {
-            // if (err) { return console.log(err); }
-            // console.log(body.url);
-            // console.log(body.explanation);
-        // });
-
-        // const https = require('https');
-
-        // https.get('https://api.nuki.io/discover/bridges', (res) => {
-        //     const { statusCode } = res;
-            // const contentType = res.headers['content-type'];
-
-            // let error;
-            // if (statusCode !== 200) {
-            //     error = new Error('Request Failed.\n' + `Status Code: ${statusCode}`);
-            // } else if (!/^application\/json/.test(contentType)) {
-            //     error = new Error('Invalid content-type.\n' + `Expected application/json but received ${contentType}`);
-            // }
-            // if (error) {
-            //     console.error(error.message);
-            //     // consume response data to free up memory
-            //     res.resume();
-            //     return;
-            // }
-
-            // getIps();
-
-            // res.setEncoding('utf8');
-            // let rawData = '';
-            // res.on('data', (chunk) => { rawData += chunk; });
-            // res.on('end', () => {
-            //     try {
-            //         const parsedData = JSON.parse(rawData);
-            //         console.log(parsedData);
-            //     } catch (e) {
-            //         console.error(e.message);
-            //     }
-            // });
-        // }).on('error', (e) => {
-            // console.error(`Got error: ${e.message}`);
-        // });
-    // }
-
-    // function getIps() {
-        // sendTo(null, 'listSerial', null, function (list) {
-        //     if (!list || !list.result) {
-        //         return;
-        //     }
-        //     list = list.result;
-            // var element = $('#bridge_ip');
-        //     for (var j = 0; j < list.length; j++) {
-                // element.append('<option value="192.168.178.65">192.168.178.65</option>');
-        //     }
-        //     $('#serialport.value').val(settings.serialport).select();
-        // });
-    // }
-
-    // the function loadSettings has to exist ...
-    function load(settings, onChange) {
-        // example: select elements with id=key and class=value and insert value
-        if (!settings) return;
-            $('.value').each(function () {            
-            var $key = $(this);
-            var id = $key.attr('id');
-            if ($key.attr('type') === 'checkbox') {
-		        // do not call onChange direct, because onChange could expect some arguments
-                $key.prop('checked', settings[id]).change(function() {
-                    onChange();
-                });
-            } else {
-		        // do not call onChange direct, because onChange could expect some arguments
-                $key.val(settings[id]).change(function() {
-                    onChange();
-                }).keyup(function() {
-                    onChange();
-                });
-            }
-        });
-
-        // getNukiBridges();
-        showHideSettings();
-
-        onChange(false);
-        M.updateTextFields();  // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
-
-        $('#host_cb').change(function () {
-            showHideSettings();
-        });
-        $('#autoupd').change(function () {
-            showHideSettings();
-        });
-    }
-
-    // ... and the function save has to exist.
-    // you have to make sure the callback is called with the settings object as first param!
-    function save(callback) {
-        // example: select elements with class=value and build settings object
-        var obj = {};
-        $('.value').each(function () {
-            var $this = $(this);
-            if ($this.attr('type') === 'checkbox') {
-                obj[$this.attr('id')] = $this.prop('checked');
-            } else {
-                obj[$this.attr('id')] = $this.val();
-            }
-        });
-        callback(obj);
-    }
-</script>
+	<!-- these files always have to be included -->
+	<script type="text/javascript" src="../../js/translate.js"></script>
+	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
+	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+	
+	<script type="text/javascript" src="words.js"></script>
+	<script type="text/javascript">
+	<!--
+	var onChange;
+	var bridgeList = [];
+	
+	// load
+	function load(settings, onChange)
+	{
+		bridges = settings.bridges || [];
+		values2table('bridges', bridges, onChange);
+		setBridgeIds(bridges);
+		
+		_load(settings, onChange);
+	}
+	
+	// save
+	function save(callback)
+	{
+		var obj = {bridges: table2values('bridges')};
+		_save(callback, obj);
+	}
+	
+	// set bridge ids
+	function setBridgeIds(bridges)
+	{
+		bridges.forEach(function(bridge, i)
+		{
+			bridgeList.push(parseInt(bridge.bridge_id));
+			setBridgeId(i, bridge.bridge_id);
+		});
+	}
+	
+	// set bridge id
+	function setBridgeId(index, bridge_id)
+	{
+		var entry = $('#bridges [data-index="' + index + '"][data-name="bridge_id"]');
+		var element = $('#bridge_' + index + '-' + bridge_id);
+		
+		if (element.length == 0)
+			entry.after('<input class="values-input" style="width: 100%" type="text" value="' + bridge_id + '" id="bridge_' + index + '-' + bridge_id + '" disabled>');
+		else
+			element.text(bridge_id);
+	}
+	
+	// page loaded
+	var timer;
+	$(window).on('load', function()
+	{
+        $('.modal').modal(); // initialize all modals
+		
+		// set bridge id again when add button is pressed
+		$('body').on('click', '.table-button-add, .values-buttons', function()
+		{
+			clearTimeout(timer);
+			timer = setTimeout(function() {
+				setBridgeIds(table2values('bridges'));
+			}, 150);
+		});
+		
+		// discover bridges
+		$('.button-discover').on('click', function()
+		{
+			$('#modal').modal('open');
+			$('#log').html('');
+			_log(translateWord('message_action-connecting'));
+			
+			// timeout
+			var timeout = setTimeout(function() {_log(translateWord('message_error-noconnection'), 'error');}, 7000);
+			
+			// send request
+			sendTo(null, 'discover', null, function(res)
+			{
+				_log(translateWord('message_info-connected'));
+				_log(translateWord('message_action-getbridges'));
+				clearTimeout(timeout);
+				
+				if (res.result === true)
+				{
+					_log(translateWord('message_success-gotbridges').replace(/%count%/gi, res.bridges.length), 'success');
+					console.log(JSON.stringify(res.bridges));
+					
+					var bridges = table2values('bridges');
+					res.bridges.forEach(function(bridge)
+					{
+						if (bridgeList.indexOf(bridge.bridgeId) > -1)
+						{
+							_log(translateWord('message_info-duplbridge').replace(/%id%/gi, bridge.bridgeId), 'info');
+							return;
+						}
+						
+						bridges.push({
+							'bridge_id': bridge.bridgeId,
+							'bridge_ip': bridge.ip || '',
+							'bridge_port': bridge.port || 8080,
+							'bridge_callback': true,
+							'active': true
+						});
+					});
+					
+					values2table('bridges', bridges, onChange);
+					timer = setTimeout(function() {
+						setBridgeIds(bridges);
+					}, 150);
+					
+					_log(translateWord('message_info-finished'), 'success');
+				}
+				
+				// error
+				else
+					_log(translateWord('message_error-nobridges')+' ('+res.error+')', 'error');
+			});
+		});
+		
+	});
+	// -->
+	</script>
+	<script type="text/javascript" src="admin.js"></script>
+	<link rel="stylesheet" type="text/css" href="admin.css"/>
+	
 </head>
 <body>
-    <!-- you have to put your config page in a div with id adapter-container -->
-    <div class="m adapter-container">
-        <div class="row">
-            <!-- Forms are the standard way to receive user inputted data.
-         Learn more http://materializecss.com/forms.html-->
-            <div class="row">
-                <div class="input-field col s6">
-                    <img src="nuki-logo.png" class="logo">
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="text" id="bridge_name"/>
-                    <label for="bridge_name" class="translate">name</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="text" id="bridge_ip"/>
-                    <label for="bridge_ip" class="translate">ip</label>
-                    <span for="bridge_ip" class="translate">ipeg</span>
-                </div>
-                <!-- <div class="input-field col s12 m6 l4">
-                    <select class="value" id="bridge_ip" type="text" ></select>
-                    <label for="bridge_ip" class="translate">ip</label>
-                </div> -->
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="number" id="bridge_port"/>
-                    <label for="bridge_port" class="translate">nuki_port</label>
-                </div>
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="text" id="token" />
-                    <label for="token" class="translate">token</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m4">
-                    <input class="value" type="checkbox" id="host_cb"/>
-                    <label for="host_cb" class="translate">host_cb</label>
-                </div>
-            </div>
-            <div class="row _host_port">
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="number" id="host_port"/>
-                    <label for="host_port" class="translate">host_port</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m4">
-                    <input class="value" type="checkbox" id="autoupd"/>
-                    <label for="autoupd" class="translate">autoupd</label>
-                </div>
-            </div>
-            <div class="row _interval">
-                <div class="input-field col s12 m6 l4">
-                    <input class="value" type="number" id="interval"/>
-                    <label for="interval" class="translate">interval</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12">
-                    <p class="translate">on save adapter restarts with new config immediately</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
 
+
+<div class="m adapter-container" id="settings">
+	
+	<!-- Modal Structure -->
+	<div id="modal" class="modal">
+		<div class="modal-content">
+			<div class="row">
+				<div class="col s12 m12">
+					<h2 class="translate">status</h2>
+					<ul id="log"></ul>
+				</div>
+			</div>
+			
+		</div>
+		<div class="modal-footer">
+			<a href="#!" class="btn waves-effect waves-green modal-close translate">button_closeModal</a>
+		</div>
+	</div>
+	
+	<div class="row">
+		
+		<!-- TABS -->
+		<div class="col s12">
+			<ul class="tabs">
+				<li class="tab col s3"><a class="translate active" href="#config">tab_config</a></li>
+				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.nuki#smart-home--alexa-integration-using-iobrokerjavascript">tab_alexa</a></li>
+				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.nuki#iobrokernuki">tab_info</a></li>
+			</ul>
+		</div>
+		
+		<!-- CONFIG -->
+		<div id="config" class="col s12 m12">
+			
+			<!-- DEVICES -->
+			<div class="row" style="margin-bottom: 0">
+				<div class="col s12 m12">
+					<p class="translate title">auth</p>
+				</div>
+			</div>
+			<div class="row box">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="subtitle translate">auth_info</p>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col s12" id="bridges">
+						
+							<a class="btn waves-effect waves-light table-button-add"><i class="material-icons">add_circle</i> add bridge</a>
+							<a class="btn waves-effect waves-light button-discover"><i class="material-icons">search</i> discover bridges</a>
+							
+							<div class="table-values-div">
+								<table class="table-values">
+									<thead>
+										<tr>
+											<th data-name="bridge_id" data-type="hidden" style="width: 10%" class="translate">bridge_id</th>
+											<th data-name="bridge_name" style="width: 20%" class="translate">bridge_name</th>
+											<th data-name="bridge_ip" style="width: 20%" class="translate">bridge_ip</th>
+											<th data-name="bridge_port" data-type="number" data-default="8080" style="width: 10%" class="translate">bridge_port</th>
+											<th data-name="bridge_token" style="width: 20%" class="translate">bridge_token</th>
+											<th data-name="bridge_callback" data-type="checkbox" data-default="true" style="width: 10%" class="translate">bridge_callback</th>
+											<th data-name="active" data-type="checkbox" data-default="true" style="width: 70px" class="translate">enabled</th>
+											<th data-buttons="delete" style="width: 120px"></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Other -->
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="translate title">other</p>
+						</div>
+					</div>
+					<div class="row box">
+						<div class="col s12 m12">
+							<div class="row">
+								<div class="col s6 m6">
+									<p class="subtitle translate">refresh_info</p>
+								</div>
+								<div class="col s6 m6">
+									<p class="subtitle translate">port_info</p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s6 m6">
+									<input class="value" id="refresh" type="number" placeholder="0" />
+									<label for="refresh" class="translate">refresh</label>
+								</div>
+								<div class="input-field col s6 m6">
+									<input class="value" id="port" type="number" placeholder="51988" />
+									<label for="port" class="translate">port</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+
+</div>
+
+</body>
 </html>
