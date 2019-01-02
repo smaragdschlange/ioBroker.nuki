@@ -1,12 +1,20 @@
-![Logo](admin/nuki-logo.png)
+![Logo](admin/nuki.png)
 # ioBroker.nuki
 =================
 
-This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using the API of the Nuki Bridge.
+This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using the [API of the Nuki Bridge](https://developer.nuki.io/page/nuki-bridge-http-api-170/4/#heading--introduction).
+
+[![NPM version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
+[![Travis CI](https://travis-ci.org/smaragdschlange/ioBroker.nuki.svg?branch=master)](https://travis-ci.org/smaragdschlange/ioBroker.nuki)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
+
+[![NPM](https://nodei.co/npm/iobroker.nuki.png?downloads=true)](https://nodei.co/npm/iobroker.nuki/)
+
 
 ## Requirements
 * A Nuki Smart Lock (obviously) and a Nuki (hardware or software) Bridge.
 * A running instance of ioBroker.
+
 
 ## Usage
 Each instance of the Nuki adapter represents a Nuki bridge. When creating an instance, simply enter IP address, port and token of your Nuki bridge. The name is optional and will be generated automatically if left empty. The checkbox "use callback" and the value "callback port in ioBroker" are optional and can be set in order to make use of the callback function of the Nuki. After saving an instance there will be created a bridge device with a channel for each Nuki lock that is connected to the specified Nuki bridge. The channels provide the current state of the Nuki lock as output parameters:
@@ -33,6 +41,7 @@ Valid input values are:
 * openAction: Button for unlatching the Nuki
 * openLocknGoAction: Button for unlatching and after some seconds locking the Nuki
 * unlockLocknGoAction: Button for unlocking and after some seconds locking the Nuki
+
 
 ## Additional information
 How to get your bridges token:
