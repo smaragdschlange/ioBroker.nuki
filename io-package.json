@@ -32,7 +32,7 @@
         "docs": "README.md",
         "platform": "Javascript/Node.js",
         "mode": "daemon",
-        "icon": "nuki.png",
+        "icon": "nuki-logo.png",
         "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo.png",
         "materialize": true,
         "enabled": true,
