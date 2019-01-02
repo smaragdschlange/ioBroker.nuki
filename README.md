@@ -13,14 +13,10 @@ This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https:
 * A running instance of ioBroker.
 
 **Table of contents**
-1. [Setup instructions (Quick Setup)](https://github.com/Zefau/ioBroker.nello#quick-setup)
-2. [Setup instructions (Advanced Setup)](https://github.com/Zefau/ioBroker.nello#advanced-setup)
-3. [Smart Home / Alexa integration using ioBroker.javascript](https://github.com/Zefau/ioBroker.nello#smart-home--alexa-integration-using-iobrokerjavascript)
-   1. [Open door using Alexa](https://github.com/Zefau/ioBroker.nello#open-door-using-alexa)
-   2. [Let Alexa inform you about door ring](https://github.com/Zefau/ioBroker.nello#let-alexa-inform-you-about-door-ring)
-4. [Changelog](https://github.com/Zefau/ioBroker.nello#changelog)
-5. [Licence](https://github.com/Zefau/ioBroker.nello#license)
-
+1. [Installation](#installation)
+2. [Smart Home / Alexa integration using ioBroker.javascript](#smart-home--alexa-integration-using-iobrokerjavascript)
+3. [Changelog](#changelog)
+4. [Licence](#license)
 
 
 ## Installation
