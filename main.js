@@ -198,11 +198,6 @@ adapter.on('message', function(msg)
 	
 	switch(msg.command)
 	{
-		case 'getBridgeId':
-			adapter.log.debug('Discover bridges..');
-			//library.msg(msg.from, msg.command, {result: true, data: {password: library.encrypt(adapter.config.encryptionKey, msg.message.cleartext)}}, msg.callback);
-			break;
-			
 		case 'discover':
 			adapter.log.info('Discovering bridges..');
 			
