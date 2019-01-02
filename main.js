@@ -1,6 +1,6 @@
 'use strict';
 const utils = require(__dirname + '/lib/utils'); // Get common adapter utils
-const adapter = utils.Adapter('nuki2');
+const adapter = utils.Adapter('nuki');
 
 const _request = require('request');
 const _http = require('express')();
