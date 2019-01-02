@@ -19,7 +19,8 @@ This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https:
    3. [States](#states)
 2. [Smart Home / Alexa integration using ioBroker.javascript](#smart-home--alexa-integration-using-iobrokerjavascript)
 3. [Changelog](#changelog)
-4. [Licence](#license)
+4. [Credits](#credits)
+5. [Licence](#license)
 
 
 ## Installation
@@ -140,6 +141,10 @@ Note: When updating from 0.1.x to 0.2.0 or higher it is recommended to delete al
 
 ### 0.0.1
 * (smaragdschlange) initial release
+
+
+## Credits
+Thanks to [@Mik13](https://github.com/Mik13) for the [Nuki Bridge API implementation](https://github.com/Mik13/nuki-bridge-api#nuki-bridge-api).
 
 
 ## License
