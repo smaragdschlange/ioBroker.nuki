@@ -47,7 +47,7 @@ Callbacks can also be set and removed manually from any browser with following U
 ### States
 If you successfully setup ioBroker.nuki, the following channels and states are created:
 
-#### Bridges
+#### Bridges (local Bridge API)
 A bridge will be created as device with the name pattern ```bridge__<name of bridge>```. The following channels / states will be created in each bridge:
 
 | Channel | State | Description |
@@ -64,7 +64,7 @@ A bridge will be created as device with the name pattern ```bridge__<name of bri
 | - | versWifi | Version of the WiFi modules firmware (hardware bridge only) |
 | - | versApp | Version of the bridge app (software bridge only) |
 
-#### Locks
+#### Locks (local Bridge API)
 A lock will be created as device with the name pattern ```door__<name of door>```. The following channels / states will be created in each bridge:
 
 | Channel | State | Description |
@@ -77,6 +77,13 @@ A lock will be created as device with the name pattern ```door__<name of door>``
 | status | locked | Indication if door is locked |
 | status | refreshed | Timestamp of last update |
 | status | state | Current lock-state of the Nuki |
+
+#### Locks (Webi API)
+Additionally the following states will be available when Nuki Web API has been enabled:
+
+| Channel | State | Description |
+|:------- |:----- |:----------- |
+| - | - | documentation coming soon... |
 
 
 ## Smart Home / Alexa integration using ioBroker.javascript
@@ -92,6 +99,7 @@ Coming soon..
 * (zefau) Support for multiple bridges
 * (zefau) Support for discovery within admin panel
 * (zefau) Additional states for bridges and better separation between software / hardware bridge
+* (zefau) Added Nuki Web API
 
 Note: When updating to 1.1.0 it is recommended to delete all instances of the old version before installing the new version.
 
