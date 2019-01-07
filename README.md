@@ -1,6 +1,6 @@
 ![Logo](admin/nuki-logo.png)
 # ioBroker.nuki
-This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using the [API of the Nuki Bridge](https://developer.nuki.io/page/nuki-bridge-http-api-170/4/#heading--introduction).
+This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using **both** the [local API of the Nuki Bridge](https://developer.nuki.io/page/nuki-bridge-http-api-170/4/#heading--introduction) as well as the [Web API](https://developer.nuki.io/page/nuki-web-api-111/3/).
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
 [![Travis CI](https://travis-ci.org/smaragdschlange/ioBroker.nuki.svg?branch=master)](https://travis-ci.org/smaragdschlange/ioBroker.nuki)
