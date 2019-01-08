@@ -30,6 +30,7 @@
     "url": "https://github.com/smaragdschlange/ioBroker.nuki"
   },
   "dependencies": {
+    "nuki-api", "^1.0.4",
     "nuki-bridge-api": "^1.2.0",
     "request": "^2.85.0",	
     "express": "^4.16.3",
