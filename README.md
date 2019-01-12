@@ -3,7 +3,7 @@
 This ioBroker adapter allows to control and monitor the [Nuki Smart Lock](https://nuki.io/de/) by using **both** the [local API of the Nuki Bridge](https://developer.nuki.io/page/nuki-bridge-http-api-170/4/#heading--introduction) as well as the [Web API](https://developer.nuki.io/page/nuki-web-api-111/3/).
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
-[![Travis CI](https://travis-ci.org/smaragdschlange/ioBroker.nuki.svg?branch=master)](https://travis-ci.org/smaragdschlange/ioBroker.nuki)
+[![Travis CI](https://travis-ci.org/Zefau/ioBroker.nuki.svg?branch=master)](https://travis-ci.org/Zefau/ioBroker.nuki)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
 
 [![NPM](https://nodei.co/npm/iobroker.nuki.png?downloads=true)](https://nodei.co/npm/iobroker.nuki/)
@@ -75,15 +75,24 @@ A lock will be created as device with the name pattern ```door__<name of door>``
 | - | name | Name of the Nuki |
 | status | batteryCritical | States critical battery level |
 | status | locked | Indication if door is locked |
+| status | lockState | Current lock-state of the Nuki |
 | status | refreshed | Timestamp of last update |
-| status | state | Current lock-state of the Nuki |
 
 #### Locks (Webi API)
 Additionally the following states will be available when Nuki Web API has been enabled:
 
 | Channel | State | Description |
 |:------- |:----- |:----------- |
-| - | - | documentation coming soon... |
+| status | closed | Indication if door is closed (boolean of doorState) |
+| status | doorState | Current door-state of the Nuki |
+| status | lastAction | Last triggered action |
+| status | mode | The smartlock mode |
+| status | trigger | The state trigger |
+| users | - | Users of Nuki |
+| users.___user___ | authId | The smartlock authorization id |
+| users.___user___ | ... | ... |
+| config | advertisingMode | The advertising mode (battery saving) |
+| config | ... | ... |
 
 
 ## Smart Home / Alexa integration using ioBroker.javascript
@@ -153,6 +162,8 @@ Note: When updating from 0.1.x to 0.2.0 or higher it is recommended to delete al
 
 ## Credits
 Thanks to [@Mik13](https://github.com/Mik13) for the [Nuki Bridge API implementation](https://github.com/Mik13/nuki-bridge-api#nuki-bridge-api).
+
+Thanks to [@intelligencecompany](https://github.com/intelligencecompany) for the [Nuki Web API implementation](https://github.com/intelligencecompany/nuki-api#readme).
 
 
 ## License
