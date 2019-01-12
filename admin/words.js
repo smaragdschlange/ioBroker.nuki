@@ -15,13 +15,34 @@ systemDictionary = {
 		"de": "Informationen"
 	},
 	
-	"auth": {
+	"web": {
+		"en": "Connection settings of the Nuki Smart Locks (optional)",
+		"de": "Verbindungseinstellungen der Nuki Smart Locks (optional)"
+	},
+	"web_info": {
+		"en": "The connection settings for the Nuki Smart Locks (using the <a href='https://developer.nuki.io/page/nuki-web-api-111/3/'>official Nuki Web API</a>). The Nuki Web API offers various ways to interact with a Nuki Smart Lock. The API transmits all commands directly through a permanent HTTPS/TLS connection to the corresponding Nuki bridge, which forwards it via Bluetooth to the Smart Lock for execution. Responses are directly fed back into Nuki Web.<br /><br /><strong>Please go to <a href='https://web.nuki.io/de/#/admin/web-api'>web.nuki.io</a> (create an account) and generate your API token!</strong>",
+		"de": "Die Verbindungseinstellungen für die Nuki Smart Locks (mit der <a href='https://developer.nuki.io/page/nuki-web-api-111/3/'>offiziellen Nuki Web API</a>).<br /><br /><strong>Bitte auf <a href='https://web.nuki.io/de/#/admin/web-api'>web.nuki.io</a> einen API Token erstellen!</strong>"
+	},
+	"api_token": {
+		"en": "API Token",
+		"de": "API Token"
+	},
+	
+	"bridge": {
 		"en": "Connection settings of the Nuki Bridge",
 		"de": "Verbindungseinstellungen der Nuki Bridge"
 	},
-	"auth_info": {
-		"en": "The connection settings for the Nuki Bridge.",
-		"de": "Die Verbindungseinstellungen für die Nuki Bridge."
+	"bridge_info": {
+		"en": "The connection settings for the Nuki Bridge (using the <a href='https://developer.nuki.io/page/nuki-bridge-http-api-170/4/'>official Nuki Bridge API</a>). The REST API on the Nuki Bridge offers simple endpoints to list all available Nuki Smart Locks, retrieve their current lock state and perform lock operations.",
+		"de": "Die Verbindungseinstellungen für die Nuki Bridge (mit der <a href='https://developer.nuki.io/page/nuki-bridge-http-api-170/4/'>offiziellen Nuki Bridge API</a>)."
+	},
+	"add_bridge": {
+		"en": "Add Bridge",
+		"de": "Bridge hinzufügen"
+	},
+	"discoer_bridges": {
+		"en": "Discover Bridges",
+		"de": "Bridges suchen"
 	},
 	
 	"message_action-connecting": {
