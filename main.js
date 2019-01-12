@@ -24,8 +24,8 @@ var library = new Library(adapter);
 const LOCK = require(__dirname + '/LOCK.js');
 const NODES = require(__dirname + '/NODES.js');
 
-var setup = false;
-var nuki, bridges = {}, doors = {};
+var setup = [];
+var nuki = null, bridges = {}, doors = {}, listeners = {};
 var callback = false, refresh = null;
 
 
@@ -64,30 +64,10 @@ adapter.on('ready', function()
 	{
 		nuki = new Nuki();
 		nuki.apiKey = adapter.config.api_token;
-		setup = true;
+		setup.push('web_api');
 		
 		// get locks
-		nuki.getSmartLocks(true).then(function(smartlocks)
-		{
-			smartlocks.forEach(function(smartlock)
-			{
-				smartlock.nukiId = smartlock.smartlockId;
-				updateDoor(smartlock);
-				
-				// get users
-				nuki.getSmartLockUsers(smartlock.nukiId, true).then(function(users)
-				{
-					users.forEach(function(user)
-					{
-						var nodePath = doors[smartlock.nukiId].device + '.users.' + user.name.toLowerCase().replace(/ /gi, '_') + '.';
-						NODES.LOCK.USERS.forEach(function(node)
-						{
-							setInformation(Object.assign(node, {node: nodePath + node.state, description: 'User ' + user.name}), user);
-						});
-					});
-				}).catch(function(e) {adapter.log.warn('Error retrieving users: ' + e.message)});
-			});
-		}).catch(function(e) {adapter.log.warn('Error retrieving smartlocks: ' + e.message)});
+		updateLocks();
 	}
 	
 	
@@ -101,7 +81,7 @@ adapter.on('ready', function()
 	
 	else
 	{
-		setup = true;
+		setup.push('bridge_api');
 		
 		// go through bridges
 		adapter.config.bridges.forEach(function(device, i)
@@ -135,21 +115,23 @@ adapter.on('ready', function()
 		});
 	}
 	
+	// exit if no API is given
+	if (setup.length == 0) return;
 	
-	if (!setup)
-		return;
-	
-	
-	
-	
-	
-	
-	
-
 	
 	// periodically refresh settings
-	if (adapter.config.refresh !== undefined && adapter.config.refresh > 10)
-		refresh = setInterval(function() {for (var key in bridges) {getBridgeInfo(bridges[key])}}, Math.round(parseInt(adapter.config.refresh)*1000));
+	if (adapter.config.refresh !== undefined && adapter.config.refresh >= 10)
+	{
+		refresh = setInterval(function()
+		{
+			// update nuki
+			updateLocks();
+			
+			// update bridge
+			for (var key in bridges) {getBridgeInfo(bridges[key])}
+			
+		}, Math.round(parseInt(adapter.config.refresh)*1000));
+	}
 	
 	// attach server to listen (@see https://stackoverflow.com/questions/9304888/how-to-get-data-passed-from-a-form-in-express-node-js/38763341#38763341)
 	if (callback)
@@ -167,7 +149,7 @@ adapter.on('ready', function()
 			try
 			{
 				payload = req.body;
-				updateDoor({'nukiId': payload.nukiId, 'state': {'state': payload.state, 'batteryCritical': payload.batteryCritical, 'timestamp': new Date()}});
+				updateLock({'nukiId': payload.nukiId, 'state': {'state': payload.state, 'batteryCritical': payload.batteryCritical, 'timestamp': new Date()}});
 			}
 			catch(e)
 			{
@@ -193,6 +175,7 @@ adapter.on('stateChange', function(node, object)
 	{
 		adapter.getObject(node, function(err, node)
 		{
+			adapter.setState(node, 0, true);
 			var nukiId = node.common.nukiId || false;
 			if (err !== null || !nukiId)
 			{
@@ -203,18 +186,41 @@ adapter.on('stateChange', function(node, object)
 			// retrieve Nuki and apply action
 			adapter.log.info('Triggered action -' + LOCK.ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '.');
 			
-			var nuki = doors[nukiId].instance;
-			nuki.lockAction(action)
-				.then(function()
+			// try bridge API
+			var bridge = bridges[doors[nukiId].bridge] !== undefined ? bridges[doors[nukiId].bridge].instance : null;
+			if (bridge !== null)
+			{
+				adapter.log.debug('Action applied on Bridge API.');
+				bridge.get(nukiId).then(function(device)
 				{
-					adapter.log.info('Successfully triggered action -' + LOCK.ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '.');
-					library._setValue(node, 0);
-				})
-				.catch(function(e)
-				{
-					adapter.log.warn('Error triggering action -' + LOCK.ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '. See debug log for details.');
-					adapter.log.debug(e.message);
+					device.lockAction(action)
+						.then(function()
+						{
+							adapter.log.info('Successfully triggered action -' + LOCK.ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '.');
+							library._setValue(node, 0);
+						})
+						.catch(function(e)
+						{
+							adapter.log.warn('Error triggering action -' + LOCK.ACTIONS[action] + '- on Nuki ' + doors[nukiId].name + '. See debug log for details.');
+							adapter.log.debug(e.message);
+						});
 				});
+			}
+			
+			// try Web API
+			else if (nuki !== null)
+			{
+				adapter.log.debug('Action applied on Web API.');
+				_request({
+					method: 'POST',
+					url: 'https://api.nuki.io/smartlock/' + nukiId + '/action',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': 'Bearer ' + adapter.config.api_token
+					},
+					body: '{"action": ' + action + '}',
+				});
+			}
 		});
 	}
 });
@@ -241,11 +247,11 @@ adapter.on('message', function(msg)
 				}
 				else
 				{
-					var bridges = body.bridges;
-					adapter.log.info('Bridges discovered: ' + bridges.length);
-					adapter.log.debug(JSON.stringify(bridges));
+					var discovered = body.bridges;
+					adapter.log.info('Bridges discovered: ' + discovered.length);
+					adapter.log.debug(JSON.stringify(discovered));
 					
-					library.msg(msg.from, msg.command, {result: true, bridges: bridges}, msg.callback);
+					library.msg(msg.from, msg.command, {result: true, bridges: discovered}, msg.callback);
 				}
 			});
 			break;
@@ -267,7 +273,8 @@ function getBridgeInfo(bridge)
 			// create Nuki
 			nuki.bridge = bridge.data.bridge_id !== '' ? bridge.data.bridge_id : undefined;
 			nuki.state = nuki.lastKnownState;
-			updateDoor(nuki);
+			adapter.log.debug('getBridgeInfo(): ' + JSON.stringify(nuki));
+			updateLock(nuki);
 			
 			// attach callback (NOTE: https is not supported according to API documentation)
 			if (bridge.data.bridge_callback)
@@ -343,22 +350,61 @@ function getBridgeInfo(bridge)
 }
 
 /**
+ * Update Nuki Locks.
+ *
+ */
+function updateLocks()
+{
+	adapter.log.info('Retrieving Nuki\'s from Web API..');
+	nuki.getSmartLocks(true).then(function(smartlocks)
+	{
+		smartlocks.forEach(function(smartlock)
+		{
+			smartlock.nukiId = smartlock.smartlockId;
+			if (setup.indexOf('bridge_api') > -1) delete smartlock.state.state; // use state retrieved from bridge instead of this
+			adapter.log.debug('updateLocks(): ' + JSON.stringify(smartlock));
+			updateLock(smartlock);
+			
+			// get users
+			nuki.getSmartLockUsers(smartlock.nukiId, true).then(function(users)
+			{
+				users.forEach(function(user)
+				{
+					var nodePath = doors[smartlock.nukiId].device + '.users.' + user.name.toLowerCase().replace(/ /gi, '_');
+					library.set({node: nodePath, description: 'User ' + user.name});
+					
+					NODES.LOCK.USERS.forEach(function(node)
+					{
+						setInformation(Object.assign(node, {node: nodePath + '.' + node.state}), user);
+					});
+				});
+				
+			}).catch(function(e) {adapter.log.warn('Error retrieving users: ' + e.message)});
+		});
+		
+	}).catch(function(e) {adapter.log.warn('Error retrieving smartlocks: ' + e.message)});
+}
+
+/**
  * Update states of Nuki Door based on payload.
  *
  */
-function updateDoor(payload)
+function updateLock(payload)
 {
 	// index Nuki
 	var device;
 	if (doors[payload.nukiId] === undefined)
 	{
 		device = 'door__' + payload.name.toLowerCase().replace(/ /gi, '_');
-		doors[payload.nukiId] = {device: device, name: payload.name, state: payload.state.state, bridge: payload.bridge || null};
+		doors[payload.nukiId] = {device: device, name: payload.name, state: payload.state.state, bridge: null};
 	}
 	
 	// retrieve Nuki name
 	else
 		device = doors[payload.nukiId].device;
+	
+	// update bridge
+	if (payload.bridge !== undefined) doors[payload.nukiId].bridge = payload.bridge;
 	
 	// create / update device
 	adapter.createDevice(device, {name: payload.name}, {}, function(err)
@@ -382,11 +428,12 @@ function setInformation(node, payload)
 	try
 	{
 		// action
-		if (node.action !== undefined)
+		if (node.action !== undefined && listeners[node.node] === undefined)
 		{
 			node.common.nukiId = payload.nukiId;
-			library.set(node, 0);
+			library.set(node, node.def);
 			adapter.subscribeStates(node.node); // attach state listener
+			listeners[node.node] = node;
 		}
 		
 		// status
@@ -409,7 +456,7 @@ function setInformation(node, payload)
 			
 			// write value
 			if (tmp !== undefined && tmp[status] !== undefined)
-				library.set(node, node.type === 'boolean' && Number.isInteger(tmp[status]) ? (tmp[status] === 1) : tmp[status]);
+				library.set(node, (node.states !== undefined ? node.states[tmp[status]] : (node.type === 'boolean' && Number.isInteger(tmp[status]) ? (tmp[status] === 1) : tmp[status])));
 		}
 		
 		// only state creation

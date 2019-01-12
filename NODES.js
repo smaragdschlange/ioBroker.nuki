@@ -22,7 +22,7 @@ module.exports.LOCK = {
 		{'state': 'id', 'description': 'ID of the Nuki', 'status': 'nukiId', 'role': 'value'},
 		{'state': 'name', 'description': 'Name of the Nuki', 'status': 'name', 'role': 'text'},
 		{'state': 'bridge', 'description': 'Bridge of the Nuki', 'status': 'bridge', 'role': 'text'},
-		{'state': 'action', 'description': 'Trigger an action on %name%', 'action': true, 'type': 'number', 'role': 'value', 'common': {'write': true, 'states': LOCK.ACTIONS}},
+		{'state': 'action', 'description': 'Trigger an action on %name%', 'action': true, 'def': 0, 'type': 'number', 'role': 'value', 'common': {'write': true, 'states': LOCK.ACTIONS}},
 		
 		// STATUS
 		{'state': 'status', 'description': 'Current status of %name%', 'role': 'channel'},
@@ -30,9 +30,9 @@ module.exports.LOCK = {
 		{'state': 'status.batteryCritical', 'description': 'States critical battery level', 'status': 'state.batteryCritical', 'role': 'indicator.lowbat', 'type': 'boolean'},
 		{'state': 'status.refreshed', 'description': 'Timestamp of last update', 'status': 'state.timestamp', 'role': 'date'},
 		{'state': 'status.lockState', 'description': 'Current lock-state of the Nuki', 'status': 'state.state', 'type': 'number', 'role': 'value', 'common': {'states': LOCK.STATES}},
-		{'state': 'status.locked', 'description': 'Indication if door is locked (boolean of lockState)', 'status': 'state.state', 'type': 'boolean', 'role': 'sensor.lock', 'common': {'states': {"0": false, "1": true, "2": false, "3": false, "4": true, "5": false, "6": false, "7": false, "254": false, "255": false}}},
+		{'state': 'status.locked', 'description': 'Indication if door is locked (boolean of lockState)', 'status': 'state.state', 'type': 'boolean', 'role': 'sensor.lock', 'states': {"0": 'false', "1": 'true', "2": 'false', "3": 'false', "4": 'true', "5": 'false', "6": 'false', "7": 'false', "254": 'false', "255": 'false'}},
 		{'state': 'status.doorState', 'description': 'Current door-state of the Nuki', 'status': 'state.doorState', 'type': 'number', 'role': 'value', 'common': {'states': LOCK.DOOR}},
-		{'state': 'status.closed', 'description': 'Indication if door is closed (boolean of doorState)', 'status': 'state.doorState', 'type': 'boolean', 'role': 'sensor.lock', 'common': {'states': {"0": false, "1": false, "2": true, "3": false, "4": true, "5": false}}},
+		{'state': 'status.closed', 'description': 'Indication if door is closed (boolean of doorState)', 'status': 'state.doorState', 'type': 'boolean', 'role': 'sensor.lock', 'states': {"0": 'false', "1": 'false', "2": 'true', "3": 'false', "4": 'true', "5": 'false'}},
 		{'state': 'status.lastAction', 'description': 'Last triggered action', 'status': 'state.lastAction', 'type': 'number', 'role': 'value', 'common': {'states': LOCK.ACTIONS}},
 		{'state': 'status.trigger', 'description': 'The state trigger', 'status': 'state.trigger', 'type': 'number', 'role': 'value', 'common': {'states': {"0": 'SYSTEM', "1": 'MANUAL', "2": 'BUTTON', "3": 'AUTOMATIC', "4": 'WEB', "5": 'APP'}}},
 		
@@ -78,6 +78,19 @@ module.exports.LOCK = {
 	USERS: [
 		{'state': 'name', 'description': 'Name of user', 'status': 'name', 'role': 'text'},
 		{'state': 'type', 'description': 'The type of the authorization', 'status': 'type', 'type': 'number', 'role': 'value', 'common': {'states': {"0": 'APP', "1": 'BRIDGE', "2": 'FOB', "3": 'KEYPAD', "13": 'KEYPAD CODE', "14": 'Z-KEY', "15": 'VIRTUAL'}}},
+		{'state': 'id', 'description': 'The unique id of user', 'status': 'id', 'role': 'text'},
+		{'state': 'authId', 'description': 'The smartlock authorization id', 'status': 'authId', 'role': 'text'},
+		{'state': 'enabled', 'description': 'True if the user is enabled', 'status': 'enabled', 'role': 'indicator', 'type': 'boolean'},
+		{'state': 'remoteAllowed', 'description': 'True if the auth has remote access', 'status': 'remoteAllowed', 'role': 'indicator', 'type': 'boolean'},
+		{'state': 'lockCount', 'description': 'The lock count', 'status': 'lockCount', 'role': 'value'},
+		{'state': 'dateLastActive', 'description': 'The last active date', 'status': 'lastActiveDate', 'role': 'date'},
+		{'state': 'dateCreated', 'description': 'The creation date', 'status': 'creationDate', 'role': 'date'},
+		{'state': 'dateUpdated', 'description': 'The update date', 'status': 'updateDate', 'role': 'date'},
 		
+		{'state': 'allowedFromDate', 'description': 'The allowed from date', 'status': 'allowedFromDate', 'role': 'text'},
+		{'state': 'allowedUntilDate', 'description': 'The allowed until date', 'status': 'allowedUntilDate', 'role': 'text'},
+		{'state': 'allowedWeekDays', 'description': 'The allowed weekdays', 'status': 'allowedWeekDays', 'role': 'value'}, // {64: 'Monday', 32: 'Tuesday', 16: 'Wednesday', 8: 'Thursday', 4: 'Friday', 2: 'Saturday', 1: 'Sunday'}
+		{'state': 'allowedFromTime', 'description': 'The allowed from time (in minutes from midnight)', 'status': 'allowedFromTime', 'role': 'value'},
+		{'state': 'allowedUntilTime', 'description': 'The allowed until time (in minutes from midnight)', 'status': 'allowedUntilTime', 'role': 'value'},
 	]
 }
