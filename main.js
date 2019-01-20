@@ -161,6 +161,7 @@ adapter.on('ready', function()
 	}
 });
 
+ master
 /*
  * STATE CHANGE
  *
@@ -224,6 +225,7 @@ adapter.on('stateChange', function(node, object)
 		});
 	}
 });
+ master
 
 /*
  * HANDLE MESSAGES
