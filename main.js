@@ -338,6 +338,7 @@ function initNukiStates(_obj) {
 
     adapter.subscribeStates(nukiPath + '.*Action');
     adapter.subscribeStates(nukiPath + '.action');
+    adapter.subscribeStates(nukiPath + '.batteryCritical');
     setLockState(_obj.nukiId, nukiState);
 }
 
