@@ -13,12 +13,6 @@ var express     = require('express');        // call express
 var bodyParser  = require("body-parser");
 var request     = require('request');
 
-// you have to call the adapter function and pass a options object
-// name has to be set and has to be equal to adapters folder name and main file name excluding extension
-// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
-var adapter = new utils.Adapter('nuki');
-adapter.useFormatDate = true;   // load from ;system.config the global date format
-
 // REST server
 var app     = express();
 var timer   = null;
@@ -37,95 +31,111 @@ var callbackId  = '4';
 var hostPort    = null;
 var timeOut     = 3000;
 
+// you have to call the adapter function and pass a options object
+// name has to be set and has to be equal to adapters folder name and main file name excluding extension
+// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
+//var adapter = new utils.Adapter('nuki');
+let adapter;
+function startAdapter(options) {
+    options = options || {};
+    Object.assign(options, {name: 'nuki'});
+    adapter = new utils.Adapter(options);
 
-// is called when adapter shuts down - callback has to be called under any circumstances!
-adapter.on('unload', function (callback) {
-    try {
-        if (callbackId != '4') {
-            hostCb = false;
-            removeCallback(callbackId);
+    //adapter.log.debug('Adapter generated');
+    
+//    adapter.useFormatDate = true;   // load from ;system.config the global date format
+
+    // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
+    adapter.on('message', function (obj) {
+        if (typeof obj === 'object' && obj.message) {
+            if (obj.command === 'send') {
+                // e.g. send email or pushover or whatever
+                console.log('send command');
+
+                // Send response in callback if required
+                if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
+            }
         }
-        if (timer) clearInterval(timer);
-        adapter.log.info('cleaned everything up...');
+    });
+
+    // is called when databases are connected and adapter received configuration.
+    // start here!
+    adapter.on('ready', function () {
+        if (bridgeIp != '') {
+            getBridgeList();
+        }
+        // delay before request
         setTimeout(function() {
+            main();
+        }, timeOut);
+    });
+
+    // is called when adapter shuts down - callback has to be called under any circumstances!
+    adapter.on('unload', function (callback) {
+        try {
+            if (callbackId != '4') {
+                hostCb = false;
+                removeCallback(callbackId);
+            }
+            if (timer) clearInterval(timer);
+            adapter.log.info('cleaned everything up...');
+            setTimeout(function() {
+                callback();
+            }, timeOut); 
+        } catch (e) {
             callback();
-        }, timeOut); 
-    } catch (e) {
-        callback();
-    }
-});
+        }
+    });
 
-// is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
-});
+    // is called if a subscribed object changes
+    adapter.on('objectChange', function (id, obj) {
+        // Warning, obj can be null if it was deleted
+        adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
+    });
 
-// is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
-    var path = id.split('.',5);
-    var nukiId = path[3];
-    var actionState = path[4];
+    // is called if a subscribed state changes
+    adapter.on('stateChange', function (id, state) {
+        var path = id.split('.',5);
+        var nukiId = path[3];
+        var actionState = path[4];
 
-    // Warning, state can be null if it was deleted
-    adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
+        // Warning, state can be null if it was deleted
+        adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
-    // you can use the ack flag to detect if it is status (true) or command (false)
-    if (state && !state.ack) {
-        if (actionState == 'action') {
-            setLockAction(nukiId, state.val);
-        } else {
-            if (state.val == false) {
-                if (actionState == 'lockAction') {
-                    setLockAction(nukiId, '2');
-                }
+        // you can use the ack flag to detect if it is status (true) or command (false)
+        if (state && !state.ack) {
+            if (actionState == 'action') {
+                setLockAction(nukiId, state.val);
             } else {
-                switch (actionState) {
-                    case 'lockAction':
-                        setLockAction(nukiId, '1');
-                        break;
-                    case 'openAction':
-                        setLockAction(nukiId, '3');
-                        break;
-                    case 'unlockLocknGoAction':
-                        setLockAction(nukiId, '4');
-                        break;
-                    case 'openLocknGoAction':
-                        setLockAction(nukiId, '5');
-                        break;
-                    default:
-                        adapter.log.warn('unrecognized actionState (' + actionState + ')');
-                        break;
+                if (state.val == false) {
+                    if (actionState == 'lockAction') {
+                        setLockAction(nukiId, '2');
+                    }
+                } else {
+                    switch (actionState) {
+                        case 'lockAction':
+                            setLockAction(nukiId, '1');
+                            break;
+                        case 'openAction':
+                            setLockAction(nukiId, '3');
+                            break;
+                        case 'unlockLocknGoAction':
+                            setLockAction(nukiId, '4');
+                            break;
+                        case 'openLocknGoAction':
+                            setLockAction(nukiId, '5');
+                            break;
+                        default:
+                            adapter.log.warn('unrecognized actionState (' + actionState + ')');
+                            break;
+                    }
                 }
             }
         }
-    }
-});
+    });
 
-// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', function (obj) {
-    if (typeof obj === 'object' && obj.message) {
-        if (obj.command === 'send') {
-            // e.g. send email or pushover or whatever
-            console.log('send command');
-
-            // Send response in callback if required
-            if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-        }
-    }
-});
-
-// is called when databases are connected and adapter received configuration.
-// start here!
-adapter.on('ready', function () {
-    if (bridgeIp != '') {
-        getBridgeList();
-    }
-    // delay before request
-    setTimeout(function() {
-        main();
-    }, timeOut);
-});
+    return adapter;
+};
 
 function initBridgeStates(_obj, _name, _token) {
     bridgeId    = _obj.bridgeId;
@@ -746,4 +756,14 @@ function main() {
             timer = setInterval(getLockList, interval);
         }
     }
+}
+
+// If started as allInOne/compact mode => return function to create instance
+if (module && module.parent) {
+    module.exports = startAdapter;
+    //adapter.log.debug('Adapter started in compact mode');
+} else {
+    // or start the instance directly
+    startAdapter();
+    //adapter.log.debug('Adapter started in normal mode');
 }
