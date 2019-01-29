@@ -1,15 +1,15 @@
 {
-  "Auto": "Auto",
-  "Manual": "Manual",
-  "settings": "Nuki adapter settings",
-  "name": "name of the Nuki bridge",
-  "ip": "IP address of the Nuki bridge",
-  "ipeg": "e.g. 192.168.1.50",
-  "nuki_port": "port of the Nuki bridge",
-  "token": "token",
-  "autoupd": "periodic status updates",
-  "interval": "update interval (in minutes)",
-  "host_cb": "use callback",
-  "host_port": "callback port in ioBroker",
-  "on save adapter restarts with new config immediately": "On save adapter restarts with new config immediately."
+    "Auto": "Auto",
+    "Manual": "Manual",
+    "autoupd": "Periodic state updates",
+    "host_cb": "Use Callback",
+    "host_port": "Callback port in ioBroker",
+    "interval": "Update interval (in minutes)",
+    "ip": "IP address of the Nuki bridge",
+    "ipeg": "e.g. 192.168.1.50",
+    "name": "Name of the Nuki bridge",
+    "nuki_port": "Port of the Nuki bridge",
+    "on save adapter restarts with new config immediately": "on save adapter restarts with new config immediately",
+    "settings": "Nuki adapter settings",
+    "token": "Token"
 }

@@ -1,0 +1,15 @@
+{
+    "Auto": "汽车",
+    "Manual": "手册",
+    "autoupd": "周期性状态的更新",
+    "host_cb": "使用回调",
+    "host_port": "回港口ioBroker",
+    "interval": "更新的时间间隔(在分钟)",
+    "ip": "IP地址Nuki桥",
+    "ipeg": "例如192.168.1.50",
+    "name": "名称的Nuki桥",
+    "nuki_port": "港口的Nuki桥",
+    "on save adapter restarts with new config immediately": "在保存适配器重新启动与新的配置立即",
+    "settings": "Nuki设置适配器",
+    "token": "令牌"
+}

@@ -1,0 +1,15 @@
+{
+    "Auto": "Auto",
+    "Manual": "Handleiding",
+    "autoupd": "Periodieke status updates",
+    "host_cb": "Terugbellen Gebruik.",
+    "host_port": "Callback-poort in ioBroker",
+    "interval": "Update-interval (in minuten)",
+    "ip": "IP-adres van de Nuki brug",
+    "ipeg": "bijvoorbeeld 192.168.1.50",
+    "name": "Naam van de brug Nuki",
+    "nuki_port": "De haven van de Nuki brug",
+    "on save adapter restarts with new config immediately": "op bespaar adapter opnieuw met nieuwe config onmiddellijk",
+    "settings": "Nuki adapter instellingen",
+    "token": "Token"
+}

@@ -1,0 +1,15 @@
+{
+    "Auto": "Auto",
+    "Manual": "Manuale",
+    "autoupd": "Periodico di aggiornamenti di stato",
+    "host_cb": "Richiamata",
+    "host_port": "Richiamata la porta in ioBroker",
+    "interval": "Aggiornamento intervallo di tempo (in minuti)",
+    "ip": "L'indirizzo IP di Nuki ponte",
+    "ipeg": "ad esempio, 192.168.1.50",
+    "name": "Nome del Nuki ponte",
+    "nuki_port": "La porta del ponte Nuki",
+    "on save adapter restarts with new config immediately": "salva adattatore riavvia con la nuova config immediatamente",
+    "settings": "Nuki impostazioni della scheda di",
+    "token": "Token"
+}
