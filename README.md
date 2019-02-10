@@ -60,6 +60,10 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
+### 1.0.5
+* (ldittmar81) add gulp auto translation
+* (smaragdschlange) add license
+
 ### 1.0.4
 * (smaragdschlange) improvement: added Support for Compact mode (js-Controller 2.0 Feature)
 

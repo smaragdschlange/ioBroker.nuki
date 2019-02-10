@@ -599,6 +599,7 @@ function initServer(_ip, _port) {
         var nukiState = { "state": state, "stateName": stateName, "batteryCritical": batteryCritical };
 
         adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
+        adapter.log.info('battery status received for NukiID ' + nukiId + ': ' + nukiState.batteryCritical);
         setLockState(nukiId, nukiState);
     });
 
