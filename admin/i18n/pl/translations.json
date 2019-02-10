@@ -1,0 +1,15 @@
+{
+    "Auto": "Auto",
+    "Manual": "Podręcznik",
+    "autoupd": "Okresowe aktualizacje stanu",
+    "host_cb": "Korzystanie Z Oddzwonienia",
+    "host_port": "Port oddzwonienia w ioBroker",
+    "interval": "Odstęp czasu (w minutach)",
+    "ip": "Adres IP mostu Нуки ",
+    "ipeg": "na przykład 192.168.1.50",
+    "name": "Nazwa mostu Нуки ",
+    "nuki_port": "Port mostu Нуки ",
+    "on save adapter restarts with new config immediately": "zapisz ponownym uruchomieniu zasilacza z nowy konfig raz",
+    "settings": "Ustawienia karty sieciowej Нуки ",
+    "token": "Marker"
+}

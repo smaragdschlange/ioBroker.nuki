@@ -26,15 +26,16 @@
     "url": "https://github.com/smaragdschlange/ioBroker.nuki"
   },
   "dependencies": {
-    "request": "^2.85.0",	
+    "request": "^2.85.0",
     "express": "^4.16.3",
     "body-parser": "^1.18.2",
     "ip": "^1.1.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "mocha": "^4.1.0",
-    "chai": "^4.1.2"
+    "chai": "^4.1.2",
+    "axios": "^0.18.0"
   },
   "main": "main.js",
   "scripts": {
