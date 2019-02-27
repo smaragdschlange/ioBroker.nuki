@@ -27,7 +27,8 @@ var bridgeToken = null;
 var bridgeName  = null;
 var interval    = null;
 var hostCb      = null;
-var callbackId  = '4';
+var cbSet       = false;
+var callbackId  = null;
 var hostPort    = null;
 var timeOut     = 3000;
 
@@ -73,7 +74,7 @@ function startAdapter(options) {
     // is called when adapter shuts down - callback has to be called under any circumstances!
     adapter.on('unload', function (callback) {
         try {
-            if (callbackId != '4') {
+            if (cbSet) {
                 hostCb = false;
                 removeCallback(callbackId);
             }
@@ -521,7 +522,14 @@ function getBridgeList() {
                             obj = content.bridges[bridge];
                             if (obj) {
                                 if (obj.ip == '0.0.0.0') {
-                                    adapter.log.warn('bridgeID ' + obj.bridgeId + ': discovery is disabled via "/configAuth" or through the Nuki App. No auto discovery possible.');
+                                    adapter.log.warn('bridgeID ' + obj.bridgeId + ': no auto discovery possible.');
+                                    if (bridgeIp != '') {
+                                        obj.ip = bridgeIp;
+                                        adapter.log.info('setting bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
+                                        initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
+                                    } else {
+                                        adapter.log.info('please specify IP of bridge: ' + obj.bridgeId + ')');
+                                    }
                                 } else if (obj.ip == adapter.config.bridge_ip) {
                                     if (obj.port == adapter.config.bridge_port) {
                                         adapter.log.info('found bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
@@ -532,6 +540,7 @@ function getBridgeList() {
                                     initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
                                 } else {
                                     adapter.log.info('found additional bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
+                                    initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
                                 }
                             } else {
                                 adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
@@ -611,7 +620,7 @@ function initServer(_ip, _port) {
 function checkCallback(_hostCb) {
     var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
     var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki';
-    var cbExists = '';
+    var cbExists = false;
     var cbId = null;
 
     request(
@@ -627,7 +636,7 @@ function checkCallback(_hostCb) {
                     for (var row in content.callbacks) {
                         cbId = content.callbacks[row];
                         if (cbId.url == cbUrl) {
-                            cbExists = 'x';
+                            cbExists = true;
                             if (_hostCb == false) {
                                 adapter.log.debug('Callback should be removed: ' + cbUrl);
                                 // delay after request
@@ -643,14 +652,16 @@ function checkCallback(_hostCb) {
                         } else {
                             callbackId = '0';
                         }
-                        if (cbExists == 'x') {
+                        if (cbExists) {
+                                cbSet = true;
                                 adapter.log.info('Callback allready set: ' + cbUrl);
                                 initServer(hostIp, hostPort);
                         } else {
                             if (callbackId == '3') {
-                                callbackId = '4';
+                                cbSet = false;
                                 adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
                             } else {
+                                cbSet = true;
                                 initServer(hostIp, hostPort);
                                 // delay after request
                                 setTimeout(function() {
@@ -684,8 +695,8 @@ function removeCallback(_id) {
                 if (!error && response.statusCode == 200) {
                     if (content && content.hasOwnProperty('success')) {
                         if (content.success) {
+                            cbSet = false;
                             adapter.log.info('Callback-ID successfully removed: ' + _id);
-                            callbackId = 4;
                         } else {
                             adapter.log.warn('Callback-ID could not be removed: ' + _id);
                         }
