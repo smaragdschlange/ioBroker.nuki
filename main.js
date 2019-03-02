@@ -367,47 +367,49 @@ function setLockState(_nukiId, _nukiState) {
     // adapter.setState(bridgeId + '.info.bridgeIp', bridgeIp, true);
     // adapter.setState(bridgeId + '.info.bridgePort', bridgePort, true);
     
-    switch(_nukiState.state) {
-        case 1:
-            // fall through
-        case 4:
-            adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: false, ack: true});
-            setTimeout(function() {
+    if (_nukiState) {
+        switch(_nukiState.state) {
+            case 1:
+                // fall through
+            case 4:
+                adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
+                adapter.setState(nukiPath + '.lockAction', {val: false, ack: true});
+                setTimeout(function() {
+                    adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+                }, timeOut);
+                break;
+            case 2:
+                // fall through
+            case 3:
+                // fall through
+            case 5:
+                // fall through
+            case 6:
+                // fall through
+            case 7:
+                adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
+                adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
+                setTimeout(function() {
+                    adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+                }, timeOut);
+                break;
+            default:
+                adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
+                adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
                 adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            }, timeOut);
-            break;
-        case 2:
-            // fall through
-        case 3:
-            // fall through
-        case 5:
-            // fall through
-        case 6:
-            // fall through
-        case 7:
-            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            setTimeout(function() {
-                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            }, timeOut);
-            break;
-        default:
-            adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-            adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-            adapter.setState(nukiPath + '.action', {val: 0, ack: true});
-            break;
-    } 
-    
-    adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
-    // adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
-    adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
+                break;
+        } 
+        
+        adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
+        // adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
+        adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
 
-    if (_nukiState.hasOwnProperty('timestamp')) {
-        adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
-    } else {
-        timeStamp = new Date();
-        adapter.setState(nukiPath + '.timestamp', {val: timeStamp, ack: true});
+        if (_nukiState.hasOwnProperty('timestamp')) {
+            adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
+        } else {
+            timeStamp = new Date();
+            adapter.setState(nukiPath + '.timestamp', {val: timeStamp, ack: true});
+        }
     }
 }
 
