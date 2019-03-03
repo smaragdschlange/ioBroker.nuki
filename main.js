@@ -367,7 +367,7 @@ function setLockState(_nukiId, _nukiState) {
     // adapter.setState(bridgeId + '.info.bridgeIp', bridgeIp, true);
     // adapter.setState(bridgeId + '.info.bridgePort', bridgePort, true);
     
-    if (_nukiState) {
+    if (_nukiState != null) {
         switch(_nukiState.state) {
             case 1:
                 // fall through
