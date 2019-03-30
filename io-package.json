@@ -68,10 +68,6 @@
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>"
         ],
-        "docs": {
-            "en": "docs/en/admin.md",
-            "de": "docs/de/admin.md"
-        },
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "mode": "daemon",
