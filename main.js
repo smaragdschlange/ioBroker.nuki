@@ -80,9 +80,9 @@ function startAdapter(options) {
             }
             if (timer) clearInterval(timer);
             adapter.log.info('cleaned everything up...');
-            setTimeout(function() {
+            //setTimeout(function() {
                 callback();
-            }, timeOut); 
+            //}, timeOut); 
         } catch (e) {
             callback();
         }
