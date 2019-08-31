@@ -60,6 +60,9 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
+### 1.0.7
+* (smaragdschlange) bug fix: impact on other Nuki-connected gateways
+
 ### 1.0.6
 * (smaragdschlange) dependencies update
 

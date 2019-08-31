@@ -609,9 +609,16 @@ function initServer(_ip, _port) {
         var batteryCritical = req.body.batteryCritical;
         var nukiState = { "state": state, "stateName": stateName, "batteryCritical": batteryCritical };
 
-        adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
-        adapter.log.info('battery status received for NukiID ' + nukiId + ': ' + nukiState.batteryCritical);
-        setLockState(nukiId, nukiState);
+        try {
+            adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
+            adapter.log.info('battery status received for NukiID ' + nukiId + ': ' + nukiState.batteryCritical);
+            setLockState(nukiId, nukiState);
+
+            res.sendStatus(200);
+        } catch (e) {
+            res.sendStatus(500);
+			adapter.log.warn(e.message);
+        }
     });
 
     // start the server
