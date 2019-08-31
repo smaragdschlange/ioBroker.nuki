@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "news": {
             "0.1.3": {
                 "en": "timestamp bug fixed",
@@ -38,6 +38,10 @@
                 "es": "añadido Soporte para el modo Compacto (js-Controlador 2.0)",
                 "pl": "dodano wsparcie dla trybu kompaktowego (JS-kontroler składnik 2.0)",
                 "zh-cn": "增加支持，对于契约模式(js-2.0功能控制器)"
+            },
+            "1.0.6": {
+                "en": "updated some dependencies due to security vulnerabilities",
+                "de": "Abhängigkeiten wegen Sicherheitslücken aktualisiert"
             }
         },
         "title": "Nuki Smart Lock",
