@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.0.7",
+        "version": "1.1.0",
         "news": {
             "1.0.3": {
                 "en": "periodic state updates added and restructure objects",
@@ -34,6 +34,10 @@
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
                 "de": "Status 200 Antwort für HTTP-Anfragen hinzugefügt"
+            },
+            "1.1.0": {
+                "en": "added support for Nuki Opener",
+                "de": "Unterstützung für Nuki Opener hinzugefügt"
             }
         },
         "title": "Nuki Smart Lock",
