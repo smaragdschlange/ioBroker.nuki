@@ -97,7 +97,7 @@ function startAdapter(options) {
     // is called if a subscribed state changes
     adapter.on('stateChange', function (id, state) {
         var path = id.split('.',5);
-        var nukiId = path[3];
+        var nukiId = path[2];
         var actionState = path[4];
 
         // Warning, state can be null if it was deleted
@@ -205,9 +205,10 @@ function initBridgeStates(_obj, _name, _token) {
 
 function initNukiLockStates(_obj) {
     var nukiState = _obj.lastKnownState;
-    var nukiPath = bridgeId + '.' + _obj.nukiId;
+    //var nukiPath = bridgeId + '.' + _obj.nukiId;
 
-    adapter.setObjectNotExists(nukiPath, {
+    // device
+    adapter.setObjectNotExists(_obj.nukiId, {
         type: 'device',
         common: {
             name: _obj.name
@@ -215,19 +216,70 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.deviceType', {
-        type: 'state',
+    // device info
+    adapter.setObjectNotExists(_obj.nukiId + '.info', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.info.deviceType',
+            _obj.nukiId + '.info.batteryCritical'                     
+        ], */
         common: {
-            name: 'Lock',
-            type: 'string',
-            write: false,
-            role: 'info'
+            name: 'Information'
         },
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.lockState', {
+    adapter.setObjectNotExists(_obj.nukiId + '.info.deviceType', {
         type: 'state',
+        // parent: _obj.nukiId + '.info',
+        common: {
+            name: 'Typ',
+            type: 'string',
+            write: false,
+            states: {
+                '0': 'Lock',
+                '1': 'unknown device',
+                '2': 'Opener',
+            },
+            def: _obj.deviceType,
+            role: 'value'
+        },
+        native: {}
+    });
+
+    // adapter.setState(_obj.nukiId + '.info.deviceType', {val: _obj.deviceType, ack: true});
+
+    adapter.setObjectNotExists(_obj.nukiId + '.info.batteryCritical', {
+        type: 'state',
+        // parent: _obj.nukiId + '.info',
+        common: {
+            name: 'Batterie schwach',
+            type: 'boolean',
+            write: false,
+            role: 'indicator.lowbat'
+        },
+        native: {}
+    });
+    
+    // states
+    adapter.setObjectNotExists(_obj.nukiId + '.states', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.states.lockState',
+            _obj.nukiId + '.states.state',            
+            _obj.nukiId + '.states.timestamp'                    
+        ], */
+        common: {
+            name: 'Status'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.nukiId + '.states.lockState', {
+        type: 'state',
+        // parent: _obj.nukiId + '.states',
         common: {
             name: 'Nuki aufgeschlossen',
             type: 'boolean',
@@ -237,8 +289,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.state', {
+    adapter.setObjectNotExists(_obj.nukiId + '.states.state', {
         type: 'state',
+        // parent: _obj.nukiId + '.states',
         common: {
             name: 'Status',
             type: 'number',
@@ -260,19 +313,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.batteryCritical', {
+    adapter.setObjectNotExists(_obj.nukiId + '.states.timestamp', {
         type: 'state',
-        common: {
-            name: 'Batterie schwach',
-            type: 'boolean',
-            write: false,
-            role: 'indicator.lowbat'
-        },
-        native: {}
-    });
-    
-    adapter.setObjectNotExists(nukiPath + '.timestamp', {
-        type: 'state',
+        // parent: _obj.nukiId + '.states',
         common: {
             name: 'Zuletzt aktualisiert',
             type: 'string',
@@ -282,8 +325,26 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.action', {
+    // actions
+    adapter.setObjectNotExists(_obj.nukiId + '.actions', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.actions.action',
+            _obj.nukiId + '.actions.lockAction',
+            _obj.nukiId + '.actions.openAction',
+            _obj.nukiId + '.actions.unlockLocknGoAction',            
+            _obj.nukiId + '.actions.openLocknGoAction'                    
+        ], */
+        common: {
+            name: 'Aktionen'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.action', {
         type: 'state',
+        // parent: _obj.nukiId + '.actions',
         common: {
             name: 'Aktion',
             type: 'number',
@@ -300,8 +361,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.lockAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.lockAction', {
         type: 'state',
+        // parent: _obj.nukiId + '.actions',
         common: {
             name: 'Tür auf-/abschließen',
             type: 'boolean',
@@ -311,8 +373,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.openAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.openAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'Tür öffnen',
             type:  'boolean',
@@ -323,8 +386,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.unlockLocknGoAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.unlockLocknGoAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'Tür aufschließen (lock‘n’go)',
             type:  'boolean',
@@ -335,8 +399,9 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.openLocknGoAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.openLocknGoAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'Tür öffnen (lock‘n’go)',
             type:  'boolean',
@@ -347,37 +412,95 @@ function initNukiLockStates(_obj) {
         native: {}
     });
 
-    adapter.subscribeStates(nukiPath + '.*Action');
-    adapter.subscribeStates(nukiPath + '.action');
-    adapter.subscribeStates(nukiPath + '.batteryCritical');
+    // listen to changes
+    adapter.subscribeStates(_obj.nukiId + '.actions.*Action');
+    adapter.subscribeStates(_obj.nukiId + '.actions.action');
+    adapter.subscribeStates(_obj.nukiId + '.info.batteryCritical');
+
+    // set states
     setLockState(_obj.nukiId, nukiState);
 }
 
 function initNukiOpenerStates(_obj) {
     var nukiState = _obj.lastKnownState;
-    var nukiPath = bridgeId + '.' + _obj.nukiId;
+    //var nukiPath = bridgeId + '.' + _obj.nukiId;
 
-    adapter.setObjectNotExists(nukiPath, {
-        type: 'device',
+    // device info
+    adapter.setObjectNotExists(_obj.nukiId + '.info', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.info.deviceType',
+            _obj.nukiId + '.info.batteryCritical'                     
+        ], */
         common: {
-            name: _obj.name
+            name: 'Information'
         },
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.deviceType', {
+    adapter.setObjectNotExists(_obj.nukiId + '.info.deviceType', {
         type: 'state',
+        // parent: _obj.nukiId + '.info',
         common: {
-            name: 'Opener',
+            name: 'Typ',
             type: 'string',
             write: false,
-            role: 'info'
+            states: {
+                '0': 'Lock',
+                '1': 'unknown device',
+                '2': 'Opener',
+            },
+            def : _obj.deviceType,
+            role: 'value'
         },
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.state', {
+    // adapter.setState(_obj.nukiId + '.info.deviceType', {val: _obj.deviceType, ack: true});
+
+    adapter.setObjectNotExists(_obj.nukiId + '.info.batteryCritical', {
         type: 'state',
+        // parent: _obj.nukiId + '.info',
+        common: {
+            name: 'Batterie schwach',
+            type: 'boolean',
+            write: false,
+            role: 'indicator.lowbat'
+        },
+        native: {}
+    });
+    
+    // states
+    adapter.setObjectNotExists(_obj.nukiId + '.states', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.states.lockState',
+            _obj.nukiId + '.states.state',            
+            _obj.nukiId + '.states.timestamp'                    
+        ], */
+        common: {
+            name: 'Status'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.nukiId + '.states.lockState', {
+        type: 'state',
+        // parent: _obj.nukiId + '.states',
+        common: {
+            name: 'Ring to Open aktiv',
+            type: 'boolean',
+            write: false,
+            role: 'sensor.lock'   
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.nukiId + '.states.state', {
+        type: 'state',
+        // parent: _obj.nukiId + '.states',
         common: {
             name: 'Status',
             type: 'number',
@@ -396,19 +519,9 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
     
-    adapter.setObjectNotExists(nukiPath + '.batteryCritical', {
+    adapter.setObjectNotExists(_obj.nukiId + '.states.timestamp', {
         type: 'state',
-        common: {
-            name: 'Batterie schwach',
-            type: 'boolean',
-            write: false,
-            role: 'indicator.lowbat'
-        },
-        native: {}
-    });
-    
-    adapter.setObjectNotExists(nukiPath + '.timestamp', {
-        type: 'state',
+        // parent: _obj.nukiId + '.states',
         common: {
             name: 'Zuletzt aktualisiert',
             type: 'string',
@@ -418,8 +531,26 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.action', {
+    // actions
+    adapter.setObjectNotExists(_obj.nukiId + '.actions', {
+        type: 'channel',
+        /* parent: _obj.nukiId,
+        children: [
+            _obj.nukiId + '.actions.action',
+            _obj.nukiId + '.actions.rtoAction',
+            _obj.nukiId + '.actions.openAction',
+            _obj.nukiId + '.actions.cmActiveAction',            
+            _obj.nukiId + '.actions.cmDeactiveAction'                    
+        ], */
+        common: {
+            name: 'Aktionen'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.action', {
         type: 'state',
+        // parent: _obj.nukiId + '.actions',
         common: {
             name: 'Aktion',
             type: 'number',
@@ -436,8 +567,9 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.rtoAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.rtoAction', {
         type: 'state',
+        // parent: _obj.nukiId + '.actions',
         common: {
             name: 'Ring to Open de-/aktivieren',
             type: 'boolean',
@@ -447,8 +579,9 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.openAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.openAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'öffnen',
             type:  'boolean',
@@ -459,8 +592,9 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.cmActiveAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.cmActiveAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'Dauermodus einschalten',
             type:  'boolean',
@@ -471,8 +605,9 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.setObjectNotExists(nukiPath + '.cmDeactiveAction', {
+    adapter.setObjectNotExists(_obj.nukiId + '.actions.cmDeactiveAction', {
         type: 'state', 
+        // parent: _obj.nukiId + '.actions',
         common: {
             name:  'Dauermodus ausschalten',
             type:  'boolean',
@@ -483,9 +618,12 @@ function initNukiOpenerStates(_obj) {
         native: {}
     });
 
-    adapter.subscribeStates(nukiPath + '.*Action');
-    adapter.subscribeStates(nukiPath + '.action');
-    adapter.subscribeStates(nukiPath + '.batteryCritical');
+    // listen to changes
+    adapter.subscribeStates(_obj.nukiId + '.actions.*Action');
+    adapter.subscribeStates(_obj.nukiId + '.actions.action');
+    adapter.subscribeStates(_obj.nukiId + '.info.batteryCritical');
+
+    // set states
     setLockState(_obj.nukiId, nukiState);
 }
 
@@ -496,7 +634,7 @@ function setBridgeState(_obj, _token) {
 }
 
 function setLockState(_nukiId, _nukiState) {
-    var nukiPath = bridgeId + '.' + _nukiId;
+    //var nukiPath = bridgeId + '.' + _nukiId;
     let timeStamp = null;
     
     if (_nukiState != null) {
@@ -504,14 +642,14 @@ function setLockState(_nukiId, _nukiState) {
             case 1:
                 // fall through
             case 4:
-                if (nukiPath.deviceType == 0) {
-                    adapter.setState(nukiPath + '.lockState', {val: false, ack: true});
-                    adapter.setState(nukiPath + '.lockAction', {val: false, ack: true}); 
-                } else if (nukiPath.deviceType == 2) {
-                    adapter.setState(nukiPath + '.rtoAction', {val: false, ack: true});
+                adapter.setState(_nukiId + '.states.lockState', {val: false, ack: true});
+                if (_nukiId.deviceType == 0) {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: false, ack: true}); 
+                } else if (_nukiId.deviceType == 2) {
+                    adapter.setState(_nukiId + '.actions.rtoAction', {val: false, ack: true});
                 }
                 setTimeout(function() {
-                    adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+                    adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
                 }, timeOut);
                 break;
             case 2:
@@ -523,36 +661,35 @@ function setLockState(_nukiId, _nukiState) {
             case 6:
                 // fall through
             case 7:
-                if (nukiPath.deviceType == 0) {
-                    adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-                    adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-                } else if (nukiPath.deviceType == 2) {
-                    adapter.setState(nukiPath + '.rtoAction', {val: true, ack: true});
+                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
+                if (_nukiId.deviceType == 0) {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
+                } else if (_nukiId.deviceType == 2) {
+                    adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
                 }
                 setTimeout(function() {
-                    adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+                    adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
                 }, timeOut);
                 break;
             default:
-                if (nukiPath.deviceType == 0) {
-                    adapter.setState(nukiPath + '.lockState', {val: true, ack: true});
-                    adapter.setState(nukiPath + '.lockAction', {val: true, ack: true});
-                } else if (nukiPath.deviceType == 2) {
-                    adapter.setState(nukiPath + '.rtoAction', {val: true, ack: true});
+                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
+                if (_nukiId.deviceType == 0) {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
+                } else if (_nukiId.deviceType == 2) {
+                    adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
                 }
-                adapter.setState(nukiPath + '.action', {val: 0, ack: true});
+                adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
                 break;
         } 
         
-        adapter.setState(nukiPath + '.state', {val: _nukiState.state, ack: true});
-        // adapter.setState(nukiPath + '.stateName', {val: _nukiState.stateName, ack: true});
-        adapter.setState(nukiPath + '.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
+        adapter.setState(_nukiId + '.states.state', {val: _nukiState.state, ack: true});
+        adapter.setState(_nukiId + '.info.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
 
         if (_nukiState.hasOwnProperty('timestamp')) {
-            adapter.setState(nukiPath + '.timestamp', {val: _nukiState.timestamp, ack: true});
+            adapter.setState(_nukiId + '.states.timestamp', {val: _nukiState.timestamp, ack: true});
         } else {
             timeStamp = new Date();
-            adapter.setState(nukiPath + '.timestamp', {val: timeStamp, ack: true});
+            adapter.setState(_nukiId + '.states.timestamp', {val: timeStamp, ack: true});
         }
     }
 }
@@ -585,7 +722,8 @@ function updateAllLockStates(_content, _init) {
 }
 
 function getLockState(_nukiId) {
-    var lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&token=' + bridgeToken;
+    var deviceType = adapter._nukiId.info.deviceType.state;
+    var lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
 
     request(
         {
@@ -593,14 +731,14 @@ function getLockState(_nukiId) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.debug('lock state requested: ' + lockStateUrl);
+            adapter.log.debug('state requested: ' + lockStateUrl);
 
             if (!error && response.statusCode == 200) {
                 if (content && content.hasOwnProperty('success')) {
                     if (content.success) {
                         setLockState(_nukiId, content);
                     } else {
-                        adapter.log.warn('Lock state has not been retrieved. Check if lock is connected to bridge and try again.');
+                        adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
                     }
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and try again.');
@@ -613,7 +751,8 @@ function getLockState(_nukiId) {
 }
 
 function setLockAction(_nukiId, _action) {
-    var lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
+    var deviceType = adapter.getState(adapter.name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
+    var lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
 
     request(
         {
@@ -621,14 +760,14 @@ function setLockAction(_nukiId, _action) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.debug('lock action requested: ' + lockActionUrl);
+            adapter.log.debug('action requested: ' + lockActionUrl);
 
             if (!error && response.statusCode == 200) {
                 if (content && content.hasOwnProperty('success')) {
                     if (!content.success) {
-                        adapter.log.warn('lock action ' + _action + ' not successfully set!');
+                        adapter.log.warn('action ' + _action + ' not successfully set!');
                     } else {
-                        adapter.log.info('lock action ' + _action + ' set successfully');   
+                        adapter.log.info('action ' + _action + ' set successfully');   
                         if (hostCb == false) {                  
                             // delay before request
                             setTimeout(function() {
