@@ -825,7 +825,7 @@ function getBridgeList() {
                         for (var bridge in content.bridges) {
                             obj = content.bridges[bridge];
                             if (obj) {
-                                if (obj.ip == '0.0.0.0') {
+                                if (obj.ip == '0.0.0.0' || obj.ip == '') {
                                     adapter.log.warn('bridgeID ' + obj.bridgeId + ': no auto discovery possible.');
                                     if (bridgeIp != '') {
                                         obj.ip = bridgeIp;
@@ -843,8 +843,8 @@ function getBridgeList() {
                                     }
                                     initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
                                 } else {
-                                    adapter.log.info('found additional bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
-                                    initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
+                                    adapter.log.info('found another bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
+                                    // initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
                                 }
                             } else {
                                 adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
