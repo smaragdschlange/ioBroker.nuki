@@ -62,9 +62,6 @@ function startAdapter(options) {
     // is called when databases are connected and adapter received configuration.
     // start here!
     adapter.on('ready', function () {
-        if (bridgeIp != '') {
-            getBridgeList();
-        }
         // delay before request
         setTimeout(function() {
             main();
@@ -76,7 +73,9 @@ function startAdapter(options) {
         try {
             if (cbSet) {
                 hostCb = false;
-                removeCallback(callbackId);
+                setTimeout(function() {
+                    removeCallback(callbackId);
+                }, timeOut);
             }
             if (timer) clearInterval(timer);
             adapter.log.info('cleaned everything up...');
@@ -146,12 +145,9 @@ function startAdapter(options) {
     return adapter;
 };
 
-function initBridgeStates(_obj, _name, _token) {
-    bridgeId    = _obj.bridgeId;
-    bridgeIp    = _obj.ip;
-    bridgePort  = _obj.port;
+function initBridgeStates(_name, _token) {
 
-    adapter.setObjectNotExists(_obj.bridgeId, {
+    adapter.setObjectNotExists(bridgeId, {
         type: 'device',
         common: {
             name: _name
@@ -159,7 +155,7 @@ function initBridgeStates(_obj, _name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_obj.bridgeId + '.info', {
+    adapter.setObjectNotExists(bridgeId + '.info', {
         type: 'channel',
         common: {
             name: 'Info'
@@ -167,40 +163,41 @@ function initBridgeStates(_obj, _name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeIp', {
+    adapter.setObjectNotExists(bridgeId + '.info.bridgeIp', {
         type: 'state',
         common: {
             name: 'IP-Adresse',
             type: 'string',
             write: false,
-            role: 'info.ip'
+            role: 'info.ip',
+            def: bridgeIp
         },
         native: {}
     });
 
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgePort', {
+    adapter.setObjectNotExists(bridgeId + '.info.bridgePort', {
         type: 'state',
         common: {
             name: 'Port',
             type: 'number',
             write: false,
-            role: 'info.port'
+            role: 'info.port',
+            def: bridgePort
         },
         native: {}
     });
 
-    adapter.setObjectNotExists(_obj.bridgeId + '.info.bridgeToken', {
+    adapter.setObjectNotExists(bridgeId + '.info.bridgeToken', {
         type: 'state',
         common: {
             name: 'Token',
             type: 'string',
             write: false,
-            role: 'text'
+            role: 'text',
+            def: _token
         },
         native: {}
     });
-
-    setBridgeState(_obj, _token)
 }
 
 function initNukiLockStates(_obj) {
@@ -637,11 +634,11 @@ function initNukiOpenerStates(_obj) {
     setLockState(_obj.nukiId, nukiState);
 }
 
-function setBridgeState(_obj, _token) {
-    adapter.setState(_obj.bridgeId + '.info.bridgeIp', _obj.ip, true);
-    adapter.setState(_obj.bridgeId + '.info.bridgePort', _obj.port, true);
-    adapter.setState(_obj.bridgeId + '.info.bridgeToken', _token, true);
-}
+/* function setBridgeState(_obj, _token) {
+    adapter.setState(bridgeId + '.info.bridgeIp', bridgeIp, true);
+    adapter.setState(bridgeId + '.info.bridgePort', bridgePort, true);
+    adapter.setState(bridgeId + '.info.bridgeToken', _token, true);
+} */
 
 function setLockState(_nukiId, _nukiState) {
     //var nukiPath = bridgeId + '.' + _nukiId;
@@ -811,6 +808,11 @@ function getBridgeList() {
     var bridgeListUrl = 'https://api.nuki.io/discover/bridges';
     var obj = null;
 
+    if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
+        adapter.log.warn('please specify IP and port of bridge');
+        return;
+    }
+
     request(
         {
             url: bridgeListUrl,
@@ -819,46 +821,59 @@ function getBridgeList() {
         function (error, response, content) {
             adapter.log.debug('Bridge list requested: ' + bridgeListUrl);
 
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('errorCode')) {
-                    if (content.errorCode == 0) {
-                        for (var bridge in content.bridges) {
-                            obj = content.bridges[bridge];
-                            if (obj) {
-                                if (obj.ip == '0.0.0.0' || obj.ip == '') {
-                                    adapter.log.warn('bridgeID ' + obj.bridgeId + ': no auto discovery possible.');
-                                    if (bridgeIp != '') {
-                                        obj.ip = bridgeIp;
-                                        adapter.log.info('setting bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
-                                        initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
-                                    } else {
-                                        adapter.log.info('please specify IP of bridge: ' + obj.bridgeId + ')');
-                                    }
-                                } else if (obj.ip == adapter.config.bridge_ip) {
-                                    if (obj.port == adapter.config.bridge_port) {
-                                        adapter.log.info('found bridge: ' + obj.bridgeId + ' (IP: ' + adapter.config.bridge_ip + '; Port: ' + adapter.config.bridge_port + ')');
-                                    } else {
-                                        adapter.log.warn('found bridge (ID: ' + obj.bridgeId + '; IP: ' + obj.bridgeId + ') has different port than specified! (specified: ' + 
-                                            adapter.config.bridge_port + '; actual: ' + obj.port);
-                                    }
-                                    initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
-                                } else {
-                                    adapter.log.info('found another bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
-                                    // initBridgeStates(obj, adapter.config.bridge_name, adapter.config.token);
-                                }
-                            } else {
-                                adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
-                            }
+            if (error || response.statusCode != 200) {
+                adapter.log.error(error);
+                return;
+            }
+
+            if (!content || !content.hasOwnProperty('errorCode')) {
+                adapter.log.warn('Response has no valid content. Check if bridge ist pluged in and active and try again.');
+                return;
+            }
+
+            if (content.errorCode != 0) {
+                adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
+                return;
+            }
+
+            for (var bridge in content.bridges) {
+                obj = content.bridges[bridge];
+                if (!obj) {
+                    adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
+                    return;
+                }
+
+                if (obj.hasOwnProperty('ip')) {
+                    if (obj.ip == bridgeIp) {
+                        // found bridge
+                        bridgeId = obj.bridgeId;
+                        if (obj.port == bridgePort) {
+                            // correct port
+                            adapter.log.info('found hardware bridge: ' + bridgeId + ' (IP: ' + bridgeIp + '; Port: ' + bridgePort + ')');
+                        } else {
+                            // different port
+                            adapter.log.warn('found hardware bridge (ID: ' + bridgeId + '; IP: ' + obj.ip + ') has different port than specified! (specified: ' + 
+                            bridgePort + '; actual: ' + obj.port + '). Please specify correct port of bridge.');
                         }
+                    } else if (obj.ip == '0.0.0.0' || obj.ip == '') {
+                        adapter.log.warn('bridgeID ' + obj.bridgeId + ': no auto discovery possible. Has the HTTP API been activated and the token been set?');
                     } else {
-                        adapter.log.warn('Bridge respose has not been retrieved. Check if bridge ist pluged in and active and try again.');
+                        adapter.log.info('found another hardware bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
                     }
                 } else {
-                    adapter.log.warn('Response has no valid content. Check if bridge ist pluged in and active and try again.');
+                    // software bridge: doesn't come with IP
+                    if (bridgeId == '' || bridgeId == null) {
+                        bridgeId    = obj.bridgeId;
+                    }
+                    adapter.log.info('found software bridge: ' + obj.bridgeId);
                 }
-            } else {
-                adapter.log.error(error);
             }
+
+            if (bridgeId == '' || bridgeId == null) {
+                adapter.log.error('no bridge has been found');
+                return;
+            }
+            initBridgeStates(bridgeName, bridgeToken);
         }
     )
 }
@@ -904,7 +919,7 @@ function initServer(_ip, _port) {
     });
 
     // POST parameters sent with 
-    app.post('/api/nuki', function(req, res) {
+    app.post('/api/nuki.' + adapter.instance, function(req, res) {
         var nukiId = req.body.nukiId;
         var state = req.body.state;
         var stateName = req.body.stateName;
@@ -930,7 +945,7 @@ function initServer(_ip, _port) {
 
 function checkCallback(_hostCb) {
     var cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
-    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki';
+    var cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki.' + adapter.instance;
     var cbExists = false;
     var cbId = null;
 
@@ -1071,13 +1086,23 @@ function main() {
         adapter.log.debug('config port: '               + bridgePort);
         adapter.log.debug('config token: '              + bridgeToken);
 
-        // get all Nuki devices on bridge
-        getLockList(true);
-        if (adapter.config.autoupd) {
-            adapter.log.debug('timer set: ' + interval + ' milliseconds');
-            // update all states every x milliseconds
-            timer = setInterval(getLockList, interval);
-        }
+        // delay before request
+        setTimeout(function() {
+            // get Nuki bridge
+            getBridgeList();
+        }, timeOut);
+        
+        // delay before request
+        setTimeout(function() {
+            // get all Nuki devices on bridge
+            getLockList(true);
+
+            if (adapter.config.autoupd) {
+                adapter.log.debug('timer set: ' + interval + ' milliseconds');
+                // update all states every x milliseconds
+                timer = setInterval(getLockList, interval);
+            }
+        }, timeOut);
     }
 }
 
