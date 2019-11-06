@@ -1,36 +1,8 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.1.0",
+        "version": "1.1.1",
         "news": {
-            "1.0.3": {
-                "en": "periodic state updates added and restructure objects",
-                "de": "Regelmäßige Statusaktualisierungen hinzugefügt und Objekte neu angeordnet",
-                "ru": "периодические обновления добавлены и реструктуризации объектов",
-                "pt": "periódicos sobre o estado atualizações adicionadas e reestruturação de objetos",
-                "nl": "periodieke status updates toegevoegd en herstructureren objecten",
-                "fr": "périodique de l'état des mises à jour ajoutée et de restructuration des objets",
-                "it": "periodico di aggiornamenti di stato aggiunto e la ristrutturazione di oggetti",
-                "es": "periódico de las actualizaciones de estado de agregado y la reestructuración de los objetos",
-                "pl": "okresowe aktualizacje dodawane i restrukturyzacji obiektów",
-                "zh-cn": "周期性状态的更新加入和重组的对象"
-            },
-            "1.0.5": {
-                "en": "added Support for Compact mode (js-Controller 2.0 Feature)",
-                "de": "Support für den Kompactmodus (js-Controller 2.0 Feature) hinzugefügt",
-                "ru": "добавлена поддержка компактного режима (JS-контроллер компонент 2.0)",
-                "pt": "adicionado Suporte para o modo Compacto (js-Controlador 2.0 Recurso)",
-                "nl": "Ondersteuning toegevoegd voor Compacte modus (js-Controller 2.0-Functie)",
-                "fr": "ajout du Support pour le mode Compact (js-Contrôleur 2.0)",
-                "it": "aggiunto il Supporto per la modalità Compatta (js-Controller 2.0)",
-                "es": "añadido Soporte para el modo Compacto (js-Controlador 2.0)",
-                "pl": "dodano wsparcie dla trybu kompaktowego (JS-kontroler składnik 2.0)",
-                "zh-cn": "增加支持，对于契约模式(js-2.0功能控制器)"
-            },
-            "1.0.6": {
-                "en": "updated some dependencies due to security vulnerabilities",
-                "de": "Abhängigkeiten wegen Sicherheitslücken aktualisiert"
-            },
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
                 "de": "Status 200 Antwort für HTTP-Anfragen hinzugefügt"
@@ -38,6 +10,10 @@
             "1.1.0": {
                 "en": "added support for Nuki Opener",
                 "de": "Unterstützung für Nuki Opener hinzugefügt"
+            },
+            "1.1.1": {
+                "en": "default to Nuki Lock when deviceType unknown",
+                "de": "Bei unbekanntem deviceTyp wird ein Nuki Lock angenommen"
             }
         },
         "title": "Nuki Smart Lock",
