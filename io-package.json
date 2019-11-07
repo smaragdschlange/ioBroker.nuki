@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -11,7 +11,7 @@
                 "en": "added support for Nuki Opener",
                 "de": "Unterstützung für Nuki Opener hinzugefügt"
             },
-            "1.1.1": {
+            "1.1.2": {
                 "en": "default to Nuki Lock when deviceType unknown",
                 "de": "Bei unbekanntem deviceTyp wird ein Nuki Lock angenommen"
             }

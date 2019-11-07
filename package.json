@@ -1,6 +1,6 @@
 {
   "name": "iobroker.nuki",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "ioBroker Nuki Adapter",
   "author": {
     "name": "smaragdschlange",

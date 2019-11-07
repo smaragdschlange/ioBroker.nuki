@@ -21,6 +21,7 @@ var hostIp  = ipInfo.address();
 
 // Global variables
 var bridgeId    = null;
+var bridgeType  = null;
 var bridgeIp    = null;
 var bridgePort  = null;
 var bridgeToken = null;
@@ -71,17 +72,15 @@ function startAdapter(options) {
     // is called when adapter shuts down - callback has to be called under any circumstances!
     adapter.on('unload', function (callback) {
         try {
+            if (timer) clearInterval(timer);
             if (cbSet) {
                 hostCb = false;
-                setTimeout(function() {
-                    removeCallback(callbackId);
-                }, timeOut);
+                removeCallback(callbackId);
             }
-            if (timer) clearInterval(timer);
             adapter.log.info('cleaned everything up...');
-            //setTimeout(function() {
+            setTimeout(function() {
                 callback();
-            //}, timeOut); 
+            }, timeOut); 
         } catch (e) {
             callback();
         }
@@ -163,6 +162,22 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
+    adapter.setObjectNotExists(bridgeId + '.info.bridgeType', {
+        type: 'state',
+        common: {
+            name: 'Typ',
+            type: 'string',
+            write: false,
+            states: {
+                '1': 'Hardware Bridge',
+                '2': 'Software Bridge',
+            },
+            def: bridgeType,
+            role: 'value'
+        },
+        native: {}
+    });
+
     adapter.setObjectNotExists(bridgeId + '.info.bridgeIp', {
         type: 'state',
         common: {
@@ -207,6 +222,10 @@ function initNukiLockStates(_obj) {
 
     if (_obj.hasOwnProperty('deviceType')) {
         deviceType = _obj.deviceType;
+    }
+
+    if (deviceType != 2 && deviceType != 1) {
+        deviceType = 0;
     }
     
     // device
@@ -432,6 +451,10 @@ function initNukiOpenerStates(_obj) {
         deviceType = _obj.deviceType;
     }
     
+    if (deviceType != 0 && deviceType != 1) {
+        deviceType = 2;
+    }
+    
     // device info
     adapter.setObjectNotExists(_obj.nukiId + '.info', {
         type: 'channel',
@@ -649,6 +672,7 @@ function setLockState(_nukiId, _nukiState) {
         deviceType = _nukiId.deviceType;
     }
     
+    // set action and lock state
     if (_nukiState != null) {
         switch(_nukiState.state) {
             case 1:
@@ -659,6 +683,8 @@ function setLockState(_nukiId, _nukiState) {
                     adapter.setState(_nukiId + '.actions.lockAction', {val: false, ack: true}); 
                 } else if (deviceType == 2) {
                     adapter.setState(_nukiId + '.actions.rtoAction', {val: false, ack: true});
+                } else {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: false, ack: true});
                 }
                 setTimeout(function() {
                     adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
@@ -678,6 +704,8 @@ function setLockState(_nukiId, _nukiState) {
                     adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
                 } else if (deviceType == 2) {
                     adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
+                } else {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
                 }
                 setTimeout(function() {
                     adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
@@ -689,14 +717,20 @@ function setLockState(_nukiId, _nukiState) {
                     adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
                 } else if (deviceType == 2) {
                     adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
+                } else {
+                    adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
                 }
                 adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
                 break;
         } 
-        
+            
+        // set device type
+        adapter.setState(_nukiId + '.info.deviceType', {val: deviceType, ack: true});
+        // set status
         adapter.setState(_nukiId + '.states.state', {val: _nukiState.state, ack: true});
+        // set battery status
         adapter.setState(_nukiId + '.info.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
-
+        // set timestamp
         if (_nukiState.hasOwnProperty('timestamp')) {
             adapter.setState(_nukiId + '.states.timestamp', {val: _nukiState.timestamp, ack: true});
         } else {
@@ -740,7 +774,13 @@ function updateAllLockStates(_content, _init) {
 
 function getLockState(_nukiId) {
     var deviceType = adapter.getState(adapter.name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; });
-    var lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
+    var lockStateUrl = null;
+
+    if (deviceType != 2 && deviceType != 0) {
+        lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&token=' + bridgeToken;
+    } else {
+        lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
+    }
 
     request(
         {
@@ -769,7 +809,13 @@ function getLockState(_nukiId) {
 
 function setLockAction(_nukiId, _action) {
     var deviceType = adapter.getState(adapter.name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
-    var lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
+    var lockActionUrl = null;
+
+    if (deviceType != 2 && deviceType != 0) {
+        lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
+    } else {
+        lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
+    }
 
     request(
         {
@@ -846,7 +892,8 @@ function getBridgeList() {
                 if (obj.hasOwnProperty('ip')) {
                     if (obj.ip == bridgeIp) {
                         // found bridge
-                        bridgeId = obj.bridgeId;
+                        bridgeId   = obj.bridgeId;
+                        bridgeType = 1;
                         if (obj.port == bridgePort) {
                             // correct port
                             adapter.log.info('found hardware bridge: ' + bridgeId + ' (IP: ' + bridgeIp + '; Port: ' + bridgePort + ')');
@@ -863,7 +910,8 @@ function getBridgeList() {
                 } else {
                     // software bridge: doesn't come with IP
                     if (bridgeId == '' || bridgeId == null) {
-                        bridgeId    = obj.bridgeId;
+                        bridgeId   = obj.bridgeId;
+                        bridgeType = 2;
                     }
                     adapter.log.info('found software bridge: ' + obj.bridgeId);
                 }
