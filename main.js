@@ -78,9 +78,9 @@ function startAdapter(options) {
                 removeCallback(callbackId);
             }
             adapter.log.info('cleaned everything up...');
-            setTimeout(function() {
+            // setTimeout(function() {
                 callback();
-            }, timeOut); 
+            // }, timeOut); 
         } catch (e) {
             callback();
         }
