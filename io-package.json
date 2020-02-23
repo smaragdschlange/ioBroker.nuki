@@ -1,19 +1,55 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.1.2",
+        "version": "1.1.3",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
-                "de": "Status 200 Antwort für HTTP-Anfragen hinzugefügt"
+                "de": "Status 200 Antwort auf HTTP-Anfragen hinzugefügt",
+                "ru": "добавлен статус 200 ответа на HTTP-запросы",
+                "pt": "adicionado status 200 de resposta às solicitações HTTP",
+                "nl": "antwoord 200 toegevoegd aan HTTP-verzoeken",
+                "fr": "statut ajouté 200 réponse aux requêtes HTTP",
+                "it": "aggiunto stato 200 risposta alle richieste HTTP",
+                "es": "respuesta de estado 200 agregada a solicitudes HTTP",
+                "pl": "dodano status 200 odpowiedzi na żądania HTTP",
+                "zh-cn": "添加了状态200对HTTP请求的响应"
             },
             "1.1.0": {
                 "en": "added support for Nuki Opener",
-                "de": "Unterstützung für Nuki Opener hinzugefügt"
+                "de": "Unterstützung für Nuki Opener hinzugefügt",
+                "ru": "добавлена поддержка Nuki Opener",
+                "pt": "suporte adicionado ao Nuki Opener",
+                "nl": "ondersteuning toegevoegd voor Nuki Opener",
+                "fr": "Ajout du support pour Nuki Opener",
+                "it": "aggiunto supporto per Nuki Opener",
+                "es": "Soporte agregado para Nuki Opener",
+                "pl": "dodano wsparcie dla Nuki Opener",
+                "zh-cn": "增加了对Nuki Opener的支持"
             },
             "1.1.2": {
                 "en": "default to Nuki Lock when deviceType unknown",
-                "de": "Bei unbekanntem deviceTyp wird ein Nuki Lock angenommen"
+                "de": "Standardmäßig Nuki Lock, wenn der deviceType unbekannt ist",
+                "ru": "по умолчанию Nuki Lock, когда deviceType неизвестен",
+                "pt": "padrão para Nuki Lock quando deviceType desconhecido",
+                "nl": "standaard op Nuki Lock wanneer deviceType onbekend",
+                "fr": "verrouiller Nuki par défaut lorsque deviceType est inconnu",
+                "it": "impostazione predefinita su Nuki Lock quando deviceType sconosciuto",
+                "es": "predeterminado a Nuki Lock cuando deviceType desconocido",
+                "pl": "domyślnie Nuki Lock, gdy deviceType jest nieznany",
+                "zh-cn": "deviceType未知时默认为Nuki Lock"
+            },
+            "1.1.3": {
+                "en": "better support of Nuki Opener state changes",
+                "de": "Bessere Unterstützung von Nuki Opener-Statusänderungen",
+                "ru": "лучшая поддержка изменений состояния Nuki Opener",
+                "pt": "melhor suporte às alterações de estado do Nuki Opener",
+                "nl": "betere ondersteuning van Nuki Opener statuswijzigingen",
+                "fr": "meilleur support des changements d'état de Nuki Opener",
+                "it": "un migliore supporto ai cambiamenti di stato di Nuki Opener",
+                "es": "mejor soporte de los cambios de estado de Nuki Opener",
+                "pl": "lepsze wsparcie zmian stanu Openeru Nuki",
+                "zh-cn": "更好地支持Nuki Opener状态更改"
             }
         },
         "title": "Nuki Smart Lock",
