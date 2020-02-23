@@ -23,7 +23,6 @@ var hostIp  = ipInfo.address();
 var bridgeId        = null;
 var bridgeType      = null;
 var bridgeHwId      = null;
-var bridgeSvId      = null;
 var bridgeFwVer     = null;
 var bridgeWifiFwVer = null;
 var bridgeAppVer    = null;
@@ -150,6 +149,7 @@ function startAdapter(options) {
 };
 
 function initBridgeStates(_name, _token) {
+    let timeStamp = new Date();
 
     adapter.setObjectNotExists(bridgeId, {
         type: 'device',
@@ -231,29 +231,14 @@ function initBridgeStates(_name, _token) {
             },
             native: {}
         });
-    }
-
-    adapter.setObjectNotExists(bridgeId + '.info.serverId', {
-        type: 'state',
-        common: {
-            name: 'ServerID',
-            type: 'string',
-            write: false,
-            role: 'text',
-            def: bridgeSvId
-        },
-        native: {}
-    });
-
-    if (bridgeType == 1) {
+        
         adapter.setObjectNotExists(bridgeId + '.info.firmwareVersion', {
             type: 'state',
             common: {
                 name: 'Firmware',
                 type: 'string',
                 write: false,
-                role: 'text',
-                def: bridgeFwVer
+                role: 'text'
             },
             native: {}
         });
@@ -264,8 +249,7 @@ function initBridgeStates(_name, _token) {
                 name: 'WiFi Firmware',
                 type: 'string',
                 write: false,
-                role: 'text',
-                def: bridgeWifiFwVer
+                role: 'text'
             },
             native: {}
         });
@@ -276,12 +260,24 @@ function initBridgeStates(_name, _token) {
                 name: 'App Version',
                 type: 'string',
                 write: false,
-                role: 'text',
-                def: bridgeAppVer
+                role: 'text'
             },
             native: {}
         });
     }
+    
+    adapter.setObjectNotExists(bridgeId + '.info.timestamp', {
+        type: 'state',
+        common: {
+            name: 'Zuletzt aktualisiert',
+            type: 'string',
+            write: false,
+            role: 'date'
+        },
+        native: {}
+    });
+
+    setBridgeState(timeStamp);
 }
 
 function initNukiDeviceStates(_obj) {
@@ -331,7 +327,7 @@ function initNukiDeviceStates(_obj) {
             deviceType = 1; 
             break;
     }
-    
+
     adapter.setObjectNotExists(_obj.nukiId + '.info.deviceType', {
         type: 'state',
         common: {
@@ -348,6 +344,19 @@ function initNukiDeviceStates(_obj) {
         },
         native: {}
     });
+
+    if (_obj.hasOwnProperty('firmwareVersion')) {
+        adapter.setObjectNotExists(_obj.nukiId + '.info.firmwareVersion', {
+            type: 'state',
+            common: {
+                name: 'Firmware',
+                type: 'string',
+                write: false,
+                role: 'text'
+            },
+            native: {}
+        });
+    }
 
     adapter.setObjectNotExists(_obj.nukiId + '.info.batteryCritical', {
         type: 'state',
@@ -625,6 +634,21 @@ function initNukiOpenerStates(_nukiId) {
     adapter.subscribeStates(_obj.nukiId + '.actions.action');
 }
 
+function setBridgeState(_timestamp) {
+    if (bridgeType == 1) {
+        // set firmware version
+        adapter.setState(bridgeId + '.info.firmwareVersion', {val: bridgeFwVer, ack: true});
+        // set WiFi firmware version
+        adapter.setState(bridgeId + '.info.wifiFirmwareVersion', {val: bridgeWifiFwVer, ack: true});
+    } else if (bridgeType == 2) {
+        // set app version
+        adapter.setState(bridgeId + '.info.appVersion', {val: bridgeAppVer, ack: true});
+    }
+
+    // set timestamp
+    adapter.setState(bridgeId + '.info.timestamp', {val: _timestamp, ack: true});
+}
+
 function setLockState(_nukiId, _deviceType, _nukiState) {
     let timeStamp = null;
 
@@ -828,11 +852,6 @@ function getBridgeList() {
     let bridgeListUrl = 'https://api.nuki.io/discover/bridges';
     let obj = null;
 
-    if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
-        adapter.log.warn('please specify IP and port of bridge');
-        return;
-    }
-
     request(
         {
             url: bridgeListUrl,
@@ -895,13 +914,17 @@ function getBridgeList() {
                 adapter.log.error('no bridge has been found');
                 return;
             }
-            initBridgeStates(bridgeName, bridgeToken);
         }
     )
 }
 
-function getBridgeInfo() {
+function getBridgeInfo(_init) {
     let bridgeInfoUrl = 'http://' + bridgeIp + ':' + bridgePort + '/info?token='+ bridgeToken;
+
+    if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
+        adapter.log.warn('please specify IP and port of bridge');
+        return;
+    }
 
     request(
         {
@@ -917,7 +940,7 @@ function getBridgeInfo() {
                     let versions = content.versions;
                     
                     bridgeType = content.bridgeType;
-                    bridgeSvId = ids.serverId;
+                    bridgeId = ids.serverId;
                     if (bridgeType == 1) {
                         bridgeHwId = ids.hardwareId;
                         bridgeFwVer = versions.firmwareVersion;
@@ -926,9 +949,16 @@ function getBridgeInfo() {
                         bridgeAppVer = versions.appVersion
                     }
                 } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
+                    adapter.log.error('Unable access the bridge with specified IP address and port.');
+                    getBridgeList();
+                    return;
                 }
-                initBridgeStates(bridgeName, bridgeToken);
+
+                if (_init) {
+                    initBridgeStates(bridgeName, bridgeToken);
+                } else {
+                    setBridgeState(content.currentTime);
+                }
             } else if (response.statusCode == 401) {
                 adapter.log.error('Given token is invalid.');
             } else {
@@ -952,6 +982,11 @@ function getLockList(_init) {
             if (!error && response.statusCode == 200) {
                 if (content) {
                     updateAllLockStates(content, _init);
+                    // delay before request
+                    setTimeout(function() {
+                        // get Nuki bridge
+                        getBridgeInfo(false);
+                    }, timeOut);
                 } else {
                     adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
                 }
@@ -1163,8 +1198,7 @@ function main() {
         // delay before request
         setTimeout(function() {
             // get Nuki bridge
-            // getBridgeList();
-            getBridgeInfo();
+            getBridgeInfo(true);
         }, timeOut);
         
         // delay before request
