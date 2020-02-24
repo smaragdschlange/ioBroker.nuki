@@ -645,8 +645,8 @@ function initNukiOpenerStates(_nukiId) {
     });
 
     // listen to changes
-    adapter.subscribeStates(_obj.nukiId + '.actions.*Action');
-    adapter.subscribeStates(_obj.nukiId + '.actions.action');
+    adapter.subscribeStates(_nukiId + '.actions.*Action');
+    adapter.subscribeStates(_nukiId + '.actions.action');
 }
 
 function setBridgeState(_timestamp) {
