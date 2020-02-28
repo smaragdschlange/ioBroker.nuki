@@ -841,7 +841,8 @@ function getLockState(_nukiId, _forced) {
 }
 
 function setLockAction(_nukiId, _action) {
-    let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
+    // let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
+    let deviceType = adapter.getState(name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; });
     let lockActionUrl = null;
 
     adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
