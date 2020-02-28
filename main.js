@@ -799,7 +799,7 @@ function getLockState(_nukiId, _forced) {
 
     if (_forced) { 
         // retrieve states directly from the device
-        let deviceType = adapter.getState(adapter.name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; });
+        let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; });
         if (deviceType != 2 && deviceType != 0) {
             lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&token=' + bridgeToken;
         } else {
@@ -841,9 +841,10 @@ function getLockState(_nukiId, _forced) {
 }
 
 function setLockAction(_nukiId, _action) {
-    let deviceType = adapter.getState(adapter.name+'.'+adapter.instance+'.'+_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
+    let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
     let lockActionUrl = null;
 
+    adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
     if (deviceType != 2 && deviceType != 0) {
         lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
     } else {
