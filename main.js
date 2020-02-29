@@ -794,43 +794,51 @@ function updateAllLockStates(_content, _init) {
 }
 
 function getLockState(_nukiId, _forced) {
-    let lockStateUrl = null;
-    let timeStamp = null;
 
     if (_forced) { 
         // retrieve states directly from the device
-        let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; });
-        if (deviceType != 2 && deviceType != 0) {
-            lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&token=' + bridgeToken;
-        } else {
-            lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
-        }
+        adapter.getState(_nukiId + '.info.deviceType', function (err, state) {
+            let deviceType = state.val;
+            let lockStateUrl = null;
+            let timeStamp = null;
+    
+            if (err) {
+                adapter.log.error(err);
+                return;
+            }
+        
+            if (deviceType != 2 && deviceType != 0) {
+                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&token=' + bridgeToken;
+            } else {
+                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
+            }
 
-        request(
-            {
-                url: lockStateUrl,
-                json: true
-            },  
-            function (error, response, content) {
-                adapter.log.debug('state requested: ' + lockStateUrl);
+            request(
+                {
+                    url: lockStateUrl,
+                    json: true
+                },  
+                function (error, response, content) {
+                    adapter.log.debug('state requested: ' + lockStateUrl);
 
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (content.success) {
-                            timeStamp = new Date();
-                            let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical, "timestamp": timeStamp };
-                            setLockState(_nukiId, deviceType, nukiState);
+                    if (!error && response.statusCode == 200) {
+                        if (content && content.hasOwnProperty('success')) {
+                            if (content.success) {
+                                timeStamp = new Date();
+                                let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical, "timestamp": timeStamp };
+                                setLockState(_nukiId, deviceType, nukiState);
+                            } else {
+                                adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
+                            }
                         } else {
-                            adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
+                            adapter.log.warn('Response has no valid content. Check IP address and try again.');
                         }
                     } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                        adapter.log.error(error);
                     }
-                } else {
-                    adapter.log.error(error);
                 }
-            }
-        )  
+            )  
+        });
     } else {
         // retrieve states from bridge
         setTimeout(function() {
@@ -841,47 +849,55 @@ function getLockState(_nukiId, _forced) {
 }
 
 function setLockAction(_nukiId, _action) {
-    let deviceType = adapter.getState(_nukiId+'.info.deviceType', function (err, state) { return state.val; }); 
-    let lockActionUrl = null;
 
-    adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
-    if (deviceType != 2 && deviceType != 0) {
-        lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
-    } else {
-        lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
-    }
+    adapter.getState(_nukiId + '.info.deviceType', function (err, state) {
+        let deviceType = state.val;
+        let lockActionUrl = null;
 
-    request(
-        {
-            url: lockActionUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.debug('action requested: ' + lockActionUrl);
+        if (err) {
+            adapter.log.error(err);
+            return;
+        }
+    
+        adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
+        if (deviceType != 2 && deviceType != 0) {
+            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
+        } else {
+            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
+        }
 
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('success')) {
-                    if (!content.success) {
-                        adapter.log.warn('action ' + _action + ' not successfully set!');
-                    } else {
-                        adapter.log.info('action ' + _action + ' set successfully');   
-                        if (hostCb == false) {                  
-                            // delay before request
-                            setTimeout(function() {
-                                getLockState(_nukiId, false);
-                            }, timeOut);
+        request(
+            {
+                url: lockActionUrl,
+                json: true
+            },  
+            function (error, response, content) {
+                adapter.log.debug('action requested: ' + lockActionUrl);
+
+                if (!error && response.statusCode == 200) {
+                    if (content && content.hasOwnProperty('success')) {
+                        if (!content.success) {
+                            adapter.log.warn('action ' + _action + ' not successfully set!');
                         } else {
+                            adapter.log.info('action ' + _action + ' set successfully');   
+                            if (hostCb == false) {                  
+                                // delay before request
+                                setTimeout(function() {
+                                    getLockState(_nukiId, false);
+                                }, timeOut);
+                            } else {
 
+                            }
                         }
+                    } else {
+                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
                     }
                 } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                    adapter.log.error(error);
                 }
-            } else {
-                adapter.log.error(error);
             }
-        }
-    )
+        )
+    });
 }
 
 function getBridgeList() {
@@ -950,12 +966,6 @@ function getBridgeList() {
                 adapter.log.error('no bridge has been found');
                 return;
             }
-
-            // delay before request
-            setTimeout(function() {
-                // get Nuki bridge
-                getBridgeInfo(true);
-            }, timeOut);
         }
     )
 }
@@ -992,7 +1002,6 @@ function getBridgeInfo(_init) {
                     }
                 } else {
                     adapter.log.error('Unable access the bridge with specified IP address and port.');
-                    // getBridgeList();
                     return;
                 }
 
@@ -1244,7 +1253,6 @@ function main() {
         setTimeout(function() {
             // get Nuki bridge
             getBridgeList()
-            // getBridgeInfo(true);
         }, timeOut);
         
         // delay before request
