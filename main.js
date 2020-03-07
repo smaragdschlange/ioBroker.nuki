@@ -754,7 +754,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
 
     if (_firmWare != null && _firmWare != '') {
         // set firmware version
-        adapter.setState(_obj.nukiId + '.info.firmwareVersion', {val: _nukiState.firmwareVersion, ack: true});
+        adapter.setState(_nukiId + '.info.firmwareVersion', {val: _nukiState.firmwareVersion, ack: true});
     }
 }
 
@@ -820,21 +820,43 @@ function getLockState(_nukiId, _forced) {
                 },  
                 function (error, response, content) {
                     adapter.log.debug('state requested: ' + lockStateUrl);
+                    
+                    if (error) {
+                        adapter.log.error(error);
+                        return;
+                    }
 
-                    if (!error && response.statusCode == 200) {
-                        if (content && content.hasOwnProperty('success')) {
-                            if (content.success) {
-                                timeStamp = new Date();
-                                let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical, "timestamp": timeStamp };
-                                setLockState(_nukiId, deviceType, nukiState);
-                            } else {
-                                adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
-                            }
+                    if (response.statusCode != 200) {
+                        switch (response.statusCode) {
+                            case 401:
+                                adapter.log.error('Given token is invalid.');
+                                break;
+                        
+                            case 404:
+                                adapter.log.error('Nuki device is unknown.');
+                                break;
+                    
+                            case 503:
+                                adapter.log.error('Nuki device is offline.');
+                                break;
+                            
+                            default:
+                                adapter.log.error('HTTP-response: ' + response.statusCode);
+                                break;
+                        }
+                        return;
+                    }
+
+                    if (content && content.hasOwnProperty('success')) {
+                        if (content.success) {
+                            timeStamp = new Date();
+                            let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical, "timestamp": timeStamp };
+                            setLockState(_nukiId, deviceType, nukiState);
                         } else {
-                            adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                            adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
                         }
                     } else {
-                        adapter.log.error(error);
+                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
                     }
                 }
             )  
@@ -874,26 +896,52 @@ function setLockAction(_nukiId, _action) {
             function (error, response, content) {
                 adapter.log.debug('action requested: ' + lockActionUrl);
 
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (!content.success) {
-                            adapter.log.warn('action ' + _action + ' not successfully set!');
-                        } else {
-                            adapter.log.info('action ' + _action + ' set successfully');   
-                            if (hostCb == false) {                  
-                                // delay before request
-                                setTimeout(function() {
-                                    getLockState(_nukiId, false);
-                                }, timeOut);
-                            } else {
-
-                            }
-                        }
+                if (error) {
+                    adapter.log.error(error);
+                    return;
+                }
+    
+                if (response.statusCode != 200) {
+                    switch (response.statusCode) {
+                        case 400:
+                            adapter.log.error('Given action is invalid.');
+                            break;
+                    
+                        case 401:
+                            adapter.log.error('Given token is invalid.');
+                            break;
+                    
+                        case 404:
+                            adapter.log.error('Nuki device is unknown.');
+                            break;
+                        
+                        case 503:
+                            adapter.log.error('Nuki device is offline.');
+                            break;
+                            
+                        default:
+                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            break;
+                    }
+                    return;
+                }
+    
+                if (content && content.hasOwnProperty('success')) {
+                    if (!content.success) {
+                        adapter.log.warn('action ' + _action + ' not successfully set!');
                     } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                        adapter.log.info('action ' + _action + ' set successfully');   
+                        if (hostCb == false) {                  
+                            // delay before request
+                            setTimeout(function() {
+                                getLockState(_nukiId, false);
+                            }, timeOut);
+                        } else {
+
+                        }
                     }
                 } else {
-                    adapter.log.error(error);
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
                 }
             }
         )
@@ -912,8 +960,13 @@ function getBridgeList() {
         function (error, response, content) {
             adapter.log.debug('Bridge list requested: ' + bridgeListUrl);
 
-            if (error || response.statusCode != 200) {
+            if (error) {
                 adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                adapter.log.error('HTTP-response: ' + response.statusCode);
                 return;
             }
 
@@ -986,34 +1039,46 @@ function getBridgeInfo(_init) {
         function (error, response, content) {
             adapter.log.info('Bridge Info requested: ' + bridgeInfoUrl);
 
-            if (!error && response.statusCode == 200) {
-                if (content) {
-                    let ids = content.ids;
-                    let versions = content.versions;
-                    
-                    bridgeType = content.bridgeType;
-                    bridgeId = ids.serverId;
-                    if (bridgeType == 1) {
-                        bridgeHwId = ids.hardwareId;
-                        bridgeFwVer = versions.firmwareVersion;
-                        bridgeWifiFwVer = versions.wifiFirmwareVersion;
-                    } else {
-                        bridgeAppVer = versions.appVersion
-                    }
-                } else {
-                    adapter.log.error('Unable access the bridge with specified IP address and port.');
-                    return;
-                }
-
-                if (_init) {
-                    initBridgeStates(bridgeName, bridgeToken);
-                } else {
-                    setBridgeState(content.currentTime);
-                }
-            } else if (response.statusCode == 401) {
-                adapter.log.error('Given token is invalid.');
-            } else {
+            if (error) {
                 adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                switch (response.statusCode) {
+                    case 401:
+                        adapter.log.error('Given token is invalid.');
+                        break;
+
+                    default:
+                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        break;
+                }
+                return;
+            }
+
+            if (content) {
+                let ids = content.ids;
+                let versions = content.versions;
+                
+                bridgeType = content.bridgeType;
+                bridgeId = ids.serverId;
+                if (bridgeType == 1) {
+                    bridgeHwId = ids.hardwareId;
+                    bridgeFwVer = versions.firmwareVersion;
+                    bridgeWifiFwVer = versions.wifiFirmwareVersion;
+                } else {
+                    bridgeAppVer = versions.appVersion
+                }
+            } else {
+                adapter.log.error('Unable access the bridge with specified IP address and port.');
+                return;
+            }
+
+            if (_init) {
+                initBridgeStates(bridgeName, bridgeToken);
+            } else {
+                setBridgeState(content.currentTime);
             }
         }
     )
@@ -1029,25 +1094,34 @@ function getLockList(_init) {
         },  
         function (error, response, content) {
             adapter.log.info('Lock list requested: ' + lockListUrl);
-            adapter.log.debug('HTTP-response: ' + response.statusCode);
 
-            if (!error && response.statusCode == 200) {
-                if (content) {
-                    updateAllLockStates(content, _init);
-                    // delay before request
-                    setTimeout(function() {
-                        // get Nuki bridge
-                        getBridgeInfo(false);
-                    }, timeOut);
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
-                }
-            } else if (response.statusCode == 401) {
-                adapter.log.error('Given token is invalid.');
-            } else if (response.statusCode == 503) {
-                adapter.log.error('Service unavaillable.');
-            } else if (error) {
+            if (error) {
                 adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                switch (response.statusCode) {
+                    case 401:
+                        adapter.log.error('Given token is invalid.');
+                        break;
+                
+                    default:
+                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        break;
+                }
+                return;
+            }
+
+            if (content) {
+                updateAllLockStates(content, _init);
+                // delay before request
+                setTimeout(function() {
+                    // get Nuki bridge
+                    getBridgeInfo(_init);
+                }, timeOut);
+            } else {
+                adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
             }
         }
     )
@@ -1120,50 +1194,64 @@ function checkCallback(_hostCb) {
         function (error, response, content) {
             adapter.log.debug('Callback list requested: ' + cbListUrl);
 
-            if (!error && response.statusCode == 200) {
-                if (content && content.hasOwnProperty('callbacks')) {
-                    for (let row in content.callbacks) {
-                        cbId = content.callbacks[row];
-                        if (cbId.url == cbUrl) {
-                            cbExists = true;
-                            if (_hostCb == false) {
-                                adapter.log.debug('Callback should be removed: ' + cbUrl);
-                                // delay after request
-                                setTimeout(function() {
-                                    removeCallback(cbId.id);
-                                }, timeOut);
-                            }
-                        } 
-                    }
-                    if (_hostCb == true) {
-                        if (cbId) {
-                            callbackId = cbId.id;
-                        } else {
-                            callbackId = '0';
+            if (error) {
+                adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                switch (response.statusCode) {
+                    case 401:
+                        adapter.log.error('Given token is invalid.');
+                        break;
+                
+                    default:
+                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        break;
+                }
+                return;
+            }
+
+            if (content && content.hasOwnProperty('callbacks')) {
+                for (let row in content.callbacks) {
+                    cbId = content.callbacks[row];
+                    if (cbId.url == cbUrl) {
+                        cbExists = true;
+                        if (_hostCb == false) {
+                            adapter.log.debug('Callback should be removed: ' + cbUrl);
+                            // delay after request
+                            setTimeout(function() {
+                                removeCallback(cbId.id);
+                            }, timeOut);
                         }
-                        if (cbExists) {
-                                cbSet = true;
-                                adapter.log.info('Callback allready set: ' + cbUrl);
-                                initServer(hostIp, hostPort);
+                    } 
+                }
+                if (_hostCb == true) {
+                    if (cbId) {
+                        callbackId = cbId.id;
+                    } else {
+                        callbackId = '0';
+                    }
+                    if (cbExists) {
+                            cbSet = true;
+                            adapter.log.info('Callback allready set: ' + cbUrl);
+                            initServer(hostIp, hostPort);
+                    } else {
+                        if (callbackId == '3') {
+                            cbSet = false;
+                            adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
                         } else {
-                            if (callbackId == '3') {
-                                cbSet = false;
-                                adapter.log.warn('Too many Callbacks defined (3). First delete at least 1 Callback on your Nuki bridge.');
-                            } else {
-                                cbSet = true;
-                                initServer(hostIp, hostPort);
-                                // delay after request
-                                setTimeout(function() {
-                                    setCallback(cbUrl);
-                                }, timeOut);
-                            }
+                            cbSet = true;
+                            initServer(hostIp, hostPort);
+                            // delay after request
+                            setTimeout(function() {
+                                setCallback(cbUrl);
+                            }, timeOut);
                         }
                     }
-                } else {
-                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
                 }
             } else {
-                adapter.log.error(error);
+                adapter.log.warn('Response has no valid content. Check IP address and try again.');
             }
         }
     )
@@ -1181,19 +1269,40 @@ function removeCallback(_id) {
             function (error, response, content) {
                 adapter.log.debug('Callback removal requested: ' + callbackRemoveUrl);
 
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (content.success) {
-                            cbSet = false;
-                            adapter.log.info('Callback-ID successfully removed: ' + _id);
-                        } else {
-                            adapter.log.warn('Callback-ID could not be removed: ' + _id);
-                        }
+                if (error) {
+                    adapter.log.error(error);
+                    return;
+                }
+    
+                if (response.statusCode != 200) {
+                    switch (response.statusCode) {
+                        case 400:
+                            adapter.log.error('Given url is invalid or too long.');
+                            break;
+                    
+                        case 401:
+                            adapter.log.error('Given token is invalid.');
+                            break;
+                    
+                        default:
+                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            break;
+                    }
+                    return;
+                }
+    
+                if (content && content.hasOwnProperty('success')) {
+                    if (content.success) {
+                        cbSet = false;
+                        adapter.log.info('Callback-ID successfully removed: ' + _id);
                     } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                        adapter.log.warn('Callback-ID could not be removed: ' + _id);
+                        if (content.hasOwnProperty('message')) {
+                            adapter.log.warn(content.message);
+                        }
                     }
                 } else {
-                    adapter.log.error(error);
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
                 }
             }
         )
@@ -1213,19 +1322,40 @@ function setCallback(_url) {
             },  
             function (error, response, content) {
                 adapter.log.debug('Callback requested: ' + callbackAddUrl);
+                
+                if (error) {
+                    adapter.log.error(error);
+                    return;
+                }
 
-                if (!error && response.statusCode == 200) {
-                    if (content && content.hasOwnProperty('success')) {
-                        if (content.success) {
-                            adapter.log.info('Callback successfully set: ' + _url);
-                        } else {
-                            adapter.log.warn('Callback could not be set: ' + _url);
-                        }
+                if (response.statusCode != 200) {
+                    switch (response.statusCode) {
+                        case 400:
+                            adapter.log.error('Given url is invalid or too long.');
+                            break;
+                    
+                        case 401:
+                            adapter.log.error('Given token is invalid.');
+                            break;
+                    
+                        default:
+                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            break;
+                    }
+                    return;
+                }
+
+                if (content && content.hasOwnProperty('success')) {
+                    if (content.success) {
+                        adapter.log.info('Callback successfully set: ' + _url);
                     } else {
-                        adapter.log.warn('Response has no valid content. Check IP address and try again.');
+                        adapter.log.warn('Callback could not be set: ' + _url);
+                        if (content.hasOwnProperty('message')) {
+                            adapter.log.warn(content.message);
+                        }
                     }
                 } else {
-                    adapter.log.error(error);
+                    adapter.log.warn('Response has no valid content. Check IP address and try again.');
                 }
             }
         ) 
