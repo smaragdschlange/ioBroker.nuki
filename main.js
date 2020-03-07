@@ -352,7 +352,8 @@ function initNukiDeviceStates(_obj) {
                 name: 'Firmware',
                 type: 'string',
                 write: false,
-                role: 'text'
+                role: 'text',
+                def: _obj.firmwareVersion
             },
             native: {}
         });
