@@ -36,6 +36,7 @@ var cbSet           = false;
 var callbackId      = null;
 var hostPort        = null;
 var timeOut         = 3000;
+var waitTimeOut;
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
@@ -68,7 +69,7 @@ function startAdapter(options) {
     // start here!
     adapter.on('ready', function () {
         // delay before request
-        setTimeout(function() {
+        waitTimeOut = setTimeout(function() {
             main();
         }, timeOut);
     });
@@ -76,6 +77,7 @@ function startAdapter(options) {
     // is called when adapter shuts down - callback has to be called under any circumstances!
     adapter.on('unload', function (callback) {
         try {
+	    if (waitTimeOut) clearTimeout(waitTimeOut);
             if (timer) clearInterval(timer);
             if (cbSet) {
                 hostCb = false;
@@ -744,7 +746,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     }
     
     // reset action state after delay
-    setTimeout(function() {
+    waitTimeOut = setTimeout(function() {
         adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
     }, timeOut);
 
@@ -864,7 +866,7 @@ function getLockState(_nukiId, _forced) {
         });
     } else {
         // retrieve states from bridge
-        setTimeout(function() {
+        waitTimeOut = setTimeout(function() {
             // get all Nuki devices on bridge
             getLockList(false);
         }, timeOut);
@@ -934,7 +936,7 @@ function setLockAction(_nukiId, _action) {
                         adapter.log.info('action ' + _action + ' set successfully');   
                         if (hostCb == false) {                  
                             // delay before request
-                            setTimeout(function() {
+                            waitTimeOut = setTimeout(function() {
                                 getLockState(_nukiId, false);
                             }, timeOut);
                         } else {
@@ -1117,7 +1119,7 @@ function getLockList(_init) {
             if (content) {
                 updateAllLockStates(content, _init);
                 // delay before request
-                setTimeout(function() {
+                waitTimeOut = setTimeout(function() {
                     // get Nuki bridge
                     getBridgeInfo(_init);
                 }, timeOut);
@@ -1128,7 +1130,7 @@ function getLockList(_init) {
     )
     if (_init) {
         // delay before request
-        setTimeout(function() {
+        waitTimeOut = setTimeout(function() {
             // check for callbacks on Nuki bridge
             checkCallback(hostCb);
         }, timeOut);
@@ -1221,7 +1223,7 @@ function checkCallback(_hostCb) {
                         if (_hostCb == false) {
                             adapter.log.debug('Callback should be removed: ' + cbUrl);
                             // delay after request
-                            setTimeout(function() {
+                            waitTimeOut = setTimeout(function() {
                                 removeCallback(cbId.id);
                             }, timeOut);
                         }
@@ -1245,7 +1247,7 @@ function checkCallback(_hostCb) {
                             cbSet = true;
                             initServer(hostIp, hostPort);
                             // delay after request
-                            setTimeout(function() {
+                            waitTimeOut = setTimeout(function() {
                                 setCallback(cbUrl);
                             }, timeOut);
                         }
@@ -1381,13 +1383,13 @@ function main() {
         adapter.log.debug('config token: '              + bridgeToken);
 
         // delay before request
-        setTimeout(function() {
+        waitTimeOut = setTimeout(function() {
             // get Nuki bridge
             getBridgeList()
         }, timeOut);
         
         // delay before request
-        setTimeout(function() {
+        waitTimeOut = setTimeout(function() {
             // get all Nuki devices on bridge
             getLockList(true);
         }, timeOut);
