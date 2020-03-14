@@ -74,6 +74,9 @@ When updating from 0.1.x to 0.2.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
+### 1.1.5
+* (smaragdschlange) bug fix: clear all timeouts on unload
+
 ### 1.1.4
 * (smaragdschlange) bug fix: object was not defined
 
