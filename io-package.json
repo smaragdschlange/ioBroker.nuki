@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.1.4",
+        "version": "1.1.5",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -39,7 +39,7 @@
                 "pl": "domyślnie Nuki Lock, gdy deviceType jest nieznany",
                 "zh-cn": "deviceType未知时默认为Nuki Lock"
             },
-            "1.1.4": {
+            "1.1.5": {
                 "en": "better support of Nuki Opener state changes",
                 "de": "Bessere Unterstützung von Nuki Opener-Statusänderungen",
                 "ru": "лучшая поддержка изменений состояния Nuki Opener",
