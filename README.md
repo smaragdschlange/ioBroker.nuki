@@ -77,6 +77,7 @@ When updating from 1.0.x to 1.1.0 or higher it is recommended to delete all inst
 
 ### 1.2.0
 * (smaragdschlange) improvement: support of hashed token (set to standard)
+* (smaragdschlange) improvement: better use of delay before requests in order to prevent null messages
 
 ### 1.1.5
 * (smaragdschlange) bug fix: clear all timeouts on unload
