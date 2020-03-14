@@ -34,86 +34,12 @@
         } else {
             $('._host_port').hide();
         }
+        if ($('#bridge_type').val() == '1') {
+            $('._fp_token').show();
+        } else {
+            $('._fp_token').hide();
+        }
     }
-
-        // function getNukiBridges() {
-        //     const https = require('https');
-
-        //     https.get('https://api.nuki.io/discover/bridges', (resp) => {
-        //     let data = '';
-
-        //     // A chunk of data has been recieved.
-        //     resp.on('data', (chunk) => {
-        //         data += chunk;
-        //     });
-
-        // // The whole response has been received. Print out the result.
-        // resp.on('end', () => {
-        //     console.log(JSON.parse(data).explanation);
-        // });
-
-        // }).on("error", (err) => {
-        // console.log("Error: " + err.message);
-        // });
-
-        // const request = require('request');
-
-        // request('https://api.nuki.io/discover/bridges', { json: true }, (err, res, body) => {
-        //     if (err) { return console.log(err); }
-        //     console.log(body.url);
-        //     console.log(body.explanation);
-        // });
-
-        // const https = require('https');
-
-        // https.get('https://api.nuki.io/discover/bridges', (res) => {
-        //     const { statusCode } = res;
-            // const contentType = res.headers['content-type'];
-
-            // let error;
-            // if (statusCode !== 200) {
-            //     error = new Error('Request Failed.\n' + `Status Code: ${statusCode}`);
-            // } else if (!/^application\/json/.test(contentType)) {
-            //     error = new Error('Invalid content-type.\n' + `Expected application/json but received ${contentType}`);
-            // }
-            // if (error) {
-            //     console.error(error.message);
-            //     // consume response data to free up memory
-            //     res.resume();
-            //     return;
-            // }
-
-            // getIps();
-
-            // res.setEncoding('utf8');
-            // let rawData = '';
-            // res.on('data', (chunk) => { rawData += chunk; });
-            // res.on('end', () => {
-            //     try {
-            //         const parsedData = JSON.parse(rawData);
-            //         console.log(parsedData);
-            //     } catch (e) {
-            //         console.error(e.message);
-            //     }
-            // });
-        // }).on('error', (e) => {
-            // console.error(`Got error: ${e.message}`);
-        // });
-    // }
-
-    // function getIps() {
-        // sendTo(null, 'listSerial', null, function (list) {
-        //     if (!list || !list.result) {
-        //         return;
-        //     }
-        //     list = list.result;
-            // var element = $('#bridge_ip');
-        //     for (var j = 0; j < list.length; j++) {
-                // element.append('<option value="192.168.178.65">192.168.178.65</option>');
-        //     }
-        //     $('#serialport.value').val(settings.serialport).select();
-        // });
-    // }
 
     // the function loadSettings has to exist ...
     function load(settings, onChange) {
@@ -137,7 +63,6 @@
             }
         });
 
-        // getNukiBridges();
         showHideSettings();
 
         onChange(false);
@@ -147,6 +72,9 @@
             showHideSettings();
         });
         $('#autoupd').change(function () {
+            showHideSettings();
+        });
+        $('#bridge_type').change(function () {
             showHideSettings();
         });
     }
@@ -191,17 +119,28 @@
                     <label for="bridge_ip" class="translate">ip</label>
                     <span for="bridge_ip" class="translate">ipeg</span>
                 </div>
-                <!-- <div class="input-field col s12 m6 l4">
-                    <select class="value" id="bridge_ip" type="text" ></select>
-                    <label for="bridge_ip" class="translate">ip</label>
-                </div> -->
                 <div class="input-field col s12 m6 l4">
                     <input class="value" type="number" id="bridge_port"/>
-                    <label for="bridge_port" class="translate">nuki_port</label>
+                    <label for="bridge_port" class="translate">bridge_port</label>
                 </div>
+                <div class="input-field col s12 m6 l4">
+                    <select class="value" type="number" id="bridge_type">
+                        <option value="1" class="translate">Hardware</option>
+                        <option value="2" class="translate">Software</option>
+                    </select>
+                    <label for="bridge_type" class="translate">bridge_type</label>
+                </div>
+            </div>
+            <div class="row">
                 <div class="input-field col s12 m6 l4">
                     <input class="value" type="text" id="token" />
                     <label for="token" class="translate">token</label>
+                </div>
+            <!-- </div> -->
+            <!-- <div class="row _fp_token"> -->
+                <div class="input-field col s12 m6 l4 _fp_token">
+                    <input class="value" type="checkbox" id="fp_token"/>
+                    <label for="fp_token" class="translate">fp_token</label>
                 </div>
             </div>
             <div class="row">

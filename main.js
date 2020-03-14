@@ -12,6 +12,7 @@ var utils = require('@iobroker/adapter-core'); // Get common adapter utils
 var express     = require('express');        // call express
 var bodyParser  = require("body-parser");
 var request     = require('request');
+var crypto      = require('crypto');
 
 // REST server
 var app     = express();
@@ -29,6 +30,7 @@ var bridgeAppVer    = null;
 var bridgeIp        = null;
 var bridgePort      = null;
 var bridgeToken     = null;
+var forcePlainToken = null;
 var bridgeName      = null;
 var interval        = null;
 var hostCb          = null;
@@ -36,6 +38,7 @@ var cbSet           = false;
 var callbackId      = null;
 var hostPort        = null;
 var timeOut         = 3000;
+var actionTimeOut, sleepTimeOut;
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
@@ -67,24 +70,21 @@ function startAdapter(options) {
     // is called when databases are connected and adapter received configuration.
     // start here!
     adapter.on('ready', function () {
-        // delay before request
-        setTimeout(function() {
-            main();
-        }, timeOut);
+        main();
     });
 
     // is called when adapter shuts down - callback has to be called under any circumstances!
     adapter.on('unload', function (callback) {
         try {
+            if (actionTimeOut) clearTimeout(actionTimeOut);
+            if (sleepTimeOut) clearTimeout(sleepTimeOut);
             if (timer) clearInterval(timer);
             if (cbSet) {
                 hostCb = false;
                 removeCallback(callbackId);
             }
             adapter.log.info('cleaned everything up...');
-            // setTimeout(function() {
                 callback();
-            // }, timeOut); 
         } catch (e) {
             callback();
         }
@@ -744,7 +744,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     }
     
     // reset action state after delay
-    setTimeout(function() {
+    actionTimeOut = setTimeout(function() {
         adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
     }, timeOut);
 
@@ -809,9 +809,9 @@ function getLockState(_nukiId, _forced) {
             }
         
             if (deviceType != 2 && deviceType != 0) {
-                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&token=' + bridgeToken;
+                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&' + get_token();
             } else {
-                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&token=' + bridgeToken;
+                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&' + get_token();
             }
 
             request(
@@ -863,11 +863,8 @@ function getLockState(_nukiId, _forced) {
             )  
         });
     } else {
-        // retrieve states from bridge
-        setTimeout(function() {
-            // get all Nuki devices on bridge
-            getLockList(false);
-        }, timeOut);
+        // get all Nuki devices on bridge
+        getLockList(false);
     }
 }
 
@@ -884,9 +881,9 @@ function setLockAction(_nukiId, _action) {
     
         adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
         if (deviceType != 2 && deviceType != 0) {
-            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&token=' + bridgeToken;
+            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&' + get_token();
         } else {
-            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&token=' + bridgeToken;
+            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&' + get_token();
         }
 
         request(
@@ -932,11 +929,8 @@ function setLockAction(_nukiId, _action) {
                         adapter.log.warn('action ' + _action + ' not successfully set!');
                     } else {
                         adapter.log.info('action ' + _action + ' set successfully');   
-                        if (hostCb == false) {                  
-                            // delay before request
-                            setTimeout(function() {
-                                getLockState(_nukiId, false);
-                            }, timeOut);
+                        if (hostCb == false) {       
+                            getLockState(_nukiId, false);
                         } else {
 
                         }
@@ -1025,7 +1019,7 @@ function getBridgeList() {
 }
 
 function getBridgeInfo(_init) {
-    let bridgeInfoUrl = 'http://' + bridgeIp + ':' + bridgePort + '/info?token='+ bridgeToken;
+    let bridgeInfoUrl = 'http://' + bridgeIp + ':' + bridgePort + '/info?'+ get_token();
 
     if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
         adapter.log.warn('please specify IP and port of bridge');
@@ -1073,6 +1067,10 @@ function getBridgeInfo(_init) {
                 }
             } else {
                 adapter.log.error('Unable access the bridge with specified IP address and port.');
+                
+                // Nuki bridge discovery
+                getBridgeList();
+
                 return;
             }
 
@@ -1085,9 +1083,18 @@ function getBridgeInfo(_init) {
     )
 }
 
-function getLockList(_init) {
-    let lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?token='+ bridgeToken;
+async function getLockList(_init) {
+    // delay befor next request
+    await sleep(timeOut);
+     
+    // get Nuki bridge info
+    getBridgeInfo(_init);
 
+    // delay befor next request
+    await sleep(timeOut);
+     
+    let lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?'+ get_token();
+   
     request(
         {
             url: lockListUrl,
@@ -1116,22 +1123,18 @@ function getLockList(_init) {
 
             if (content) {
                 updateAllLockStates(content, _init);
-                // delay before request
-                setTimeout(function() {
-                    // get Nuki bridge
-                    getBridgeInfo(_init);
-                }, timeOut);
             } else {
                 adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
             }
         }
     )
+
     if (_init) {
-        // delay before request
-        setTimeout(function() {
-            // check for callbacks on Nuki bridge
-            checkCallback(hostCb);
-        }, timeOut);
+        // delay befor next request
+        await sleep(timeOut);
+
+        // check for callbacks on Nuki bridge
+        checkCallback(hostCb);
     }
 }
 
@@ -1182,7 +1185,7 @@ function initServer(_ip, _port) {
 }
 
 function checkCallback(_hostCb) {
-    let cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&token=' + bridgeToken;
+    let cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&' + get_token();
     let cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki.' + adapter.instance;
     let cbExists = false;
     let cbId = null;
@@ -1220,10 +1223,7 @@ function checkCallback(_hostCb) {
                         cbExists = true;
                         if (_hostCb == false) {
                             adapter.log.debug('Callback should be removed: ' + cbUrl);
-                            // delay after request
-                            setTimeout(function() {
-                                removeCallback(cbId.id);
-                            }, timeOut);
+                            removeCallback(cbId.id);
                         }
                     } 
                 }
@@ -1244,10 +1244,7 @@ function checkCallback(_hostCb) {
                         } else {
                             cbSet = true;
                             initServer(hostIp, hostPort);
-                            // delay after request
-                            setTimeout(function() {
-                                setCallback(cbUrl);
-                            }, timeOut);
+                            setCallback(cbUrl);
                         }
                     }
                 }
@@ -1258,10 +1255,13 @@ function checkCallback(_hostCb) {
     )
 }
 
-function removeCallback(_id) {
-    let callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&token=' + bridgeToken;
+async function removeCallback(_id) {
+    let callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&' + get_token();
 
     if (hostCb == false) {
+        // delay befor next request
+        await sleep(timeOut);
+
         request(
             {
                 url: callbackRemoveUrl,
@@ -1310,12 +1310,15 @@ function removeCallback(_id) {
     }
 }
 
-function setCallback(_url) {
+async function setCallback(_url) {
     let callbackString = _url.replace(':', '%3A');
     callbackString = callbackString.replace('/', '%2F');
-    let callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&token=' + bridgeToken;
+    let callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&' + get_token();
     
     if (hostCb == true) {
+        // delay befor next request
+        await sleep(timeOut);
+
         request(
             {
                 url: callbackAddUrl,
@@ -1363,10 +1366,30 @@ function setCallback(_url) {
     }
 }
 
+function get_token() {
+    let apendix = '';
+
+    if (forcePlainToken != '' || bridgeType != 1) {
+        apendix = 'token=' + bridgeToken
+    } else {
+        let ts = new Date().toISOString().substr(0, 19)+'Z'; // YYY-MM-DDTHH:MM:SSZ
+        let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
+        let hash = crypto.createHash('sha256').update(ts + ',' + rnr + ',' + bridgeToken).digest('hex');
+        apendix = 'ts=' + ts + '&rnr=' + rnr + '&hash=' + hash;       
+    }
+    return apendix;
+}
+
+function sleep(ms) {
+    return sleepTimeOut = new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function main() {
     bridgeIp = adapter.config.bridge_ip;
     bridgePort = adapter.config.bridge_port;
+    bridgeType = adapter.config.bridge_type;
     bridgeToken = adapter.config.token;
+    forcePlainToken = adapter.config.fp_token;
     bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
     interval = adapter.config.interval * 60000;
     hostPort = adapter.config.host_port;
@@ -1380,17 +1403,8 @@ function main() {
         adapter.log.debug('config port: '               + bridgePort);
         adapter.log.debug('config token: '              + bridgeToken);
 
-        // delay before request
-        setTimeout(function() {
-            // get Nuki bridge
-            getBridgeList()
-        }, timeOut);
-        
-        // delay before request
-        setTimeout(function() {
-            // get all Nuki devices on bridge
-            getLockList(true);
-        }, timeOut);
+        // get all Nuki devices on bridge
+        getLockList(true);
 
         if (adapter.config.autoupd) {
             adapter.log.debug('timer set: ' + interval + ' milliseconds');

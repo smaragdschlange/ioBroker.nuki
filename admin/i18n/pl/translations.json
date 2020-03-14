@@ -8,8 +8,10 @@
     "ip": "Adres IP mostu Нуки ",
     "ipeg": "na przykład 192.168.1.50",
     "name": "Nazwa mostu Нуки ",
-    "nuki_port": "Port mostu Нуки ",
+    "bridge_port": "Port mostu Нуки ",
     "on save adapter restarts with new config immediately": "zapisz ponownym uruchomieniu zasilacza z nowy konfig raz",
     "settings": "Ustawienia karty sieciowej Нуки ",
-    "token": "Marker"
+    "token": "Marker",
+    "fp_token": "Wymuś zwykły token",
+    "bridge_type": "Rodzaj mostu Nuki:"
 }

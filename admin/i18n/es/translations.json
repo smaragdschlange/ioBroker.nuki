@@ -8,8 +8,10 @@
     "ip": "Dirección IP del puente de Nuki",
     "ipeg": "por ejemplo, 192.168.1.50",
     "name": "Nombre de la Nuki puente",
-    "nuki_port": "Puerto de la Nuki puente",
+    "bridge_port": "Puerto de la Nuki puente",
     "on save adapter restarts with new config immediately": "en guardar adaptador se reinicia con la nueva config de inmediato",
     "settings": "Nuki configuración del adaptador",
-    "token": "Token"
+    "token": "Token",
+    "fp_token": "Forzar ficha simple",
+    "bridge_type": "Tipo del puente Nuki:"
 }

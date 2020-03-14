@@ -8,8 +8,10 @@
     "ip": "IP地址Nuki桥",
     "ipeg": "例如192.168.1.50",
     "name": "名称的Nuki桥",
-    "nuki_port": "港口的Nuki桥",
+    "bridge_port": "港口的Nuki桥",
     "on save adapter restarts with new config immediately": "在保存适配器重新启动与新的配置立即",
     "settings": "Nuki设置适配器",
-    "token": "令牌"
+    "token": "代币",
+    "fp_token": "强制普通令牌",
+    "bridge_type": "Nuki桥的类型："
 }

@@ -8,8 +8,10 @@
     "ip": "L'indirizzo IP di Nuki ponte",
     "ipeg": "ad esempio, 192.168.1.50",
     "name": "Nome del Nuki ponte",
-    "nuki_port": "La porta del ponte Nuki",
+    "bridge_port": "La porta del ponte Nuki",
     "on save adapter restarts with new config immediately": "salva adattatore riavvia con la nuova config immediatamente",
     "settings": "Nuki impostazioni della scheda di",
-    "token": "Token"
+    "token": "Token",
+    "fp_token": "Forza token normale",
+    "bridge_type": "Tipo di ponte Nuki:"
 }

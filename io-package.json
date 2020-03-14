@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.1.4",
+        "version": "1.2.0",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -15,18 +15,6 @@
                 "pl": "dodano status 200 odpowiedzi na żądania HTTP",
                 "zh-cn": "添加了状态200对HTTP请求的响应"
             },
-            "1.1.0": {
-                "en": "added support for Nuki Opener",
-                "de": "Unterstützung für Nuki Opener hinzugefügt",
-                "ru": "добавлена поддержка Nuki Opener",
-                "pt": "suporte adicionado ao Nuki Opener",
-                "nl": "ondersteuning toegevoegd voor Nuki Opener",
-                "fr": "Ajout du support pour Nuki Opener",
-                "it": "aggiunto supporto per Nuki Opener",
-                "es": "Soporte agregado para Nuki Opener",
-                "pl": "dodano wsparcie dla Nuki Opener",
-                "zh-cn": "增加了对Nuki Opener的支持"
-            },
             "1.1.2": {
                 "en": "default to Nuki Lock when deviceType unknown",
                 "de": "Standardmäßig Nuki Lock, wenn der deviceType unbekannt ist",
@@ -39,7 +27,7 @@
                 "pl": "domyślnie Nuki Lock, gdy deviceType jest nieznany",
                 "zh-cn": "deviceType未知时默认为Nuki Lock"
             },
-            "1.1.4": {
+            "1.1.5": {
                 "en": "better support of Nuki Opener state changes",
                 "de": "Bessere Unterstützung von Nuki Opener-Statusänderungen",
                 "ru": "лучшая поддержка изменений состояния Nuki Opener",
@@ -50,6 +38,18 @@
                 "es": "mejor soporte de los cambios de estado de Nuki Opener",
                 "pl": "lepsze wsparcie zmian stanu Openeru Nuki",
                 "zh-cn": "更好地支持Nuki Opener状态更改"
+            },
+            "1.2.0": {
+                "en": "support of hashed token (set to standard) & better use of delay before requests in order to prevent null messages",
+                "de": "Unterstützung von Hash-Token (auf Standard gesetzt) und bessere Nutzung der Verzögerung vor Anforderungen, um Nullnachrichten zu verhindern",
+                "ru": "поддержка хешированного токена (установленного на стандарт) и более эффективное использование задержки перед запросами, чтобы предотвратить пустые сообщения",
+                "pt": "suporte de token de hash (definido como padrão) e melhor uso do atraso antes das solicitações para evitar mensagens nulas",
+                "nl": "ondersteuning van gehasht token (ingesteld op standaard) en beter gebruik van vertraging vóór verzoeken om null-berichten te voorkomen",
+                "fr": "prise en charge du jeton haché (défini sur standard) et meilleure utilisation du délai avant les demandes afin d'éviter les messages nuls",
+                "it": "supporto del token hash (impostato su standard) e migliore utilizzo del ritardo prima delle richieste per prevenire messaggi null",
+                "es": "soporte de token hash (establecido en estándar) y mejor uso de retraso antes de las solicitudes para evitar mensajes nulos",
+                "pl": "obsługa tokenów mieszanych (ustawionych na standardowe) i lepsze wykorzystanie opóźnień przed żądaniami w celu zapobiegania pustym wiadomościom",
+                "zh-cn": "支持哈希令牌（设置为标准），并更好地利用请求前的延迟，以防止出现空消息"
             }
         },
         "title": "Nuki Smart Lock",
@@ -95,17 +95,25 @@
         ],
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
-        "type": "hardware"
+        "type": "hardware",
+        "connectionType": "local",
+        "dataSource": [
+            "push",
+            "pull"
+        ]
     },
     "native": {
         "bridge_name": "Nuki bridge",
         "bridge_ip": "",
         "bridge_port": "8080",
+        "bridge_type": "1",
         "token": "",
+        "fp_token": "",
         "autoupd": false,
         "interval": "10",
         "host_cb": false,
         "host_port": "9092"
     },
+    
     "objects": []
 }
