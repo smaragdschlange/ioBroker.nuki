@@ -313,6 +313,9 @@ function initNukiDeviceStates(_obj) {
 
     if (_obj.hasOwnProperty('deviceType')) {
         deviceType = _obj.deviceType;
+    } else {
+        adapter.log.error('Unknown device type (' + deviceType + '). Defaulting to Nuki lock.');
+        deviceType = 0; 
     }
     
     switch(deviceType) {

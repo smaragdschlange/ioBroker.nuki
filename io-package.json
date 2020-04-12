@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.2.0",
+        "version": "1.2.1",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -50,6 +50,18 @@
                 "es": "soporte de token hash (establecido en estándar) y mejor uso de retraso antes de las solicitudes para evitar mensajes nulos",
                 "pl": "obsługa tokenów mieszanych (ustawionych na standardowe) i lepsze wykorzystanie opóźnień przed żądaniami w celu zapobiegania pustym wiadomościom",
                 "zh-cn": "支持哈希令牌（设置为标准），并更好地利用请求前的延迟，以防止出现空消息"
+            },
+            "1.2.1": {
+                "en": "Device type defaulting to Nuki Smart Lock when not provided by bridge.",
+                "de": "Gerätetyp standardmäßig Nuki Smart Lock, wenn nicht von Bridge bereitgestellt.",
+                "ru": "Тип устройства по умолчанию - Nuki Smart Lock, если он не предусмотрен мостом.",
+                "pt": "Tipo de dispositivo padrão para Nuki Smart Lock quando não fornecido pela bridge.",
+                "nl": "Apparaattype standaard ingesteld op Nuki Smart Lock indien niet geleverd door bridge.",
+                "fr": "Le type d'appareil par défaut est Nuki Smart Lock lorsqu'il n'est pas fourni par le pont.",
+                "it": "Tipo di dispositivo predefinito su Nuki Smart Lock quando non fornito da Bridge.",
+                "es": "Tipo de dispositivo predeterminado en Nuki Smart Lock cuando no lo proporciona el puente.",
+                "pl": "Typ urządzenia domyślnie ustawiony na Nuki Smart Lock, gdy nie jest dostarczany przez mostek.",
+                "zh-cn": "当网桥未提供时，设备类型默认为Nuki Smart Lock。"
             }
         },
         "title": "Nuki Smart Lock",
