@@ -1386,11 +1386,12 @@ function get_devicetype_by_statename(_stateName) {
     let deviceType = 1;
     let openerStateNames = [ 'untrained', 'online', 'rto active', 'open', 'opening', 'boot run'];
     let lockStateNames = [ 'uncalibrated', 'locked', 'unlocking', 'unlocked', 'locking', 'unlatched', 'unlocked (lock ‘n’ go)', 'unlatching', 'motor blocked' ];
+
+    adapter.log.debug('Searching for sate name ' + _stateName);
     
     for (let stateName in openerStateNames) {
         if ( _stateName == stateName ) {
             deviceType = 2;
-            return deviceType;
         }
     }
 
@@ -1398,11 +1399,10 @@ function get_devicetype_by_statename(_stateName) {
         for (let stateName in lockStateNames) {
             if ( _stateName == stateName ) {
                 deviceType = 0;
-                return deviceType;
             }
         }
     }
-    
+
     return deviceType;
 }
 
