@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.2.1",
+        "version": "1.2.2",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -51,17 +51,17 @@
                 "pl": "obsługa tokenów mieszanych (ustawionych na standardowe) i lepsze wykorzystanie opóźnień przed żądaniami w celu zapobiegania pustym wiadomościom",
                 "zh-cn": "支持哈希令牌（设置为标准），并更好地利用请求前的延迟，以防止出现空消息"
             },
-            "1.2.1": {
-                "en": "Device type defaulting to Nuki Smart Lock when not provided by bridge.",
-                "de": "Gerätetyp standardmäßig Nuki Smart Lock, wenn nicht von Bridge bereitgestellt.",
-                "ru": "Тип устройства по умолчанию - Nuki Smart Lock, если он не предусмотрен мостом.",
-                "pt": "Tipo de dispositivo padrão para Nuki Smart Lock quando não fornecido pela bridge.",
-                "nl": "Apparaattype standaard ingesteld op Nuki Smart Lock indien niet geleverd door bridge.",
-                "fr": "Le type d'appareil par défaut est Nuki Smart Lock lorsqu'il n'est pas fourni par le pont.",
-                "it": "Tipo di dispositivo predefinito su Nuki Smart Lock quando non fornito da Bridge.",
-                "es": "Tipo de dispositivo predeterminado en Nuki Smart Lock cuando no lo proporciona el puente.",
-                "pl": "Typ urządzenia domyślnie ustawiony na Nuki Smart Lock, gdy nie jest dostarczany przez mostek.",
-                "zh-cn": "当网桥未提供时，设备类型默认为Nuki Smart Lock。"
+            "1.2.2": {
+                "en": "get device type by state name when not provided by bridge",
+                "de": "Gerätetyp nach Statusname abrufen, wenn nicht von Bridge bereitgestellt",
+                "ru": "получить тип устройства по имени состояния, если он не предоставлен мостом",
+                "pt": "obtém o tipo de dispositivo pelo nome do estado quando não é fornecido pela ponte",
+                "nl": "apparaattype opvragen op naam van de staat wanneer deze niet wordt geleverd door bridge",
+                "fr": "obtenir le type de périphérique par nom d'état lorsqu'il n'est pas fourni par le pont",
+                "it": "ottenere il tipo di dispositivo in base al nome dello stato quando non fornito da bridge",
+                "es": "obtener el tipo de dispositivo por nombre de estado cuando no lo proporciona bridge",
+                "pl": "pobierz typ urządzenia według nazwy stanu, jeśli nie jest udostępniony przez most",
+                "zh-cn": "当网桥未提供时，通过状态名称获取设备类型"
             }
         },
         "title": "Nuki Smart Lock",

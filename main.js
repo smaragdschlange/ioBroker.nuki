@@ -314,8 +314,7 @@ function initNukiDeviceStates(_obj) {
     if (_obj.hasOwnProperty('deviceType')) {
         deviceType = _obj.deviceType;
     } else {
-        adapter.log.error('Unknown device type (' + deviceType + '). Defaulting to Nuki lock.');
-        deviceType = 0; 
+        deviceType = get_devicetype_by_statename(nukiState.stateName)
     }
     
     switch(deviceType) {
@@ -1381,6 +1380,30 @@ function get_token() {
         apendix = 'ts=' + ts + '&rnr=' + rnr + '&hash=' + hash;       
     }
     return apendix;
+}
+
+function get_devicetype_by_statename(_stateName) {
+    let deviceType = 1;
+    let openerStateNames = [ 'untrained', 'online', 'rto active', 'open', 'opening', 'boot run'];
+    let lockStateNames = [ 'uncalibrated', 'locked', 'unlocking', 'unlocked', 'locking', 'unlatched', 'unlocked (lock ‘n’ go)', 'unlatching', 'motor blocked' ];
+    
+    openerStateNames.forEach( function (value) {
+        if ( _stateName == value ) {
+            deviceType = 2;
+            break;
+        }
+    });
+
+    if (deviceType == 1) {
+        lockStateNames.forEach( function (value) {
+            if ( _stateName == value ) {
+                deviceType = 0;
+                break;
+            }
+        });
+    }
+    
+    return deviceType;
 }
 
 function sleep(ms) {
