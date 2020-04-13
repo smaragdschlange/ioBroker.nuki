@@ -1396,7 +1396,7 @@ function get_devicetype_by_statename(_stateName) {
     }
 
     if (deviceType == 1) {
-        for (stateName in lockStateNames) {
+        for (let stateName in lockStateNames) {
             if ( _stateName == lockStateNames[stateName] ) {
                 deviceType = 0;
             }
