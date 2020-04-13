@@ -1086,13 +1086,13 @@ function getBridgeInfo(_init) {
 }
 
 async function getLockList(_init) {
-    // delay befor next request
+    // delay before next request
     await sleep(timeOut);
      
     // get Nuki bridge info
     getBridgeInfo(_init);
 
-    // delay befor next request
+    // delay before next request
     await sleep(timeOut);
      
     let lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?'+ get_token();
@@ -1132,7 +1132,7 @@ async function getLockList(_init) {
     )
 
     if (_init) {
-        // delay befor next request
+        // delay before next request
         await sleep(timeOut);
 
         // check for callbacks on Nuki bridge
@@ -1261,7 +1261,7 @@ async function removeCallback(_id) {
     let callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&' + get_token();
 
     if (hostCb == false) {
-        // delay befor next request
+        // delay before next request
         await sleep(timeOut);
 
         request(
@@ -1318,7 +1318,7 @@ async function setCallback(_url) {
     let callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&' + get_token();
     
     if (hostCb == true) {
-        // delay befor next request
+        // delay before next request
         await sleep(timeOut);
 
         request(
@@ -1387,20 +1387,20 @@ function get_devicetype_by_statename(_stateName) {
     let openerStateNames = [ 'untrained', 'online', 'rto active', 'open', 'opening', 'boot run'];
     let lockStateNames = [ 'uncalibrated', 'locked', 'unlocking', 'unlocked', 'locking', 'unlatched', 'unlocked (lock ‘n’ go)', 'unlatching', 'motor blocked' ];
     
-    openerStateNames.forEach( function (value) {
-        if ( _stateName == value ) {
+    for (let stateName in openerStateNames) {
+        if ( _stateName == stateName ) {
             deviceType = 2;
             return deviceType;
         }
-    });
+    }
 
     if (deviceType == 1) {
-        lockStateNames.forEach( function (value) {
-            if ( _stateName == value ) {
+        for (let stateName in lockStateNames) {
+            if ( _stateName == stateName ) {
                 deviceType = 0;
                 return deviceType;
             }
-        });
+        }
     }
     
     return deviceType;
