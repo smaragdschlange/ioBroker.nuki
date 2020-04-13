@@ -1390,14 +1390,14 @@ function get_devicetype_by_statename(_stateName) {
     adapter.log.debug('Searching for sate name ' + _stateName);
     
     for (let stateName in openerStateNames) {
-        if ( _stateName == stateName ) {
+        if ( _stateName = openerStateNames[stateName] ) {
             deviceType = 2;
         }
     }
 
     if (deviceType == 1) {
-        for (let stateName in lockStateNames) {
-            if ( _stateName == stateName ) {
+        for (stateName in lockStateNames) {
+            if ( _stateName = lockStateNames[stateName] ) {
                 deviceType = 0;
             }
         }
