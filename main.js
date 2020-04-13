@@ -1390,7 +1390,7 @@ function get_devicetype_by_statename(_stateName) {
     openerStateNames.forEach( function (value) {
         if ( _stateName == value ) {
             deviceType = 2;
-            break;
+            return deviceType;
         }
     });
 
@@ -1398,7 +1398,7 @@ function get_devicetype_by_statename(_stateName) {
         lockStateNames.forEach( function (value) {
             if ( _stateName == value ) {
                 deviceType = 0;
-                break;
+                return deviceType;
             }
         });
     }
