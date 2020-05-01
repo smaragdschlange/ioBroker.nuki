@@ -8,7 +8,7 @@
 'use strict';
 
 // you have to require the utils module and call adapter function
-var utils = require('@iobroker/adapter-core'); // Get common adapter utils
+var utils       = require('@iobroker/adapter-core'); // Get common adapter utils
 var express     = require('express');        // call express
 var bodyParser  = require("body-parser");
 var request     = require('request');
@@ -93,7 +93,7 @@ function startAdapter(options) {
     // is called if a subscribed object changes
     adapter.on('objectChange', function (id, obj) {
         // Warning, obj can be null if it was deleted
-        adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
+        adapter.log.debug(`objectChange ${id} ${JSON.stringify(obj)}`);
     });
 
     // is called if a subscribed state changes
@@ -103,7 +103,7 @@ function startAdapter(options) {
         let actionState = path[4];
 
         // Warning, state can be null if it was deleted
-        adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
+        adapter.log.debug(`stateChange ${id} ${JSON.stringify(state)}`);
 
         // you can use the ack flag to detect if it is status (true) or command (false)
         if (state && !state.ack) {
@@ -137,7 +137,7 @@ function startAdapter(options) {
                             setLockAction(nukiId, '5');
                             break;
                         default:
-                            adapter.log.warn('unrecognized actionState (' + actionState + ')');
+                            adapter.log.warn(`unrecognized actionState (${actionState})`);
                             break;
                     }
                 }
@@ -151,7 +151,7 @@ function startAdapter(options) {
 function initBridgeStates(_name, _token) {
     let timeStamp = new Date();
 
-    adapter.setObjectNotExists(bridgeId, {
+    adapter.setObjectNotExists(`${bridgeId}`, {
         type: 'device',
         common: {
             name: _name
@@ -159,7 +159,7 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(bridgeId + '.info', {
+    adapter.setObjectNotExists(`${bridgeId}.info`, {
         type: 'channel',
         common: {
             name: 'Info'
@@ -167,7 +167,7 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(bridgeId + '.info.bridgeIp', {
+    adapter.setObjectNotExists(`${bridgeId}.info.bridgeIp`, {
         type: 'state',
         common: {
             name: 'IP-Adresse',
@@ -179,7 +179,7 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(bridgeId + '.info.bridgePort', {
+    adapter.setObjectNotExists(`${bridgeId}.info.bridgePort`, {
         type: 'state',
         common: {
             name: 'Port',
@@ -191,7 +191,7 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(bridgeId + '.info.bridgeToken', {
+    adapter.setObjectNotExists(`${bridgeId}.info.bridgeToken`, {
         type: 'state',
         common: {
             name: 'Token',
@@ -203,7 +203,7 @@ function initBridgeStates(_name, _token) {
         native: {}
     });
 
-    adapter.setObjectNotExists(bridgeId + '.info.bridgeType', {
+    adapter.setObjectNotExists(`${bridgeId}.info.bridgeType`, {
         type: 'state',
         common: {
             name: 'Typ',
@@ -220,7 +220,7 @@ function initBridgeStates(_name, _token) {
     });
 
     if (bridgeType == 1) {
-        adapter.setObjectNotExists(bridgeId + '.info.hardwareId', {
+        adapter.setObjectNotExists(`${bridgeId}.info.hardwareId`, {
             type: 'state',
             common: {
                 name: 'HardwareID',
@@ -232,7 +232,7 @@ function initBridgeStates(_name, _token) {
             native: {}
         });
         
-        adapter.setObjectNotExists(bridgeId + '.info.firmwareVersion', {
+        adapter.setObjectNotExists(`${bridgeId}.info.firmwareVersion`, {
             type: 'state',
             common: {
                 name: 'Firmware',
@@ -243,7 +243,7 @@ function initBridgeStates(_name, _token) {
             native: {}
         });
 
-        adapter.setObjectNotExists(bridgeId + '.info.wifiFirmwareVersion', {
+        adapter.setObjectNotExists(`${bridgeId}.info.wifiFirmwareVersion`, {
             type: 'state',
             common: {
                 name: 'WiFi Firmware',
@@ -254,7 +254,7 @@ function initBridgeStates(_name, _token) {
             native: {}
         });
     } else {
-        adapter.setObjectNotExists(bridgeId + '.info.appVersion', {
+        adapter.setObjectNotExists(`${bridgeId}.info.appVersion`, {
             type: 'state',
             common: {
                 name: 'App Version',
@@ -266,7 +266,7 @@ function initBridgeStates(_name, _token) {
         });
     }
     
-    adapter.setObjectNotExists(bridgeId + '.info.timestamp', {
+    adapter.setObjectNotExists(`${bridgeId}.info.timestamp`, {
         type: 'state',
         common: {
             name: 'Zuletzt aktualisiert',
@@ -285,7 +285,7 @@ function initNukiDeviceStates(_obj) {
     let deviceType = 1;
     
     // device
-    adapter.setObjectNotExists(_obj.nukiId, {
+    adapter.setObjectNotExists(`${_obj.nukiId}`, {
         type: 'device',
         common: {
             name: _obj.name
@@ -294,7 +294,7 @@ function initNukiDeviceStates(_obj) {
     });
 
     // device info
-    adapter.setObjectNotExists(_obj.nukiId + '.info', {
+    adapter.setObjectNotExists(`${_obj.nukiId}.info`, {
         type: 'channel',
         common: {
             name: 'Information'
@@ -303,7 +303,7 @@ function initNukiDeviceStates(_obj) {
     });
 
     // device states
-    adapter.setObjectNotExists(_obj.nukiId + '.states', {
+    adapter.setObjectNotExists(`${_obj.nukiId}.states`, {
         type: 'channel',
         common: {
             name: 'Status'
@@ -325,12 +325,12 @@ function initNukiDeviceStates(_obj) {
             initNukiOpenerStates(_obj.nukiId);
             break;
         default:
-            adapter.log.error('Unknown device type (' + deviceType + '). Setting minimal states.');
+            adapter.log.error(`Unknown device type (${deviceType}). Setting minimal states.`);
             deviceType = 1; 
             break;
     }
 
-    adapter.setObjectNotExists(_obj.nukiId + '.info.deviceType', {
+    adapter.setObjectNotExists(`${_obj.nukiId}.info.deviceType`, {
         type: 'state',
         common: {
             name: 'Typ',
@@ -348,7 +348,7 @@ function initNukiDeviceStates(_obj) {
     });
 
     if (_obj.hasOwnProperty('firmwareVersion')) {
-        adapter.setObjectNotExists(_obj.nukiId + '.info.firmwareVersion', {
+        adapter.setObjectNotExists(`${_obj.nukiId}.info.firmwareVersion`, {
             type: 'state',
             common: {
                 name: 'Firmware',
@@ -361,7 +361,7 @@ function initNukiDeviceStates(_obj) {
         });
     }
 
-    adapter.setObjectNotExists(_obj.nukiId + '.info.batteryCritical', {
+    adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryCritical`, {
         type: 'state',
         common: {
             name: 'Batterie schwach',
@@ -372,7 +372,7 @@ function initNukiDeviceStates(_obj) {
         native: {}
     });
     
-    adapter.setObjectNotExists(_obj.nukiId + '.states.timestamp', {
+    adapter.setObjectNotExists(`${_obj.nukiId}.states.timestamp`, {
         type: 'state',
         common: {
             name: 'Zuletzt aktualisiert',
@@ -384,7 +384,7 @@ function initNukiDeviceStates(_obj) {
     });
 
     // listen to changes
-    adapter.subscribeStates(_obj.nukiId + '.info.batteryCritical');
+    adapter.subscribeStates(`${_obj.nukiId}.info.batteryCritical`);
 
     // set states
     setLockState(_obj.nukiId, deviceType, nukiState);
@@ -392,7 +392,7 @@ function initNukiDeviceStates(_obj) {
 
 function initNukiLockStates(_nukiId) {
     
-    adapter.setObjectNotExists(_nukiId + '.info.mode', {
+    adapter.setObjectNotExists(`${_nukiId}.info.mode`, {
         type: 'state',
         common: {
             name: 'Modus',
@@ -407,7 +407,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.states.lockState', {
+    adapter.setObjectNotExists(`${_nukiId}.states.lockState`, {
         type: 'state',
         common: {
             name: 'Nuki aufgeschlossen',
@@ -418,7 +418,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.states.state', {
+    adapter.setObjectNotExists(`${_nukiId}.states.state`, {
         type: 'state',
         common: {
             name: 'Status',
@@ -443,7 +443,7 @@ function initNukiLockStates(_nukiId) {
     });
 
     // device actions
-    adapter.setObjectNotExists(_nukiId + '.actions', {
+    adapter.setObjectNotExists(`${_nukiId}.actions`, {
         type: 'channel',
         common: {
             name: 'Aktionen'
@@ -451,7 +451,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.action', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.action`, {
         type: 'state',
         common: {
             name: 'Aktion',
@@ -469,7 +469,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.lockAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.lockAction`, {
         type: 'state',
         common: {
             name: 'Tür auf-/abschließen',
@@ -480,7 +480,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.openAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.openAction`, {
         type: 'state', 
         common: {
             name:  'Tür öffnen',
@@ -492,7 +492,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.unlockLocknGoAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.unlockLocknGoAction`, {
         type: 'state', 
         common: {
             name:  'Tür aufschließen (lock‘n’go)',
@@ -504,7 +504,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.openLocknGoAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.openLocknGoAction`, {
         type: 'state', 
         common: {
             name:  'Tür öffnen (lock‘n’go)',
@@ -517,13 +517,13 @@ function initNukiLockStates(_nukiId) {
     });
 
     // listen to changes
-    adapter.subscribeStates(_nukiId + '.actions.*Action');
-    adapter.subscribeStates(_nukiId + '.actions.action');
+    adapter.subscribeStates(`${_nukiId}.actions.*Action`);
+    adapter.subscribeStates(`${_nukiId}.actions.action`);
 }
 
 function initNukiOpenerStates(_nukiId) {
 
-    adapter.setObjectNotExists(_nukiId + '.info.mode', {
+    adapter.setObjectNotExists(`${_nukiId}.info.mode`, {
         type: 'state',
         common: {
             name: 'Modus',
@@ -538,7 +538,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.states.lockState', {
+    adapter.setObjectNotExists(`${_nukiId}.states.lockState`, {
         type: 'state',
         common: {
             name: 'Ring to Open aktiv',
@@ -549,7 +549,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.states.state', {
+    adapter.setObjectNotExists(`${_nukiId}.states.state`, {
         type: 'state',
         common: {
             name: 'Status',
@@ -574,7 +574,7 @@ function initNukiOpenerStates(_nukiId) {
     });
     
     // device actions
-    adapter.setObjectNotExists(_nukiId + '.actions', {
+    adapter.setObjectNotExists(`${_nukiId}.actions`, {
         type: 'channel',
         common: {
             name: 'Aktionen'
@@ -582,7 +582,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.action', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.action`, {
         type: 'state',
         common: {
             name: 'Aktion',
@@ -600,7 +600,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.rtoAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.rtoAction`, {
         type: 'state',
         common: {
             name: 'Ring to Open de-/aktivieren',
@@ -611,7 +611,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.openAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.openAction`, {
         type: 'state', 
         common: {
             name:  'öffnen',
@@ -623,7 +623,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.cmActiveAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.cmActiveAction`, {
         type: 'state', 
         common: {
             name:  'Dauermodus einschalten',
@@ -635,7 +635,7 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(_nukiId + '.actions.cmDeactiveAction', {
+    adapter.setObjectNotExists(`${_nukiId}.actions.cmDeactiveAction`, {
         type: 'state', 
         common: {
             name:  'Dauermodus ausschalten',
@@ -648,23 +648,23 @@ function initNukiOpenerStates(_nukiId) {
     });
 
     // listen to changes
-    adapter.subscribeStates(_nukiId + '.actions.*Action');
-    adapter.subscribeStates(_nukiId + '.actions.action');
+    adapter.subscribeStates(`${_nukiId}.actions.*Action`);
+    adapter.subscribeStates(`${_nukiId}.actions.action`);
 }
 
 function setBridgeState(_timestamp) {
     if (bridgeType == 1) {
         // set firmware version
-        adapter.setState(bridgeId + '.info.firmwareVersion', {val: bridgeFwVer, ack: true});
+        adapter.setState(`${bridgeId}.info.firmwareVersion`, {val: bridgeFwVer, ack: true});
         // set WiFi firmware version
-        adapter.setState(bridgeId + '.info.wifiFirmwareVersion', {val: bridgeWifiFwVer, ack: true});
+        adapter.setState(`${bridgeId}.info.wifiFirmwareVersion`, {val: bridgeWifiFwVer, ack: true});
     } else if (bridgeType == 2) {
         // set app version
-        adapter.setState(bridgeId + '.info.appVersion', {val: bridgeAppVer, ack: true});
+        adapter.setState(`${bridgeId}.info.appVersion`, {val: bridgeAppVer, ack: true});
     }
 
     // set timestamp
-    adapter.setState(bridgeId + '.info.timestamp', {val: _timestamp, ack: true});
+    adapter.setState(`${bridgeId}.info.timestamp`, {val: _timestamp, ack: true});
 }
 
 function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
@@ -676,16 +676,16 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     }
  
     // set device type
-    adapter.setState(_nukiId + '.info.deviceType', {val: _deviceType, ack: true});
+    adapter.setState(`${_nukiId}.info.deviceType`, {val: _deviceType, ack: true});
     // set battery status
-    adapter.setState(_nukiId + '.info.batteryCritical', {val: _nukiState.batteryCritical, ack: true});
+    adapter.setState(`${_nukiId}.info.batteryCritical`, {val: _nukiState.batteryCritical, ack: true});
     // set timestamp
     if (_nukiState.hasOwnProperty('timestamp')) {
         timeStamp =  _nukiState.timestamp;
     } else {
         timeStamp = new Date();
     }
-    adapter.setState(_nukiId + '.states.timestamp', {val: timeStamp, ack: true});
+    adapter.setState(`${_nukiId}.states.timestamp`, {val: timeStamp, ack: true});
 
     // lock or opener?
     if (_deviceType == 0) {
@@ -694,8 +694,8 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
             case 1:
                 // fall through
             case 4:
-                adapter.setState(_nukiId + '.states.lockState', {val: false, ack: true});
-                adapter.setState(_nukiId + '.actions.lockAction', {val: false, ack: true}); 
+                adapter.setState(`${_nukiId}.states.lockState`, {val: false, ack: true});
+                adapter.setState(`${_nukiId}.actions.lockAction`, {val: false, ack: true}); 
                 break;
             case 2:
                 // fall through
@@ -706,12 +706,12 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
             case 6:
                 // fall through
             case 7:
-                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
-                adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
+                adapter.setState(`${_nukiId}.states.lockState`, {val: true, ack: true});
+                adapter.setState(`${_nukiId}.actions.lockAction`, {val: true, ack: true});
                 break;
             default:
-                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
-                adapter.setState(_nukiId + '.actions.lockAction', {val: true, ack: true});
+                adapter.setState(`${_nukiId}.states.lockState`, {val: true, ack: true});
+                adapter.setState(`${_nukiId}.actions.lockAction`, {val: true, ack: true});
                 break;
         }   
     } else if (_deviceType == 2) {
@@ -720,8 +720,8 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
             case 1:
                 // fall through
             case 4:
-                adapter.setState(_nukiId + '.states.lockState', {val: false, ack: true});
-                adapter.setState(_nukiId + '.actions.rtoAction', {val: false, ack: true});
+                adapter.setState(`${_nukiId}.states.lockState`, {val: false, ack: true});
+                adapter.setState(`${_nukiId}.actions.rtoAction`, {val: false, ack: true});
                 break;
             case 2:
                 // fall through
@@ -732,12 +732,12 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
             case 6:
                 // fall through
             case 7:
-                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
-                adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
+                adapter.setState(`${_nukiId}.states.lockState`, {val: true, ack: true});
+                adapter.setState(`${_nukiId}.actions.rtoAction`, {val: true, ack: true});
                 break;
             default:
-                adapter.setState(_nukiId + '.states.lockState', {val: true, ack: true});
-                adapter.setState(_nukiId + '.actions.rtoAction', {val: true, ack: true});
+                adapter.setState(`${_nukiId}.states.lockState`, {val: true, ack: true});
+                adapter.setState(`${_nukiId}.actions.rtoAction`, {val: true, ack: true});
                 break;
         }   
     } else {
@@ -747,17 +747,17 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     
     // reset action state after delay
     actionTimeOut = setTimeout(function() {
-        adapter.setState(_nukiId + '.actions.action', {val: 0, ack: true});
+        adapter.setState(`${_nukiId}.actions.action`, {val: 0, ack: true});
     }, timeOut);
 
     // set mode
-    adapter.setState(_nukiId + '.info.mode', {val: _nukiState.mode, ack: true});
+    adapter.setState(`${_nukiId}.info.mode`, {val: _nukiState.mode, ack: true});
     // set status
-    adapter.setState(_nukiId + '.states.state', {val: _nukiState.state, ack: true});
+    adapter.setState(`${_nukiId}.states.state`, {val: _nukiState.state, ack: true});
 
     if (_firmWare != null && _firmWare != '') {
         // set firmware version
-        adapter.setState(_nukiId + '.info.firmwareVersion', {val: _nukiState.firmwareVersion, ack: true});
+        adapter.setState(`${_nukiId}.info.firmwareVersion`, {val: _nukiState.firmwareVersion, ack: true});
     }
 }
 
@@ -775,10 +775,10 @@ function updateAllLockStates(_content, _init) {
     for (nukilock in _content) {
         obj = _content[nukilock];
         if (_init) {
-            adapter.log.debug('found Nuki device: ' + obj.nukiId);
+            adapter.log.debug(`found Nuki device: ${obj.nukiId}`);
             initNukiDeviceStates(obj);
         } else {
-            adapter.log.debug('updating Nuki device: ' + obj.nukiId);
+            adapter.log.debug(`updating Nuki device: ${obj.nukiId}`);
             if (obj.hasOwnProperty('deviceType')) {
                 deviceType = obj.deviceType;
             } else {
@@ -800,7 +800,7 @@ function getLockState(_nukiId, _forced) {
 
     if (_forced) { 
         // retrieve states directly from the device
-        adapter.getState(_nukiId + '.info.deviceType', function (err, state) {
+        adapter.getState(`${_nukiId}.info.deviceType`, function (err, state) {
             let deviceType = state.val;
             let lockStateUrl = null;
             let timeStamp = null;
@@ -811,9 +811,9 @@ function getLockState(_nukiId, _forced) {
             }
         
             if (deviceType != 2 && deviceType != 0) {
-                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId  + '&' + get_token();
+                lockStateUrl = `http://${bridgeIp}:${bridgePort}/lockState?nukiId=${_nukiId}&${get_token()}`;
             } else {
-                lockStateUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockState?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&' + get_token();
+                lockStateUrl = `http://${bridgeIp}:${bridgePort}/lockState?nukiId=${_nukiId}&deviceType=${deviceType}&${get_token()}`;
             }
 
             request(
@@ -822,7 +822,7 @@ function getLockState(_nukiId, _forced) {
                     json: true
                 },  
                 function (error, response, content) {
-                    adapter.log.debug('state requested: ' + lockStateUrl);
+                    adapter.log.debug(`state requested: ${lockStateUrl}`);
                     
                     if (error) {
                         adapter.log.error(error);
@@ -844,7 +844,7 @@ function getLockState(_nukiId, _forced) {
                                 break;
                             
                             default:
-                                adapter.log.error('HTTP-response: ' + response.statusCode);
+                                adapter.log.error(`HTTP-response: ${response.statusCode}`);
                                 break;
                         }
                         return;
@@ -872,7 +872,7 @@ function getLockState(_nukiId, _forced) {
 
 function setLockAction(_nukiId, _action) {
 
-    adapter.getState(_nukiId + '.info.deviceType', function (err, state) {
+    adapter.getState(`${_nukiId}.info.deviceType`, function (err, state) {
         let deviceType = state.val;
         let lockActionUrl = null;
 
@@ -881,11 +881,11 @@ function setLockAction(_nukiId, _action) {
             return;
         }
     
-        adapter.log.debug('Setting lock action ' + _action + ' for NukiID ' + _nukiId + ' (device type ' + deviceType + ').');
+        adapter.log.debug(`Setting lock action ${_action} for NukiID ${_nukiId} (device type ${deviceType}).`);
         if (deviceType != 2 && deviceType != 0) {
-            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&action=' + _action + '&' + get_token();
+            lockActionUrl = `http://${bridgeIp}:${bridgePort}/lockAction?nukiId=${_nukiId}&action=${_action}&${get_token()}`;
         } else {
-            lockActionUrl = 'http://' + bridgeIp + ':' + bridgePort + '/lockAction?nukiId=' + _nukiId + '&deviceType=' + deviceType + '&action=' + _action + '&' + get_token();
+            lockActionUrl = `http://${bridgeIp}:${bridgePort}/lockAction?nukiId=${_nukiId}&deviceType=${deviceType}&action=${_action}&${get_token()}`;
         }
 
         request(
@@ -894,7 +894,7 @@ function setLockAction(_nukiId, _action) {
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.debug('action requested: ' + lockActionUrl);
+                adapter.log.debug(`action requested: ${lockActionUrl}`);
 
                 if (error) {
                     adapter.log.error(error);
@@ -920,7 +920,7 @@ function setLockAction(_nukiId, _action) {
                             break;
                             
                         default:
-                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            adapter.log.error(`HTTP-response: ${response.statusCode}`);
                             break;
                     }
                     return;
@@ -928,9 +928,9 @@ function setLockAction(_nukiId, _action) {
     
                 if (content && content.hasOwnProperty('success')) {
                     if (!content.success) {
-                        adapter.log.warn('action ' + _action + ' not successfully set!');
+                        adapter.log.warn(`action ${_action} not successfully set!`);
                     } else {
-                        adapter.log.info('action ' + _action + ' set successfully');   
+                        adapter.log.info(`action ${_action} set successfully`);   
                         if (hostCb == false) {       
                             getLockState(_nukiId, false);
                         } else {
@@ -955,7 +955,7 @@ function getBridgeList() {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.debug('Bridge list requested: ' + bridgeListUrl);
+            adapter.log.debug(`Bridge list requested: ${bridgeListUrl}`);
 
             if (error) {
                 adapter.log.error(error);
@@ -963,7 +963,7 @@ function getBridgeList() {
             }
 
             if (response.statusCode != 200) {
-                adapter.log.error('HTTP-response: ' + response.statusCode);
+                adapter.log.error(`HTTP-response: ${response.statusCode}`);
                 return;
             }
 
@@ -991,16 +991,15 @@ function getBridgeList() {
                         bridgeType = 1;
                         if (obj.port == bridgePort) {
                             // correct port
-                            adapter.log.info('found hardware bridge: ' + bridgeId + ' (IP: ' + bridgeIp + '; Port: ' + bridgePort + ')');
+                            adapter.log.info(`found hardware bridge: ${bridgeId} (IP: ${bridgeIp}; Port: ${bridgePort})`);
                         } else {
                             // different port
-                            adapter.log.warn('found hardware bridge (ID: ' + bridgeId + '; IP: ' + obj.ip + ') has different port than specified! (specified: ' + 
-                            bridgePort + '; actual: ' + obj.port + '). Please specify correct port of bridge.');
+                            adapter.log.warn(`found hardware bridge (ID: ${bridgeId}; IP: ${obj.ip}) has different port than specified! (specified: ${bridgePort}; actual: ${obj.port}). Please specify correct port of bridge.`);
                         }
                     } else if (obj.ip == '0.0.0.0' || obj.ip == '') {
-                        adapter.log.warn('bridgeID ' + obj.bridgeId + ': no auto discovery possible. Has the HTTP API been activated and the token been set?');
+                        adapter.log.warn(`bridgeID ${obj.bridgeId}: no auto discovery possible. Has the HTTP API been activated and the token been set?`);
                     } else {
-                        adapter.log.info('found another hardware bridge: ' + obj.bridgeId + ' (IP: ' + obj.ip + '; Port: ' + obj.port + ')');
+                        adapter.log.info(`found another hardware bridge: ${obj.bridgeId} (IP: ${obj.ip}; Port: ${obj.port})`);
                     }
                 } else {
                     // software bridge: doesn't come with IP
@@ -1008,7 +1007,7 @@ function getBridgeList() {
                         bridgeId   = obj.bridgeId;
                         bridgeType = 2;
                     }
-                    adapter.log.info('found software bridge: ' + obj.bridgeId);
+                    adapter.log.info(`found software bridge: ${obj.bridgeId}`);
                 }
             }
 
@@ -1021,7 +1020,7 @@ function getBridgeList() {
 }
 
 function getBridgeInfo(_init) {
-    let bridgeInfoUrl = 'http://' + bridgeIp + ':' + bridgePort + '/info?'+ get_token();
+    let bridgeInfoUrl = `http://${bridgeIp}:${bridgePort}/info?${get_token()}`;
 
     if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
         adapter.log.warn('please specify IP and port of bridge');
@@ -1034,7 +1033,7 @@ function getBridgeInfo(_init) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.info('Bridge Info requested: ' + bridgeInfoUrl);
+            adapter.log.info(`Bridge Info requested: ${bridgeInfoUrl}`);
 
             if (error) {
                 adapter.log.error(error);
@@ -1048,7 +1047,7 @@ function getBridgeInfo(_init) {
                         break;
 
                     default:
-                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
                         break;
                 }
                 return;
@@ -1095,7 +1094,7 @@ async function getLockList(_init) {
     // delay before next request
     await sleep(timeOut);
      
-    let lockListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/list?'+ get_token();
+    let lockListUrl = `http://${bridgeIp}:${bridgePort}/list?${get_token()}`;
    
     request(
         {
@@ -1103,7 +1102,7 @@ async function getLockList(_init) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.info('Lock list requested: ' + lockListUrl);
+            adapter.log.info(`Lock list requested: ${lockListUrl}`);
 
             if (error) {
                 adapter.log.error(error);
@@ -1117,7 +1116,7 @@ async function getLockList(_init) {
                         break;
                 
                     default:
-                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
                         break;
                 }
                 return;
@@ -1146,11 +1145,11 @@ function initServer(_ip, _port) {
 
     // routes will go here
     app.get('/api/:key', function(req, res) {
-        res.send('Hello ' + req.params.key + ' ;-)');
+        res.send(`Hello ${req.params.key} ;-)`);
     });
 
     // POST parameters sent with 
-    app.post('/api/nuki.' + adapter.instance, function(req, res) {
+    app.post(`/api/nuki.${adapter.instance}`, function(req, res) {
         let nukiId = req.body.nukiId;
         let deviceType = 0;
         let mode = 2;
@@ -1170,8 +1169,8 @@ function initServer(_ip, _port) {
         let nukiState = { "mode": mode, "state": state, "stateName": stateName, "batteryCritical": batteryCritical, "timestamp": timeStamp };
 
         try {
-            adapter.log.info('status change received for NukiID ' + nukiId + ': ' + nukiState.stateName);
-            adapter.log.info('battery status received for NukiID ' + nukiId + ': ' + nukiState.batteryCritical);
+            adapter.log.info(`status change received for NukiID ${nukiId}: ${nukiState.stateName}`);
+            adapter.log.info(`battery status received for NukiID ${nukiId}: ${nukiState.batteryCritical}`);
             setLockState(nukiId, deviceType, nukiState);
 
             res.sendStatus(200);
@@ -1183,12 +1182,12 @@ function initServer(_ip, _port) {
 
     // start the server
     app.listen(_port, _ip);
-    adapter.log.info('Server listening to http://' + _ip + ':' + _port);
+    adapter.log.info(`Server listening to http://${_ip}:${_port}`);
 }
 
 function checkCallback(_hostCb) {
-    let cbListUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/list?&' + get_token();
-    let cbUrl = 'http://' + hostIp + ':' + hostPort + '/api/nuki.' + adapter.instance;
+    let cbListUrl = `http://${bridgeIp}:${bridgePort}/callback/list?&${get_token()}`;
+    let cbUrl = `http://${hostIp}:${hostPort}/api/nuki.${adapter.instance}`;
     let cbExists = false;
     let cbId = null;
 
@@ -1198,7 +1197,7 @@ function checkCallback(_hostCb) {
             json: true
         },  
         function (error, response, content) {
-            adapter.log.debug('Callback list requested: ' + cbListUrl);
+            adapter.log.debug(`Callback list requested: ${cbListUrl}`);
 
             if (error) {
                 adapter.log.error(error);
@@ -1212,7 +1211,7 @@ function checkCallback(_hostCb) {
                         break;
                 
                     default:
-                        adapter.log.error('HTTP-response: ' + response.statusCode);
+                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
                         break;
                 }
                 return;
@@ -1224,7 +1223,7 @@ function checkCallback(_hostCb) {
                     if (cbId.url == cbUrl) {
                         cbExists = true;
                         if (_hostCb == false) {
-                            adapter.log.debug('Callback should be removed: ' + cbUrl);
+                            adapter.log.debug(`Callback should be removed: ${cbUrl}`);
                             removeCallback(cbId.id);
                         }
                     } 
@@ -1237,7 +1236,7 @@ function checkCallback(_hostCb) {
                     }
                     if (cbExists) {
                             cbSet = true;
-                            adapter.log.info('Callback allready set: ' + cbUrl);
+                            adapter.log.info(`Callback allready set: ${cbUrl}`);
                             initServer(hostIp, hostPort);
                     } else {
                         if (callbackId == '3') {
@@ -1258,7 +1257,7 @@ function checkCallback(_hostCb) {
 }
 
 async function removeCallback(_id) {
-    let callbackRemoveUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/remove?id=' + _id + '&' + get_token();
+    let callbackRemoveUrl = `http://${bridgeIp}:${bridgePort}/callback/remove?id=${_id}&${get_token()}`;
 
     if (hostCb == false) {
         // delay before next request
@@ -1270,7 +1269,7 @@ async function removeCallback(_id) {
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.debug('Callback removal requested: ' + callbackRemoveUrl);
+                adapter.log.debug(`Callback removal requested: ${callbackRemoveUrl}`);
 
                 if (error) {
                     adapter.log.error(error);
@@ -1288,7 +1287,7 @@ async function removeCallback(_id) {
                             break;
                     
                         default:
-                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            adapter.log.error(`HTTP-response: ${response.statusCode}`);
                             break;
                     }
                     return;
@@ -1297,9 +1296,9 @@ async function removeCallback(_id) {
                 if (content && content.hasOwnProperty('success')) {
                     if (content.success) {
                         cbSet = false;
-                        adapter.log.info('Callback-ID successfully removed: ' + _id);
+                        adapter.log.info(`Callback-ID successfully removed: ${_id}`);
                     } else {
-                        adapter.log.warn('Callback-ID could not be removed: ' + _id);
+                        adapter.log.warn(`Callback-ID could not be removed: ${_id}`);
                         if (content.hasOwnProperty('message')) {
                             adapter.log.warn(content.message);
                         }
@@ -1315,7 +1314,7 @@ async function removeCallback(_id) {
 async function setCallback(_url) {
     let callbackString = _url.replace(':', '%3A');
     callbackString = callbackString.replace('/', '%2F');
-    let callbackAddUrl = 'http://' + bridgeIp + ':' + bridgePort + '/callback/add?url=' + callbackString + '&' + get_token();
+    let callbackAddUrl = `http://${bridgeIp}:${bridgePort}/callback/add?url=${callbackString}&${get_token()}`;
     
     if (hostCb == true) {
         // delay before next request
@@ -1327,7 +1326,7 @@ async function setCallback(_url) {
                 json: true
             },  
             function (error, response, content) {
-                adapter.log.debug('Callback requested: ' + callbackAddUrl);
+                adapter.log.debug(`Callback requested: ${callbackAddUrl}`);
                 
                 if (error) {
                     adapter.log.error(error);
@@ -1345,7 +1344,7 @@ async function setCallback(_url) {
                             break;
                     
                         default:
-                            adapter.log.error('HTTP-response: ' + response.statusCode);
+                            adapter.log.error(`HTTP-response: ${response.statusCode}`);
                             break;
                     }
                     return;
@@ -1353,9 +1352,9 @@ async function setCallback(_url) {
 
                 if (content && content.hasOwnProperty('success')) {
                     if (content.success) {
-                        adapter.log.info('Callback successfully set: ' + _url);
+                        adapter.log.info(`Callback successfully set: ${_url}`);
                     } else {
-                        adapter.log.warn('Callback could not be set: ' + _url);
+                        adapter.log.warn(`Callback could not be set: ${_url}`);
                         if (content.hasOwnProperty('message')) {
                             adapter.log.warn(content.message);
                         }
@@ -1372,12 +1371,12 @@ function get_token() {
     let apendix = '';
 
     if (forcePlainToken != '' || bridgeType != 1) {
-        apendix = 'token=' + bridgeToken
+        apendix = `token=${bridgeToken}`
     } else {
-        let ts = new Date().toISOString().substr(0, 19)+'Z'; // YYY-MM-DDTHH:MM:SSZ
+        let ts = `${new Date().toISOString().substr(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
         let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
-        let hash = crypto.createHash('sha256').update(ts + ',' + rnr + ',' + bridgeToken).digest('hex');
-        apendix = 'ts=' + ts + '&rnr=' + rnr + '&hash=' + hash;       
+        let hash = crypto.createHash('sha256').update(`${ts},${rnr},${bridgeToken}`).digest('hex');
+        apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;       
     }
     return apendix;
 }
@@ -1387,7 +1386,7 @@ function get_devicetype_by_statename(_stateName) {
     let openerStateNames = [ 'untrained', 'online', 'rto active', 'open', 'opening', 'boot run'];
     let lockStateNames = [ 'uncalibrated', 'locked', 'unlocking', 'unlocked', 'locking', 'unlatched', 'unlocked (lock ‘n’ go)', 'unlatching', 'motor blocked' ];
 
-    adapter.log.debug('Searching for sate name ' + _stateName);
+    adapter.log.debug(`Searching for sate name ${_stateName}`);
     
     for (let stateName in openerStateNames) {
         if ( _stateName == openerStateNames[stateName] ) {
@@ -1424,16 +1423,16 @@ function main() {
     if (bridgeIp != '') {
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // adapter.config:
-        adapter.log.debug('config Nuki bridge name: '   + bridgeName);
-        adapter.log.debug('config IP address: '         + bridgeIp);
-        adapter.log.debug('config port: '               + bridgePort);
-        adapter.log.debug('config token: '              + bridgeToken);
+        adapter.log.debug(`config Nuki bridge name: ${bridgeName}`);
+        adapter.log.debug(`config IP address: ${bridgeIp}`);
+        adapter.log.debug(`config port: ${bridgePort}`);
+        adapter.log.debug(`config token: ${bridgeToken}`);
 
         // get all Nuki devices on bridge
         getLockList(true);
 
         if (adapter.config.autoupd) {
-            adapter.log.debug('timer set: ' + interval + ' milliseconds');
+            adapter.log.debug(`timer set: ${interval} milliseconds`);
             // update all states every x milliseconds
             timer = setInterval(getLockList, interval);
         }

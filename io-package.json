@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.2.2",
+        "version": "1.2.3",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -51,7 +51,7 @@
                 "pl": "obsługa tokenów mieszanych (ustawionych na standardowe) i lepsze wykorzystanie opóźnień przed żądaniami w celu zapobiegania pustym wiadomościom",
                 "zh-cn": "支持哈希令牌（设置为标准），并更好地利用请求前的延迟，以防止出现空消息"
             },
-            "1.2.2": {
+            "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
                 "de": "Gerätetyp nach Statusname abrufen, wenn nicht von Bridge bereitgestellt",
                 "ru": "получить тип устройства по имени состояния, если он не предоставлен мостом",
