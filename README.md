@@ -2,7 +2,7 @@
 # ioBroker.nuki
 ![Number of Installations](http://iobroker.live/badges/nuki-installed.svg) 
 ![Stable Version](http://iobroker.live/badges/nuki-stable.svg)
-![NPM Version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
+[![NPM Version](http://img.shields.io/npm/v/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
 [![Commits since last release](https://img.shields.io/github/commits-since/smaragdschlange/ioBroker.nuki/latest.svg)](https://github.com/smaragdschlange/ioBroker.nuki/releases/latest)
 [![Travis CI](https://travis-ci.com/smaragdschlange/ioBroker.nuki.svg?branch=master)](https://travis-ci.com/smaragdschlange/ioBroker.nuki)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.nuki.svg)](https://www.npmjs.com/package/iobroker.nuki)
