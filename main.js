@@ -446,7 +446,7 @@ function initNukiLockStates(_nukiId) {
     adapter.setObjectNotExists(`${_nukiId}.states.doorstate`, {
         type: 'state',
         common: {
-            name: 'Status',
+            name: 'Türsensor',
             type: 'number',
             write: false,
             states: {
