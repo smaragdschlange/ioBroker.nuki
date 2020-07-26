@@ -82,6 +82,9 @@ When updating from 1.0.x to 1.1.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
+### 1.3.0
+* (smaragdschlange) improvement: support of doorsensor states
+
 ### 1.2.3
 * (smaragdschlange) bug fix: convert to template strings
 

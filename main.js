@@ -391,7 +391,8 @@ function initNukiDeviceStates(_obj) {
 }
 
 function initNukiLockStates(_nukiId) {
-    
+    let doorsensorState = '4';
+
     adapter.setObjectNotExists(`${_nukiId}.info.mode`, {
         type: 'state',
         common: {
@@ -438,6 +439,25 @@ function initNukiLockStates(_nukiId) {
                 '255': 'undefined',
             },
             role: 'value'
+        },
+        native: {}
+    });
+
+    adapter.setObjectNotExists(`${_nukiId}.states.doorstate`, {
+        type: 'state',
+        common: {
+            name: 'Status',
+            type: 'number',
+            write: false,
+            states: {
+                '1': 'deactivated',
+                '2': 'door closed',
+                '3': 'door opened',
+                '4': 'door state unknown',
+                '5': 'calibrating',
+            },
+            role: 'value',
+            def: 4
         },
         native: {}
     });
@@ -755,6 +775,11 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     // set status
     adapter.setState(`${_nukiId}.states.state`, {val: _nukiState.state, ack: true});
 
+    if (_nukiState.hasOwnProperty('doorsensorState')) {
+        // set doorsensor status
+        adapter.setState(`${_nukiId}.states.doorstate`, {val: _nukiState.doorsensorState, ack: true});
+    }
+
     if (_firmWare != null && _firmWare != '') {
         // set firmware version
         adapter.setState(`${_nukiId}.info.firmwareVersion`, {val: _nukiState.firmwareVersion, ack: true});
@@ -822,6 +847,9 @@ function getLockState(_nukiId, _forced) {
                     json: true
                 },  
                 function (error, response, content) {
+                    let doorsensorState = 4;
+                    let doorsensorStateName = 'door state unknown';
+
                     adapter.log.debug(`state requested: ${lockStateUrl}`);
                     
                     if (error) {
@@ -853,7 +881,12 @@ function getLockState(_nukiId, _forced) {
                     if (content && content.hasOwnProperty('success')) {
                         if (content.success) {
                             timeStamp = new Date();
-                            let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical, "timestamp": timeStamp };
+                            if (content.hasOwnProperty("doorsensorState")){
+                                doorsensorState = content.doorsensorState;
+                                doorsensorStateName = content.doorsensorStateName;
+                            }
+                            let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical,
+                                "doorsensorState": doorsensorState, "doorsensorStateName": doorsensorStateName,"timestamp": timeStamp };
                             setLockState(_nukiId, deviceType, nukiState);
                         } else {
                             adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
@@ -1157,6 +1190,8 @@ function initServer(_ip, _port) {
         let stateName = req.body.stateName;
         let batteryCritical = req.body.batteryCritical;
         let timeStamp = new Date();
+        let doorsensorState = 4;
+        let doorsensorStateName = 'door state unknown';
         
         if (req.body.hasOwnProperty('deviceType')) {
             deviceType = req.body.deviceType
@@ -1166,7 +1201,13 @@ function initServer(_ip, _port) {
             mode = req.body.mode;
         }
 
-        let nukiState = { "mode": mode, "state": state, "stateName": stateName, "batteryCritical": batteryCritical, "timestamp": timeStamp };
+        if (req.body.hasOwnProperty('doorsensorState')) {
+            doorsensorState = req.body.doorsensorState;
+            doorsensorStateName = req.body.doorsensorStateName;
+        }
+
+        let nukiState = { "mode": mode, "state": state, "stateName": stateName, "batteryCritical": batteryCritical, 
+                "doorsensorState": doorsensorState, "doorsensorStateName": doorsensorStateName, "timestamp": timeStamp };
 
         try {
             adapter.log.info(`status change received for NukiID ${nukiId}: ${nukiState.stateName}`);
