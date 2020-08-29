@@ -283,6 +283,7 @@ function initBridgeStates(_name, _token) {
 function initNukiDeviceStates(_obj) {
     let nukiState = _obj.lastKnownState;
     let deviceType = 1;
+    let firmwareVersion = null;
     
     // device
     adapter.setObjectNotExists(`${_obj.nukiId}`, {
@@ -348,6 +349,7 @@ function initNukiDeviceStates(_obj) {
     });
 
     if (_obj.hasOwnProperty('firmwareVersion')) {
+        firmwareVersion = _obj.firmwareVersion
         adapter.setObjectNotExists(`${_obj.nukiId}.info.firmwareVersion`, {
             type: 'state',
             common: {
@@ -355,7 +357,7 @@ function initNukiDeviceStates(_obj) {
                 type: 'string',
                 write: false,
                 role: 'text',
-                def: _obj.firmwareVersion
+                def: firmwareVersion
             },
             native: {}
         });
@@ -387,7 +389,7 @@ function initNukiDeviceStates(_obj) {
     adapter.subscribeStates(`${_obj.nukiId}.info.batteryCritical`);
 
     // set states
-    setLockState(_obj.nukiId, deviceType, nukiState);
+    setLockState(_obj.nukiId, deviceType, nukiState, firmwareVersion);
 }
 
 function initNukiLockStates(_nukiId) {
@@ -457,7 +459,7 @@ function initNukiLockStates(_nukiId) {
                 '5': 'calibrating',
             },
             role: 'value',
-            def: 4
+            def: doorsensorState
         },
         native: {}
     });
@@ -782,7 +784,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
 
     if (_firmWare != null && _firmWare != '') {
         // set firmware version
-        adapter.setState(`${_nukiId}.info.firmwareVersion`, {val: _nukiState.firmwareVersion, ack: true});
+        adapter.setState(`${_nukiId}.info.firmwareVersion`, {val: _firmWare, ack: true});
     }
 }
 
@@ -790,7 +792,6 @@ function updateAllLockStates(_content, _init) {
     let obj             = null;
     let deviceType      = null;
     let nukilock        = null;
-    let firmwareVersion = null;
     
     if (_content == null) {
         adapter.log.error('no content');
@@ -811,12 +812,10 @@ function updateAllLockStates(_content, _init) {
             }
 
             if (obj.hasOwnProperty('firmwareVersion')) {
-                firmwareVersion = obj.firmwareVersion;
+                setLockState(obj.nukiId, deviceType, obj.lastKnownState, obj.firmwareVersion);
             } else {
-                firmwareVersion = '';
+                setLockState(obj.nukiId, deviceType, obj.lastKnownState);
             }
-
-            setLockState(obj.nukiId, deviceType, obj.lastKnownState, firmwareVersion);
         }
     }
 }

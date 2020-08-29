@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.3.0",
+        "version": "1.3.1",
         "news": {
             "1.0.7": {
                 "en": "added status 200 response to HTTP requests",
@@ -63,7 +63,7 @@
                 "pl": "pobierz typ urządzenia według nazwy stanu, jeśli nie jest udostępniony przez most",
                 "zh-cn": "当网桥未提供时，通过状态名称获取设备类型"
             },
-            "1.3.0": {
+            "1.3.1": {
                 "en": "support of doorsensor states",
                 "de": "Unterstützung von Türsensorzuständen",
                 "ru": "поддержка состояний дверного сенсора",
