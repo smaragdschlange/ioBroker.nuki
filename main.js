@@ -373,6 +373,19 @@ function initNukiDeviceStates(_obj) {
         },
         native: {}
     });
+
+    if (_obj.hasOwnProperty('keypadBatteryCritical')) {
+        adapter.setObjectNotExists(`${_obj.nukiId}.info.keypadBatteryCritical`, {
+            type: 'state',
+            common: {
+                name: 'KeyPad-Batterie schwach',
+                type: 'boolean',
+                write: false,
+                role: 'indicator.lowbat'
+            },
+            native: {}
+        });
+    }
     
     adapter.setObjectNotExists(`${_obj.nukiId}.states.timestamp`, {
         type: 'state',
@@ -445,7 +458,7 @@ function initNukiLockStates(_nukiId) {
         native: {}
     });
 
-    adapter.setObjectNotExists(`${_nukiId}.states.doorstate`, {
+    adapter.setObjectNotExists(`${_nukiId}.states.doorState`, {
         type: 'state',
         common: {
             name: 'Türsensor',
@@ -560,17 +573,43 @@ function initNukiOpenerStates(_nukiId) {
         native: {}
     });
 
+    if (_obj.hasOwnProperty('ringactionState')) {
+        adapter.setObjectNotExists(`${_nukiId}.states.ringactionState`, {
+            type: 'state',
+            common: {
+                name: 'Klingel betätigt',
+                type: 'boolean',
+                write: false,
+                role: 'indicator'   
+            },
+            native: {}
+        });
+    }
+
+    if (_obj.hasOwnProperty('ringactionState')) {
+        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionTimestamp`, {
+            type: 'state',
+            common: {
+                name: 'Letzte Klingelbetätigung',
+                type: 'string',
+                write: false,
+                role: 'date'
+            },
+            native: {}
+        });
+    }
+
     adapter.setObjectNotExists(`${_nukiId}.states.lockState`, {
         type: 'state',
         common: {
             name: 'Ring to Open aktiv',
             type: 'boolean',
             write: false,
-            role: 'sensor.lock'   
+            role: 'indicator'   
         },
         native: {}
     });
-
+    
     adapter.setObjectNotExists(`${_nukiId}.states.state`, {
         type: 'state',
         common: {
@@ -701,6 +740,14 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     adapter.setState(`${_nukiId}.info.deviceType`, {val: _deviceType, ack: true});
     // set battery status
     adapter.setState(`${_nukiId}.info.batteryCritical`, {val: _nukiState.batteryCritical, ack: true});
+
+    if (_nukiState.hasOwnProperty('keypadBatteryCritical')) {
+        if (_nukiState.keypadBatteryCritical != null) {
+            // set keypad battery status
+            adapter.setState(`${_nukiId}.info.keypadBatteryCritical`, {val: _nukiState.keypadBatteryCritical, ack: true});
+        }
+    }
+
     // set timestamp
     if (_nukiState.hasOwnProperty('timestamp')) {
         timeStamp =  _nukiState.timestamp;
@@ -777,9 +824,19 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     // set status
     adapter.setState(`${_nukiId}.states.state`, {val: _nukiState.state, ack: true});
 
+    if (_nukiState.hasOwnProperty('ringactionState') && _nukiState.ringactionState != null) {
+        // set doorsensor status
+        adapter.setState(`${_nukiId}.states.ringactionState`, {val: _nukiState.ringactionState, ack: true});
+    }
+
+    if (_nukiState.hasOwnProperty('ringactionTimestamp') && _nukiState.ringactionTimestamp != null) {
+        // set doorsensor status
+        adapter.setState(`${_nukiId}.states.ringactionTimestamp`, {val: _nukiState.ringactionTimestamp, ack: true});
+    }
+
     if (_nukiState.hasOwnProperty('doorsensorState')) {
         // set doorsensor status
-        adapter.setState(`${_nukiId}.states.doorstate`, {val: _nukiState.doorsensorState, ack: true});
+        adapter.setState(`${_nukiId}.states.doorState`, {val: _nukiState.doorsensorState, ack: true});
     }
 
     if (_firmWare != null && _firmWare != '') {
@@ -848,6 +905,9 @@ function getLockState(_nukiId, _forced) {
                 function (error, response, content) {
                     let doorsensorState = 4;
                     let doorsensorStateName = 'door state unknown';
+                    let keypadBatteryCritical = null;
+                    let ringactionState = null;
+                    let ringactionTimestamp = null;
 
                     adapter.log.debug(`state requested: ${lockStateUrl}`);
                     
@@ -880,12 +940,25 @@ function getLockState(_nukiId, _forced) {
                     if (content && content.hasOwnProperty('success')) {
                         if (content.success) {
                             timeStamp = new Date();
+
+                            if (req.body.hasOwnProperty('keypadBatteryCritical')) {
+                                keypadBatteryCritical = req.body.keypadBatteryCritical;
+                            }
+
                             if (content.hasOwnProperty("doorsensorState")){
                                 doorsensorState = content.doorsensorState;
                                 doorsensorStateName = content.doorsensorStateName;
                             }
-                            let nukiState = { "mode": content.mode, "state": content.state, "stateName": content.stateName, "batteryCritical": content.batteryCritical,
-                                "doorsensorState": doorsensorState, "doorsensorStateName": doorsensorStateName,"timestamp": timeStamp };
+
+                            if (req.body.hasOwnProperty('ringactionState')) {
+                                ringactionState = req.body.ringactionState;
+                                ringactionTimestamp = req.body.ringactionTimestamp;
+                            }
+
+                            let nukiState = { "mode": mode, "state": state, "stateName": stateName, "batteryCritical": batteryCritical, 
+                                    "keypadBatteryCritical": keypadBatteryCritical, "doorsensorState": doorsensorState, 
+                                    "doorsensorStateName": doorsensorStateName, "timestamp": timeStamp, "ringactionState": ringactionState, 
+                                    "ringactionTimestamp": ringactionTimestamp };
                             setLockState(_nukiId, deviceType, nukiState);
                         } else {
                             adapter.log.warn('State has not been retrieved. Check if device is connected to bridge and try again.');
@@ -1188,10 +1261,17 @@ function initServer(_ip, _port) {
         let state = req.body.state;
         let stateName = req.body.stateName;
         let batteryCritical = req.body.batteryCritical;
+        let keypadBatteryCritical = null;
         let timeStamp = new Date();
         let doorsensorState = 4;
         let doorsensorStateName = 'door state unknown';
-        
+        let ringactionState = null;
+        let ringactionTimestamp = null;
+
+        if (req.body.hasOwnProperty('keypadBatteryCritical')) {
+            keypadBatteryCritical = req.body.keypadBatteryCritical;
+        }
+
         if (req.body.hasOwnProperty('deviceType')) {
             deviceType = req.body.deviceType
         }
@@ -1205,8 +1285,15 @@ function initServer(_ip, _port) {
             doorsensorStateName = req.body.doorsensorStateName;
         }
 
+        if (req.body.hasOwnProperty('ringactionState')) {
+            ringactionState = req.body.ringactionState;
+            ringactionTimestamp = req.body.ringactionTimestamp;
+        }
+
         let nukiState = { "mode": mode, "state": state, "stateName": stateName, "batteryCritical": batteryCritical, 
-                "doorsensorState": doorsensorState, "doorsensorStateName": doorsensorStateName, "timestamp": timeStamp };
+                "keypadBatteryCritical": keypadBatteryCritical, "doorsensorState": doorsensorState, 
+                "doorsensorStateName": doorsensorStateName, "timestamp": timeStamp, "ringactionState": ringactionState, 
+                "ringactionTimestamp": ringactionTimestamp };
 
         try {
             adapter.log.info(`status change received for NukiID ${nukiId}: ${nukiState.stateName}`);
