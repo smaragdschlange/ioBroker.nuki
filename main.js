@@ -363,6 +363,35 @@ function initNukiDeviceStates(_obj) {
         });
     }
 
+    if (nukiState.hasOwnProperty('ringactionState')) {
+        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionState`, {
+            type: 'state',
+            common: {
+                name: 'Klingel betätigt',
+                type: 'boolean',
+                write: false,
+                role: 'indicator'   
+            },
+            native: {}
+        });
+
+        // listen to changes
+        adapter.subscribeStates(`${_obj.nukiId}.states.ringactionState`);
+    }
+
+    if (nukiState.hasOwnProperty('ringactionTimestamp')) {
+        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionTimestamp`, {
+            type: 'state',
+            common: {
+                name: 'Letzte Klingelbetätigung',
+                type: 'string',
+                write: false,
+                role: 'date'
+            },
+            native: {}
+        });
+    }
+
     adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryCritical`, {
         type: 'state',
         common: {
@@ -374,7 +403,7 @@ function initNukiDeviceStates(_obj) {
         native: {}
     });
 
-    if (_obj.hasOwnProperty('keypadBatteryCritical')) {
+    if (nukiState.hasOwnProperty('keypadBatteryCritical')) {
         adapter.setObjectNotExists(`${_obj.nukiId}.info.keypadBatteryCritical`, {
             type: 'state',
             common: {
@@ -385,6 +414,9 @@ function initNukiDeviceStates(_obj) {
             },
             native: {}
         });
+
+        // listen to changes
+        adapter.subscribeStates(`${_obj.nukiId}.info.keypadBatteryCritical`);
     }
     
     adapter.setObjectNotExists(`${_obj.nukiId}.states.timestamp`, {
@@ -572,32 +604,6 @@ function initNukiOpenerStates(_nukiId) {
         },
         native: {}
     });
-
-    if (_obj.hasOwnProperty('ringactionState')) {
-        adapter.setObjectNotExists(`${_nukiId}.states.ringactionState`, {
-            type: 'state',
-            common: {
-                name: 'Klingel betätigt',
-                type: 'boolean',
-                write: false,
-                role: 'indicator'   
-            },
-            native: {}
-        });
-    }
-
-    if (_obj.hasOwnProperty('ringactionState')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionTimestamp`, {
-            type: 'state',
-            common: {
-                name: 'Letzte Klingelbetätigung',
-                type: 'string',
-                write: false,
-                role: 'date'
-            },
-            native: {}
-        });
-    }
 
     adapter.setObjectNotExists(`${_nukiId}.states.lockState`, {
         type: 'state',
