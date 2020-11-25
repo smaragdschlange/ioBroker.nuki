@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.4.1",
+        "version": "1.4.2",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -27,7 +27,7 @@
                 "pl": "wsparcie stanów Doorensor",
                 "zh-cn": "支持门磁状态"
             },
-            "1.4.1": {
+            "1.4.2": {
                 "en": "support of Nuki Keypad battery state and Nuki Opener ringaction states",
                 "de": "Unterstützung des Nuki Keypad Batteriezustands und der Nuki Opener Klingelzustände",
                 "ru": "поддержка состояния батареи Nuki Keypad и состояний звонка Nuki Opener",
@@ -79,16 +79,13 @@
         "keywords": [
             "nuki",
             "smart",
-            "lock"
+            "lock",
+            "opener"
         ],
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
-        "connectionType": "local",
-        "dataSource": [
-            "push",
-            "pull"
-        ]
+        "connectionType": "local"
     },
     "native": {
         "bridge_name": "Nuki bridge",
