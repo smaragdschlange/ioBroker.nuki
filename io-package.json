@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.4.2",
+        "version": "1.4.3",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -27,7 +27,7 @@
                 "pl": "wsparcie stanów Doorensor",
                 "zh-cn": "支持门磁状态"
             },
-            "1.4.2": {
+            "1.4.3": {
                 "en": "support of Nuki Keypad battery state and Nuki Opener ringaction states",
                 "de": "Unterstützung des Nuki Keypad Batteriezustands und der Nuki Opener Klingelzustände",
                 "ru": "поддержка состояния батареи Nuki Keypad и состояний звонка Nuki Opener",
