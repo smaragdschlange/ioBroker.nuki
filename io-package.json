@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.4.3",
+        "version": "1.4.4",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -38,6 +38,18 @@
                 "es": "compatibilidad con el estado de la batería del teclado Nuki y los estados de acción del anillo Nuki Opener",
                 "pl": "obsługa stanu baterii klawiatury Nuki i stanów dzwonienia Nuki Opener",
                 "zh-cn": "支持Nuki键盘电池状态和Nuki Opener铃声状态"
+            },
+            "1.4.4": {
+                "en": "Changes to comply with admin 5.x.x requirements",
+                "de": "Änderungen, um den Anforderungen von admin 5.x.x zu entsprechen",
+                "ru": "Изменения в соответствии с требованиями администратора 5.x.x",
+                "pt": "Mudanças para cumprir os requisitos do admin 5.x.x",
+                "nl": "Wijzigingen om te voldoen aan de vereisten van admin 5.x.x",
+                "fr": "Modifications pour se conformer aux exigences de l'administrateur 5.x.x",
+                "it": "Modifiche per conformarsi ai requisiti dell'amministratore 5.x.x.",
+                "es": "Cambios para cumplir con los requisitos de admin 5.x.x",
+                "pl": "Zmiany w celu zapewnienia zgodności z wymaganiami administratora 5.x.x.",
+                "zh-cn": "更改以符合admin 5.x.x要求"
             }
         },
         "title": "Nuki Smart Lock",
@@ -85,6 +97,7 @@
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
+        "dataSource": "push",
         "connectionType": "local"
     },
     "native": {
