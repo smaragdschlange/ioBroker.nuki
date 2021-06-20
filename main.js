@@ -22,13 +22,13 @@ var hostIp  = ipInfo.address();
 
 // Global variables
 var bridgeId        = null;
-var bridgeType      = null;
+var bridgeType      = 0;
 var bridgeHwId      = null;
 var bridgeFwVer     = null;
 var bridgeWifiFwVer = null;
 var bridgeAppVer    = null;
 var bridgeIp        = null;
-var bridgePort      = null;
+var bridgePort      = '0';
 var bridgeToken     = null;
 var forcePlainToken = null;
 var bridgeName      = null;
@@ -149,7 +149,7 @@ function startAdapter(options) {
 };
 
 function initBridgeStates(_name, _token) {
-    let timeStamp = new Date();
+    let timeStamp = new Date().toISOString().substr(0,19) + '+00:00';
 
     adapter.setObjectNotExists(`${bridgeId}`, {
         type: 'device',
@@ -183,7 +183,7 @@ function initBridgeStates(_name, _token) {
         type: 'state',
         common: {
             name: 'Port',
-            type: 'number',
+            type: 'string',
             write: false,
             role: 'info.port',
             def: bridgePort
@@ -207,11 +207,11 @@ function initBridgeStates(_name, _token) {
         type: 'state',
         common: {
             name: 'Typ',
-            type: 'string',
+            type: 'number',
             write: false,
             states: {
-                '1': 'Hardware Bridge',
-                '2': 'Software Bridge',
+                1: 'Hardware Bridge',
+                2: 'Software Bridge',
             },
             role: 'value',
             def: bridgeType
@@ -283,7 +283,7 @@ function initBridgeStates(_name, _token) {
 function initNukiDeviceStates(_obj) {
     let nukiState = _obj.lastKnownState;
     let deviceType = 1;
-    let firmwareVersion = null;
+    let firmwareVersion = '';
     
     // device
     adapter.setObjectNotExists(`${_obj.nukiId}`, {
@@ -335,12 +335,12 @@ function initNukiDeviceStates(_obj) {
         type: 'state',
         common: {
             name: 'Typ',
-            type: 'string',
+            type: 'number',
             write: false,
             states: {
-                '0': 'Lock',
-                '1': 'unknown device',
-                '2': 'Opener',
+                0: 'Lock',
+                1: 'unknown device',
+                2: 'Opener',
             },
             def: deviceType,
             role: 'value'
@@ -438,17 +438,17 @@ function initNukiDeviceStates(_obj) {
 }
 
 function initNukiLockStates(_nukiId) {
-    let doorsensorState = '4';
+    let doorsensorState = 4;
 
     adapter.setObjectNotExists(`${_nukiId}.info.mode`, {
         type: 'state',
         common: {
             name: 'Modus',
-            type: 'string',
+            type: 'number',
             write: false,
             states: {
-                '2': 'door mode',
-                '3': '-',
+                2: 'door mode',
+                3: '-',
             },
             role: 'value'
         },
@@ -473,17 +473,17 @@ function initNukiLockStates(_nukiId) {
             type: 'number',
             write: false,
             states: {
-                '0': 'uncalibrated',
-                '1': 'locked',
-                '2': 'unlocking',
-                '3': 'unlocked',
-                '4': 'locking',
-                '5': 'unlatched',
-                '6': 'unlocked (lock n go)',
-                '7': 'unlatching',
-                '253': '-',
-                '254': 'motor blocked',
-                '255': 'undefined',
+                0: 'uncalibrated',
+                1: 'locked',
+                2: 'unlocking',
+                3: 'unlocked',
+                4: 'locking',
+                5: 'unlatched',
+                6: 'unlocked (lock n go)',
+                7: 'unlatching',
+                253: '-',
+                254: 'motor blocked',
+                255: 'undefined',
             },
             role: 'value'
         },
@@ -497,11 +497,11 @@ function initNukiLockStates(_nukiId) {
             type: 'number',
             write: false,
             states: {
-                '1': 'deactivated',
-                '2': 'door closed',
-                '3': 'door opened',
-                '4': 'door state unknown',
-                '5': 'calibrating',
+                1: 'deactivated',
+                2: 'door closed',
+                3: 'door opened',
+                4: 'door state unknown',
+                5: 'calibrating',
             },
             role: 'value',
             def: doorsensorState
@@ -524,12 +524,12 @@ function initNukiLockStates(_nukiId) {
             name: 'Aktion',
             type: 'number',
             states: {
-                '0': '',
-                '1': 'unlock',
-                '2': 'lock',
-                '3': 'unlatch',
-                '4': 'lock‘n’go',
-                '5': 'lock‘n’go with unlatch',
+                0: '',
+                1: 'unlock',
+                2: 'lock',
+                3: 'unlatch',
+                4: 'lock‘n’go',
+                5: 'lock‘n’go with unlatch',
             },
             role: 'value'
         },
@@ -594,11 +594,11 @@ function initNukiOpenerStates(_nukiId) {
         type: 'state',
         common: {
             name: 'Modus',
-            type: 'string',
+            type: 'number',
             write: false,
             states: {
-                '2': 'door mode',
-                '3': 'continuous mode',
+                2: 'door mode',
+                3: 'continuous mode',
             },
             role: 'value'
         },
@@ -623,17 +623,17 @@ function initNukiOpenerStates(_nukiId) {
             type: 'number',
             write: false,
             states: {
-                '0': 'untrained',
-                '1': 'online',
-                '2': '-',
-                '3': 'rto active',
-                '4': '-',
-                '5': 'open',
-                '6': '-',
-                '7': 'opening',
-                '253': 'boot run',
-                '254': '-',
-                '255': 'undefined',
+                0: 'untrained',
+                1: 'online',
+                2: '-',
+                3: 'rto active',
+                4: '-',
+                5: 'open',
+                6: '-',
+                7: 'opening',
+                253: 'boot run',
+                254: '-',
+                255: 'undefined',
             },
             role: 'value'
         },
@@ -655,12 +655,12 @@ function initNukiOpenerStates(_nukiId) {
             name: 'Aktion',
             type: 'number',
             states: {
-                '0': '',
-                '1': 'activate rto',
-                '2': 'deactivate rto',
-                '3': 'electric strike actuation',
-                '4': 'activate continuous mode',
-                '5': 'deactivate continuous mode',
+                0: '',
+                1: 'activate rto',
+                2: 'deactivate rto',
+                3: 'electric strike actuation',
+                4: 'activate continuous mode',
+                5: 'deactivate continuous mode',
             },
             role: 'value'
         },
@@ -758,7 +758,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     if (_nukiState.hasOwnProperty('timestamp')) {
         timeStamp =  _nukiState.timestamp;
     } else {
-        timeStamp = new Date();
+        timeStamp = new Date().toISOString().substr(0,19) + '+00:00';
     }
     adapter.setState(`${_nukiId}.states.timestamp`, {val: timeStamp, ack: true});
 
@@ -826,23 +826,29 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     }, timeOut);
 
     // set mode
-    adapter.setState(`${_nukiId}.info.mode`, {val: _nukiState.mode, ack: true});
+    let mode = 0;
+    mode = _nukiState.mode;
+    adapter.setState(`${_nukiId}.info.mode`, {val: mode, ack: true});
     // set status
-    adapter.setState(`${_nukiId}.states.state`, {val: _nukiState.state, ack: true});
+    let state = 0;
+    state = _nukiState.state;
+    adapter.setState(`${_nukiId}.states.state`, {val: state, ack: true});
 
     if (_nukiState.hasOwnProperty('ringactionState') && _nukiState.ringactionState != null) {
         // set doorsensor status
         adapter.setState(`${_nukiId}.states.ringactionState`, {val: _nukiState.ringactionState, ack: true});
     }
 
-    if (_nukiState.hasOwnProperty('ringactionTimestamp') && _nukiState.ringactionTimestamp != null) {
+    if (_nukiState.hasOwnProperty('ringactionTimestamp') && _nukiState.ringactionTimestamp != '') {
         // set doorsensor status
         adapter.setState(`${_nukiId}.states.ringactionTimestamp`, {val: _nukiState.ringactionTimestamp, ack: true});
     }
 
     if (_nukiState.hasOwnProperty('doorsensorState')) {
         // set doorsensor status
-        adapter.setState(`${_nukiId}.states.doorState`, {val: _nukiState.doorsensorState, ack: true});
+        let doorState = 0;
+        doorState = _nukiState.doorsensorState;
+        adapter.setState(`${_nukiId}.states.doorState`, {val: doorState, ack: true});
     }
 
     if (_firmWare != null && _firmWare != '') {
@@ -853,8 +859,8 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
 
 function updateAllLockStates(_content, _init) {
     let obj             = null;
-    let deviceType      = null;
-    let nukilock        = null;
+    let deviceType      = 0;
+    let nukilock        = 0;
     
     if (_content == null) {
         adapter.log.error('no content');
@@ -863,21 +869,23 @@ function updateAllLockStates(_content, _init) {
     
     for (nukilock in _content) {
         obj = _content[nukilock];
-        if (_init) {
-            adapter.log.debug(`found Nuki device: ${obj.nukiId}`);
-            initNukiDeviceStates(obj);
-        } else {
-            adapter.log.debug(`updating Nuki device: ${obj.nukiId}`);
-            if (obj.hasOwnProperty('deviceType')) {
-                deviceType = obj.deviceType;
+        if (obj) {
+            if (_init) {
+                adapter.log.debug(`found Nuki device: ${obj.nukiId}`);
+                initNukiDeviceStates(obj);
             } else {
-                deviceType = 0;
-            }
+                adapter.log.debug(`updating Nuki device: ${obj.nukiId}`);
+                if (obj.hasOwnProperty('deviceType')) {
+                    deviceType = obj.deviceType;
+                } else {
+                    deviceType = 0;
+                }
 
-            if (obj.hasOwnProperty('firmwareVersion')) {
-                setLockState(obj.nukiId, deviceType, obj.lastKnownState, obj.firmwareVersion);
-            } else {
-                setLockState(obj.nukiId, deviceType, obj.lastKnownState);
+                if (obj.hasOwnProperty('firmwareVersion')) {
+                    setLockState(obj.nukiId, deviceType, obj.lastKnownState, obj.firmwareVersion);
+                } else {
+                    setLockState(obj.nukiId, deviceType, obj.lastKnownState);
+                }
             }
         }
     }
@@ -888,9 +896,11 @@ function getLockState(_nukiId, _forced) {
     if (_forced) { 
         // retrieve states directly from the device
         adapter.getState(`${_nukiId}.info.deviceType`, function (err, state) {
-            let deviceType = state.val;
+            let deviceType = 0;
             let lockStateUrl = null;
-            let timeStamp = null;
+            let timeStamp = '';
+
+            deviceType = state.val;
     
             if (err) {
                 adapter.log.error(err);
@@ -913,7 +923,7 @@ function getLockState(_nukiId, _forced) {
                     let doorsensorStateName = 'door state unknown';
                     let keypadBatteryCritical = null;
                     let ringactionState = null;
-                    let ringactionTimestamp = null;
+                    let ringactionTimestamp = '';
 
                     adapter.log.debug(`state requested: ${lockStateUrl}`);
                     
@@ -945,7 +955,7 @@ function getLockState(_nukiId, _forced) {
 
                     if (content && content.hasOwnProperty('success')) {
                         if (content.success) {
-                            timeStamp = new Date();
+                            timeStamp = new Date().toISOString().substr(0,19) + '+00:00' ;
 
                             if (req.body.hasOwnProperty('keypadBatteryCritical')) {
                                 keypadBatteryCritical = req.body.keypadBatteryCritical;
@@ -984,8 +994,10 @@ function getLockState(_nukiId, _forced) {
 function setLockAction(_nukiId, _action) {
 
     adapter.getState(`${_nukiId}.info.deviceType`, function (err, state) {
-        let deviceType = state.val;
+        let deviceType = 0;
         let lockActionUrl = null;
+
+        deviceType = state.val;
 
         if (err) {
             adapter.log.error(err);
@@ -1171,7 +1183,7 @@ function getBridgeInfo(_init) {
                 bridgeType = content.bridgeType;
                 bridgeId = ids.serverId;
                 if (bridgeType == 1) {
-                    bridgeHwId = ids.hardwareId;
+                    bridgeHwId = ids.hardwareId.toString();
                     bridgeFwVer = versions.firmwareVersion;
                     bridgeWifiFwVer = versions.wifiFirmwareVersion;
                 } else {
@@ -1263,16 +1275,16 @@ function initServer(_ip, _port) {
     app.post(`/api/nuki.${adapter.instance}`, function(req, res) {
         let nukiId = req.body.nukiId;
         let deviceType = 0;
-        let mode = 2;
+        let mode = '2';
         let state = req.body.state;
         let stateName = req.body.stateName;
         let batteryCritical = req.body.batteryCritical;
         let keypadBatteryCritical = null;
-        let timeStamp = new Date();
+        let timeStamp = new Date().toISOString().substr(0,19) + '+00:00';
         let doorsensorState = 4;
         let doorsensorStateName = 'door state unknown';
         let ringactionState = null;
-        let ringactionTimestamp = null;
+        let ringactionTimestamp = '';
 
         if (req.body.hasOwnProperty('keypadBatteryCritical')) {
             keypadBatteryCritical = req.body.keypadBatteryCritical;

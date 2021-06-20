@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.4.4",
+        "version": "1.5.0",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -50,6 +50,18 @@
                 "es": "Cambios para cumplir con los requisitos de admin 5.x.x",
                 "pl": "Zmiany w celu zapewnienia zgodności z wymaganiami administratora 5.x.x.",
                 "zh-cn": "更改以符合admin 5.x.x要求"
+            },
+            "1.5.0": {
+                "en": "Compatibility with jscontroller 3.3.13",
+                "de": "Kompatibilität mit jscontroller 3.3.13",
+                "ru": "Совместимость с jscontroller 3.3.13",
+                "pt": "Compatibilidade com jscontroller 3.3.13",
+                "nl": "Compatibiliteit met jscontroller 3.3.13",
+                "fr": "Compatibilité avec jscontroller 3.3.13",
+                "it": "Compatibilità con jscontroller 3.3.13",
+                "es": "Compatibilidad con jscontroller 3.3.13",
+                "pl": "Kompatybilność z jscontrollerem 3.3.13",
+                "zh-cn": "与 jscontroller 3.3.13 的兼容性"
             }
         },
         "title": "Nuki Smart Lock",
