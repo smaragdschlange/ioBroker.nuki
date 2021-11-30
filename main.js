@@ -325,6 +325,12 @@ function initNukiDeviceStates(_obj) {
         case 2:
             initNukiOpenerStates(_obj.nukiId);
             break;
+        case 3:
+            initNukiLockStates(_obj.nukiId);
+            break;
+        case 4:
+            initNukiLockStates(_obj.nukiId);
+            break;
         default:
             adapter.log.error(`Unknown device type (${deviceType}). Setting minimal states.`);
             deviceType = 1; 
@@ -338,9 +344,11 @@ function initNukiDeviceStates(_obj) {
             type: 'number',
             write: false,
             states: {
-                0: 'Lock',
+                0: 'Nuki Smart Lock 1.0/2.0',
                 1: 'unknown device',
-                2: 'Opener',
+                2: 'Nuki Opener',
+                3: 'Nuki Smart Door',
+                4: 'Nuki Smart Lock 3.0 (Pro)',
             },
             def: deviceType,
             role: 'value'

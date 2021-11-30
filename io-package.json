@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.5.0",
+        "version": "1.6.0",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -62,6 +62,18 @@
                 "es": "Compatibilidad con jscontroller 3.3.13",
                 "pl": "Kompatybilność z jscontrollerem 3.3.13",
                 "zh-cn": "与 jscontroller 3.3.13 的兼容性"
+            },
+            "1.6.0":{
+                "en": "Added support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)",
+                "de": "Unterstützung für Nuki Smart Door und Nuki Smart Lock 3.0 (Pro) hinzugefügt",
+                "ru": "Добавлена поддержка Nuki Smart Door и Nuki Smart Lock 3.0 (Pro).",
+                "pt": "Adicionado suporte para Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
+                "nl": "Ondersteuning toegevoegd voor Nuki Smart Door en Nuki Smart Lock 3.0 (Pro)",
+                "fr": "Ajout du support pour Nuki Smart Door et Nuki Smart Lock 3.0 (Pro)",
+                "it": "Aggiunto supporto per Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
+                "es": "Soporte agregado para Nuki Smart Door y Nuki Smart Lock 3.0 (Pro)",
+                "pl": "Dodano obsługę Nuki Smart Door i Nuki Smart Lock 3.0 (Pro)",
+                "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持"
             }
         },
         "title": "Nuki Smart Lock",
