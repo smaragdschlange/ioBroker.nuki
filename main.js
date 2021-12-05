@@ -771,7 +771,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     adapter.setState(`${_nukiId}.states.timestamp`, {val: timeStamp, ack: true});
 
     // lock or opener?
-    if (_deviceType == 0) {
+    if (_deviceType == 0 || _deviceType == 3 || _deviceType == 4) {
         // set lock action and state
         switch(_nukiState.state) {
             case 1:
@@ -915,7 +915,7 @@ function getLockState(_nukiId, _forced) {
                 return;
             }
         
-            if (deviceType != 2 && deviceType != 0) {
+            if (!deviceType || deviceType == 1) {
                 lockStateUrl = `http://${bridgeIp}:${bridgePort}/lockState?nukiId=${_nukiId}&${get_token()}`;
             } else {
                 lockStateUrl = `http://${bridgeIp}:${bridgePort}/lockState?nukiId=${_nukiId}&deviceType=${deviceType}&${get_token()}`;
@@ -1013,7 +1013,7 @@ function setLockAction(_nukiId, _action) {
         }
     
         adapter.log.debug(`Setting lock action ${_action} for NukiID ${_nukiId} (device type ${deviceType}).`);
-        if (deviceType != 2 && deviceType != 0) {
+        if (!deviceType || deviceType == 1) {
             lockActionUrl = `http://${bridgeIp}:${bridgePort}/lockAction?nukiId=${_nukiId}&action=${_action}&${get_token()}`;
         } else {
             lockActionUrl = `http://${bridgeIp}:${bridgePort}/lockAction?nukiId=${_nukiId}&deviceType=${deviceType}&action=${_action}&${get_token()}`;
