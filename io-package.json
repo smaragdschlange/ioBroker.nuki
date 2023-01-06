@@ -76,17 +76,17 @@
                 "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持"
             },
             "1.7.0": {
-                "en": "implementation of latest bridge API changes (e.g. encrypted token)",
-                "de": "implementierung neuer Bridge API-Änderungen (z.B. verschlüsselter Token)",
-                "ru": "реализация последних изменений Мост API (например, зашифрованный токен)",
-                "pt": "implementação de mudanças de API de ponte mais recentes (por exemplo, token criptografado)",
+                "en": "implementation of latest bridge API changes",
+                "de": "implementierung neuer Bridge API-Änderungen",
+                "ru": "реализация последних изменений Мост API",
+                "pt": "implementação de mudanças de API de ponte mais recentes",
                 "nl": "vertaling:",
-                "fr": "mise en œuvre des derniers changements de l'API de pont (p. ex., jeton crypté)",
-                "it": "implementazione delle ultime modifiche API bridge (ad esempio token crittografato)",
-                "es": "implementación de los últimos cambios de API de puente (por ejemplo, token cifrado)",
-                "pl": "wdrożenie najnowszych zmian mostu (np. szyfrowany token)",
-                "uk": "впровадження останніх змін МВА (наприклад, зашифрованих токен)",
-                "zh-cn": "实施最新桥梁测量变化(例如加密)"
+                "fr": "mise en œuvre des derniers changements de l'API de pont",
+                "it": "implementazione delle ultime modifiche API bridge",
+                "es": "implementación de los últimos cambios de API de puente",
+                "pl": "wdrożenie najnowszych zmian mostu",
+                "uk": "впровадження останніх змін МВА",
+                "zh-cn": "实施最新桥梁测量变化"
               }
         },
         "title": "Nuki Smart Lock",

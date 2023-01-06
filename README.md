@@ -86,7 +86,7 @@ When updating from 1.0.x to 1.1.0 or higher it is recommended to delete all inst
 ## Changelog
 
 ### 1.7.0
-* (smaragdschlange) update: implementation of latest bridge API changes (encrypted token)
+* (smaragdschlange) update: implementation of latest bridge API changes (battery charge state)
 
 ### 1.6.0
 * (smaragdschlange) improvement: support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)
