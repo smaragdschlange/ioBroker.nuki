@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "1.6.0",
+        "version": "1.7.0",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -74,7 +74,20 @@
                 "es": "Soporte agregado para Nuki Smart Door y Nuki Smart Lock 3.0 (Pro)",
                 "pl": "Dodano obsługę Nuki Smart Door i Nuki Smart Lock 3.0 (Pro)",
                 "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持"
-            }
+            },
+            "1.7.0": {
+                "en": "implementation of latest bridge API changes (e.g. encrypted token)",
+                "de": "implementierung neuer Bridge API-Änderungen (z.B. verschlüsselter Token)",
+                "ru": "реализация последних изменений Мост API (например, зашифрованный токен)",
+                "pt": "implementação de mudanças de API de ponte mais recentes (por exemplo, token criptografado)",
+                "nl": "vertaling:",
+                "fr": "mise en œuvre des derniers changements de l'API de pont (p. ex., jeton crypté)",
+                "it": "implementazione delle ultime modifiche API bridge (ad esempio token crittografato)",
+                "es": "implementación de los últimos cambios de API de puente (por ejemplo, token cifrado)",
+                "pl": "wdrożenie najnowszych zmian mostu (np. szyfrowany token)",
+                "uk": "впровадження останніх змін МВА (наприклад, зашифрованих токен)",
+                "zh-cn": "实施最新桥梁测量变化(例如加密)"
+              }
         },
         "title": "Nuki Smart Lock",
         "titleLang": {

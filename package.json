@@ -1,6 +1,6 @@
 {
   "name": "iobroker.nuki",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "ioBroker Nuki Adapter",
   "author": {
     "name": "smaragdschlange",
@@ -30,6 +30,7 @@
     "express": "^4.17.1",
     "body-parser": "^1.19.0",
     "ip": "^1.1.5",
+    "tweetnacl": "^1.0.3",
     "@iobroker/adapter-core": "^1.0.3"
   },
   "devDependencies": {

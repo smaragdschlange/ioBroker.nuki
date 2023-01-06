@@ -8,51 +8,47 @@
 'use strict';
 
 // you have to require the utils module and call adapter function
-var utils       = require('@iobroker/adapter-core'); // Get common adapter utils
-var express     = require('express');        // call express
-var bodyParser  = require("body-parser");
-var request     = require('request');
-var crypto      = require('crypto');
-var nacl        = require('tweetnacl'); // cryptographic functions
-var buffer      = require("buffer");
-// nacl.utils      = require('tweetnacl-util'); // encoding & decoding 
-// var nsecret     = require('tweetnacl.secret');
+const utils         = require('@iobroker/adapter-core'); // Get common adapter utils
+const express       = require('express');        // call express
+const bodyParser    = require("body-parser");
+const request       = require('request');
+const crypto        = require('crypto');
 
-// const _sodium   = require('libsodium-wrappers');
+// internal libraries
+const bridgefunc    = require('./bridge');
+const lock          = require('./lock.js');
+const opener        = require('./opener.js');
 
 // REST server
-var app     = express();
-var timer   = null;
-var ipInfo  = require('ip');
-var hostIp  = ipInfo.address();
+const ipInfo        = require('ip');
+var app             = express();
+var timer           = null;
+export var hostIp   = ipInfo.address();
+export var hostPort = null;
 
 // Global variables
-var bridgeId        = null;
+import {bridge, cb} from './bridge';
+
+/*var bridgeId        = null;
 var bridgeType      = 0;
 var bridgeHwId      = null;
-var bridgeFwVer     = null;
-var bridgeWifiFwVer = null;
-var bridgeAppVer    = null;
 var bridgeIp        = null;
 var bridgePort      = '0';
 var bridgeToken     = null;
-var forcePlainToken = null;
-var bridgeName      = null;
-var interval        = null;
-var hostCb          = null;
+var bridgeName      = null;*/
+export var forcePlainToken = null;
+export var timeOut         = 3000;
+/*var interval        = null;
 var cbSet           = false;
 var callbackId      = null;
-var hostPort        = null;
-var timeOut         = 3000;
+var hostCb          = null;*/
 var actionTimeOut, sleepTimeOut;
-
-var semver = require('semver');
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 //var adapter = new utils.Adapter('nuki');
-let adapter;
+export var adapter;
 function startAdapter(options) {
     options = options || {};
     Object.assign(options, {name: 'nuki'});
@@ -87,9 +83,9 @@ function startAdapter(options) {
             if (actionTimeOut) clearTimeout(actionTimeOut);
             if (sleepTimeOut) clearTimeout(sleepTimeOut);
             if (timer) clearInterval(timer);
-            if (cbSet) {
-                hostCb = false;
-                removeCallback(callbackId);
+            if (cb.set) {
+                cb.host = false;
+                removeCallback(cb.id);
             }
             adapter.log.info('cleaned everything up...');
                 callback();
@@ -154,11 +150,158 @@ function startAdapter(options) {
     });
 
     return adapter;
-};
+}
+
+function main() {
+    let interval    = adapter.config.interval * 60000;
+
+    bridge.ip       = adapter.config.bridge_ip;
+    bridge.port     = adapter.config.bridge_port;
+    bridge.type     = adapter.config.bridge_type;
+    bridge.token    = adapter.config.token;
+    bridge.name     = (adapter.config.bridge_name === "") ? bridge.ip.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
+
+    forcePlainToken = adapter.config.fp_token;    
+    hostPort        = adapter.config.host_port;
+    cb.host         = adapter.config.host_cb;
+
+    if (bridge.ip != '') {
+        // The adapters config (in the instance object everything under the attribute "native") is accessible via
+        // adapter.config:
+        adapter.log.debug(`config Nuki bridge name: ${bridge.name}`);
+        adapter.log.debug(`config IP address: ${bridge.ip}`);
+        adapter.log.debug(`config port: ${bridge.port}`);
+        adapter.log.debug(`config token: ${bridge.token}`);
+
+        // get all Nuki devices on bridge
+        getLockList(true);
+
+        if (adapter.config.autoupd) {
+            adapter.log.debug(`timer set: ${interval} milliseconds`);
+            // update all states every x milliseconds
+            timer = setInterval(getLockList, interval);
+        }
+    }
+}
+
+async function getLockList(_init) {
+    // delay before next request
+    await sleep(timeOut);
+     
+    // get Nuki bridge info
+    bridgefunc.getBridgeInfo(_init);
+
+    // delay before next request
+    await sleep(timeOut);
+     
+    let lockListUrl = `http://${bridgeIp}:${bridgePort}/list?${get_token()}`;
+   
+    request(
+        {
+            url: lockListUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.info(`Lock list requested: ${lockListUrl}`);
+
+            if (error) {
+                adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                switch (response.statusCode) {
+                    case 401:
+                        adapter.log.error('Given token is invalid.');
+                        break;
+                
+                    default:
+                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
+                        break;
+                }
+                return;
+            }
+
+            if (content) {
+                updateAllLockStates(content, _init);
+            } else {
+                adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
+            }
+        }
+    )
+
+    if (_init) {
+        // delay before next request
+        await sleep(timeOut);
+
+        // check for callbacks on Nuki bridge
+        checkCallback(cb.host);
+    }
+}
+
+/*function getBridgeInfo(_init) {
+    let bridgeInfoUrl = `http://${bridgeIp}:${bridgePort}/info?${get_token()}`;
+
+    if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
+        adapter.log.warn('please specify IP and port of bridge');
+        return;
+    }
+
+    request(
+        {
+            url: bridgeInfoUrl,
+            json: true
+        },  
+        function (error, response, content) {
+            adapter.log.info(`Bridge Info requested: ${bridgeInfoUrl}`);
+
+            if (error) {
+                adapter.log.error(error);
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                switch (response.statusCode) {
+                    case 401:
+                        adapter.log.error('Given token is invalid.');
+                        break;
+
+                    default:
+                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
+                        break;
+                }
+                return;
+            }
+
+            if (content) {
+                if (_init) {
+                    bridgeType = content.bridgeType;
+                    bridgeId = content.ids.serverId;
+                    if (bridgeType == 1) {
+                        bridgeHwId = content.ids.hardwareId.toString();
+                    }
+
+                    // initialize Nuki bridge
+                    initBridgeStates(bridgeName, bridgeToken);
+
+                    if (content.hasOwnProperty('scanResults')) {
+                        // initialize found Nuki devices
+                        updateAllLockStates(content.scanResults, _init);
+                    }
+                }
+    
+                setBridgeState(content);
+            } else {
+                adapter.log.error('Unable access the bridge with specified IP address and port.');
+                
+                // Nuki bridge discovery
+                getBridgeList();
+            }
+        }
+    )
+}
 
 function initBridgeStates(_name, _token) {
-    let timeStamp = new Date().toISOString().substr(0,19) + '+00:00';
-
     adapter.setObjectNotExists(`${bridgeId}`, {
         type: 'device',
         common: {
@@ -234,7 +377,7 @@ function initBridgeStates(_name, _token) {
                 name: 'HardwareID',
                 type: 'string',
                 write: false,
-                role: 'text',
+                role: 'info.serial',
                 def: bridgeHwId
             },
             native: {}
@@ -246,7 +389,7 @@ function initBridgeStates(_name, _token) {
                 name: 'Firmware',
                 type: 'string',
                 write: false,
-                role: 'text'
+                role: 'info.firmware'
             },
             native: {}
         });
@@ -257,7 +400,7 @@ function initBridgeStates(_name, _token) {
                 name: 'WiFi Firmware',
                 type: 'string',
                 write: false,
-                role: 'text'
+                role: 'info.firmware'
             },
             native: {}
         });
@@ -268,11 +411,33 @@ function initBridgeStates(_name, _token) {
                 name: 'App Version',
                 type: 'string',
                 write: false,
-                role: 'text'
+                role: 'info.firmware'
             },
             native: {}
         });
     }
+
+    adapter.setObjectNotExists(`${bridgeId}.info.uptime`, {
+        type: 'state',
+        common: {
+            name: 'Betriebszeit der Bridge in Sekunden',
+            type: 'number',
+            write: false,
+            role: 'date'
+        },
+        native: {}
+    });
+    
+    adapter.setObjectNotExists(`${bridgeId}.info.serverConnected`, {
+        type: 'state',
+        common: {
+            name: 'Verbunden mit Nuki-Server',
+            type: 'boolean,',
+            write: false,
+            role: 'indicator.reachable'
+        },
+        native: {}
+    });
     
     adapter.setObjectNotExists(`${bridgeId}.info.timestamp`, {
         type: 'state',
@@ -284,11 +449,37 @@ function initBridgeStates(_name, _token) {
         },
         native: {}
     });
-
-    setBridgeState(timeStamp);
 }
 
-function initNukiDeviceStates(_obj) {
+function setBridgeState(_content) {
+    let versions = _content.versions;
+
+    if (bridgeType == 1) {
+        // set firmware version
+        adapter.setState(`${bridgeId}.info.firmwareVersion`, {val: versions.firmwareVersion, ack: true});
+        // set WiFi firmware version
+        adapter.setState(`${bridgeId}.info.wifiFirmwareVersion`, {val: versions.wifiFirmwareVersion, ack: true});
+    } else if (bridgeType == 2) {
+        // set app version
+        adapter.setState(`${bridgeId}.info.appVersion`, {val: versions.appVersion, ack: true});
+    }
+
+    // set uptime
+    adapter.setState(`${bridgeId}.info.uptime`, {val: _content.uptime, ack: true});
+
+    // set connetion state
+    adapter.setState(`${bridgeId}.info.serverConnected`, {val: _content.serverConnected, ack: true});
+
+    // set timestamp
+    adapter.setState(`${bridgeId}.info.timestamp`, {val: _content.currentTime, ack: true});
+
+    if (_content.hasOwnProperty('scanResults')) {
+        // initialize found Nuki devices
+        updateAllLockStates(_content.scanResults, false);
+    }
+}*/
+
+/*function initNukiDeviceStates(_obj) {
     let nukiState = _obj.lastKnownState;
     let deviceType = 1;
     let firmwareVersion = '';
@@ -379,95 +570,68 @@ function initNukiDeviceStates(_obj) {
         });
     }
 
-    if (nukiState.hasOwnProperty('ringactionState')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionState`, {
-            type: 'state',
-            common: {
-                name: 'Klingel betätigt',
-                type: 'boolean',
-                write: false,
-                role: 'indicator'   
-            },
-            native: {}
-        });
+    if (nukiState) {
+        if (nukiState.hasOwnProperty('ringactionState')) {
+            adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionState`, {
+                type: 'state',
+                common: {
+                    name: 'Klingel betätigt',
+                    type: 'boolean',
+                    write: false,
+                    role: 'indicator'   
+                },
+                native: {}
+            });
 
-        // listen to changes
-        adapter.subscribeStates(`${_obj.nukiId}.states.ringactionState`);
+            // listen to changes
+            adapter.subscribeStates(`${_obj.nukiId}.states.ringactionState`);
+        }
     }
 
-    if (nukiState.hasOwnProperty('ringactionTimestamp')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionTimestamp`, {
-            type: 'state',
-            common: {
-                name: 'Letzte Klingelbetätigung',
-                type: 'string',
-                write: false,
-                role: 'date'
-            },
-            native: {}
-        });
+    if (nukiState) {
+        if (nukiState.hasOwnProperty('ringactionTimestamp')) {
+            adapter.setObjectNotExists(`${_obj.nukiId}.states.ringactionTimestamp`, {
+                type: 'state',
+                common: {
+                    name: 'Letzte Klingelbetätigung',
+                    type: 'string',
+                    write: false,
+                    role: 'date'
+                },
+                native: {}
+            });
+        }
     }
 
-    adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryCritical`, {
-        type: 'state',
-        common: {
-            name: 'Batterie schwach',
-            type: 'boolean',
-            write: false,
-            role: 'indicator.lowbat'
-        },
-        native: {}
-    });
-
-    // listen to changes
-    adapter.subscribeStates(`${_obj.nukiId}.info.batteryCritical`);
-
-    if (nukiState.hasOwnProperty('batteryCharging')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryCharging`, {
+    if (nukiState) {
+        adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryCritical`, {
             type: 'state',
             common: {
-                name: 'Batterie lädt',
-                type: 'boolean',
-                write: false,
-                role: 'indicator.maintenance.lowbat'
-            },
-            native: {}
-        });
-
-        // listen to changes
-        adapter.subscribeStates(`${_obj.nukiId}.info.batteryCharging`);
-    }
-
-    if (nukiState.hasOwnProperty('batteryChargeState')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.info.batteryChargeState`, {
-            type: 'state',
-            common: {
-                name: 'Ladezustand der Batterie',
-                type: 'number',
-                write: false,
-                role: 'value.battery'
-            },
-            native: {}
-        });
-
-        // listen to changes
-        adapter.subscribeStates(`${_obj.nukiId}.info.batteryChargeState`);
-    }
-
-    if (nukiState.hasOwnProperty('keypadBatteryCritical')) {
-        adapter.setObjectNotExists(`${_obj.nukiId}.info.keypadBatteryCritical`, {
-            type: 'state',
-            common: {
-                name: 'KeyPad-Batterie schwach',
+                name: 'Batterie schwach',
                 type: 'boolean',
                 write: false,
                 role: 'indicator.lowbat'
             },
             native: {}
         });
+    }
 
-        // listen to changes
-        adapter.subscribeStates(`${_obj.nukiId}.info.keypadBatteryCritical`);
+    if (nukiState) {
+        if (nukiState.hasOwnProperty('keypadBatteryCritical')) {
+            adapter.setObjectNotExists(`${_obj.nukiId}.info.keypadBatteryCritical`, {
+                type: 'state',
+                common: {
+                    name: 'KeyPad-Batterie schwach',
+                    type: 'boolean',
+                    write: false,
+                    role: 'indicator.lowbat'
+                },
+                native: {}
+            });
+
+            // listen to changes
+            adapter.subscribeStates(`${_obj.nukiId}.info.keypadBatteryCritical`);
+        }
     }
     
     adapter.setObjectNotExists(`${_obj.nukiId}.states.timestamp`, {
@@ -480,6 +644,9 @@ function initNukiDeviceStates(_obj) {
         },
         native: {}
     });
+
+    // listen to changes
+    adapter.subscribeStates(`${_obj.nukiId}.info.batteryCritical`);
 
     // set states
     setLockState(_obj.nukiId, deviceType, nukiState, firmwareVersion);
@@ -767,21 +934,6 @@ function initNukiOpenerStates(_nukiId) {
     adapter.subscribeStates(`${_nukiId}.actions.action`);
 }
 
-function setBridgeState(_timestamp) {
-    if (bridgeType == 1) {
-        // set firmware version
-        adapter.setState(`${bridgeId}.info.firmwareVersion`, {val: bridgeFwVer, ack: true});
-        // set WiFi firmware version
-        adapter.setState(`${bridgeId}.info.wifiFirmwareVersion`, {val: bridgeWifiFwVer, ack: true});
-    } else if (bridgeType == 2) {
-        // set app version
-        adapter.setState(`${bridgeId}.info.appVersion`, {val: bridgeAppVer, ack: true});
-    }
-
-    // set timestamp
-    adapter.setState(`${bridgeId}.info.timestamp`, {val: _timestamp, ack: true});
-}
-
 function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     let timeStamp = null;
 
@@ -794,20 +946,6 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
     adapter.setState(`${_nukiId}.info.deviceType`, {val: _deviceType, ack: true});
     // set battery status
     adapter.setState(`${_nukiId}.info.batteryCritical`, {val: _nukiState.batteryCritical, ack: true});
-
-    if (_nukiState.hasOwnProperty('batteryCharging')) {
-        if (_nukiState.batteryCharging != null) {
-            // set battery charge status
-            adapter.setState(`${_nukiId}.info.batteryCharging`, {val: _nukiState.batteryCharging, ack: true});
-        }
-    }
-
-    if (_nukiState.hasOwnProperty('batteryChargeState')) {
-        if (_nukiState.batteryChargeState != null) {
-            // set battery charge level
-            adapter.setState(`${_nukiId}.info.batteryChargeState`, {val: _nukiState.batteryChargeState, ack: true});
-        }
-    }
 
     if (_nukiState.hasOwnProperty('keypadBatteryCritical')) {
         if (_nukiState.keypadBatteryCritical != null) {
@@ -922,6 +1060,7 @@ function setLockState(_nukiId, _deviceType, _nukiState, _firmWare) {
 function updateAllLockStates(_content, _init) {
     let obj             = null;
     let deviceType      = 0;
+    let firmwareVersion = ``;
     let nukilock        = 0;
     
     if (_content == null) {
@@ -939,19 +1078,19 @@ function updateAllLockStates(_content, _init) {
                 adapter.log.debug(`updating Nuki device: ${obj.nukiId}`);
                 if (obj.hasOwnProperty('deviceType')) {
                     deviceType = obj.deviceType;
-                } else {
-                    deviceType = 0;
                 }
 
                 if (obj.hasOwnProperty('firmwareVersion')) {
-                    setLockState(obj.nukiId, deviceType, obj.lastKnownState, obj.firmwareVersion);
-                } else {
-                    setLockState(obj.nukiId, deviceType, obj.lastKnownState);
+                    firmwareVersion = obj.firmwareVersion;
                 }
+
+                
+                    
+                setLockState(obj.nukiId, deviceType, obj.lastKnownState, firmwareVersion);
             }
         }
     }
-}
+}*/
 
 function getLockState(_nukiId, _forced) {
 
@@ -1116,7 +1255,7 @@ function setLockAction(_nukiId, _action) {
                         adapter.log.warn(`action ${_action} not successfully set!`);
                     } else {
                         adapter.log.info(`action ${_action} set successfully`);   
-                        if (hostCb == false) {       
+                        if (cb.host == false) {       
                             getLockState(_nukiId, false);
                         } else {
 
@@ -1130,7 +1269,7 @@ function setLockAction(_nukiId, _action) {
     });
 }
 
-function getBridgeList() {
+/*function getBridgeList() {
     let bridgeListUrl = 'https://api.nuki.io/discover/bridges';
     let obj = null;
 
@@ -1202,133 +1341,6 @@ function getBridgeList() {
             }
         }
     )
-}
-
-function getBridgeInfo(_init, _encrypt) {
-    let bridgeInfoUrl = `http://${bridgeIp}:${bridgePort}/info?${get_token(_encrypt)}`;
-
-    if (adapter.config.bridge_ip == '' || adapter.config.bridge_port == '') {
-        adapter.log.warn('please specify IP and port of bridge');
-        return;
-    }
-
-    request(
-        {
-            url: bridgeInfoUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.info(`Bridge Info requested: ${bridgeInfoUrl}`);
-
-            if (error) {
-                adapter.log.error(error);
-                return;
-            }
-
-            if (response.statusCode != 200) {
-                switch (response.statusCode) {
-                    case 401:
-                        adapter.log.error('Given token is invalid.');
-                        break;
-
-                    default:
-                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
-                        break;
-                }
-                return;
-            }
-
-            if (content) {
-                let ids = content.ids;
-                let versions = content.versions;
-                
-                bridgeType = content.bridgeType;
-                bridgeId = ids.serverId;
-                if (bridgeType == 1) {
-                    bridgeHwId = ids.hardwareId.toString();
-                    bridgeFwVer = versions.firmwareVersion;
-                    bridgeWifiFwVer = versions.wifiFirmwareVersion;
-                } else {
-                    bridgeAppVer = versions.appVersion
-                }
-            } else {
-                adapter.log.error('Unable access the bridge with specified IP address and port.');
-                
-                // Nuki bridge discovery
-                getBridgeList();
-
-                return;
-            }
-
-            if (_init) {
-                initBridgeStates(bridgeName, bridgeToken);
-            } else {
-                setBridgeState(content.currentTime);
-            }
-        }
-    )
-}
-
-async function getLockList(_init) {
-    // delay before next request
-    await sleep(timeOut);
-     
-    // get Nuki bridge info
-    getBridgeInfo(_init, 'X');
-
-    if (!bridgeFwVer) {
-        // delay before next request
-        await sleep(timeOut);
-        // get Nuki bridge info
-        getBridgeInfo(_init, '');
-    }
-
-    // delay before next request
-    await sleep(timeOut);
-     
-    let lockListUrl = `http://${bridgeIp}:${bridgePort}/list?${get_token()}`;
-   
-    request(
-        {
-            url: lockListUrl,
-            json: true
-        },  
-        function (error, response, content) {
-            adapter.log.info(`Lock list requested: ${lockListUrl}`);
-
-            if (error) {
-                adapter.log.error(error);
-                return;
-            }
-
-            if (response.statusCode != 200) {
-                switch (response.statusCode) {
-                    case 401:
-                        adapter.log.error('Given token is invalid.');
-                        break;
-                
-                    default:
-                        adapter.log.error(`HTTP-response: ${response.statusCode}`);
-                        break;
-                }
-                return;
-            }
-
-            if (content) {
-                updateAllLockStates(content, _init);
-            } else {
-                adapter.log.warn('Response has no valid content. Check IP address and port and try again.');
-            }
-        }
-    )
-
-    if (_init) {
-        // delay before next request
-        await sleep(timeOut);
-
-        // check for callbacks on Nuki bridge
-        checkCallback(hostCb);
-    }
 }
 
 function initServer(_ip, _port) {
@@ -1579,69 +1591,21 @@ async function setCallback(_url) {
             }
         ) 
     }
-}
+}*/
 
-function get_token(_encrypt) {
+/*export function get_token() {
     let apendix = '';
-    
-    if (forcePlainToken != '' || bridgeType != 1) {
-        apendix = `token=${bridgeToken}`
+
+    if (forcePlainToken != '' || bridge.type != 1) {
+        apendix = `token=${bridge.token}`
     } else {
-        if (semver.satisfies(bridgeFwVer, '>=1.22.1 <2.0.0 || >=2.14.0')) {
-            adapter.log.debug(`Bridge firmware is: ${bridgeFwVer}. Encrypted token is being be used.`);
-            /* (async () => {
-                apendix = get_ctoken();
-            })(); */
-            apendix = get_htoken();
-        } else if (bridgeFwVer) {
-            adapter.log.debug(`Bridge firmware is: ${bridgeFwVer}. Hashed token is being be used.`);
-            apendix = get_htoken();
-        } else if (_encrypt == 'X') {
-            adapter.log.debug(`Bridge firmware is unknown, yet. Trying encrypted token.`);
-            /* (async () => {
-                apendix = get_ctoken();
-            })(); */
-            apendix = get_htoken();
-        } else {
-            adapter.log.info(`Bridge firmware is unknown, yet. Trying hashed token.`);
-            apendix = get_htoken();
-        }  
+        let ts = `${new Date().toISOString().substr(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
+        let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
+        let hash = crypto.createHash('sha256').update(`${ts},${rnr},${bridge.token}`).digest('hex');
+        apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;       
     }
-
     return apendix;
-}
-
-async function get_ctoken() {
-    let apendix = '';
-
-    // try {
-    //     let ts = `${new Date().toISOString().substring(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
-    //     let nonce = new Uint8Array(await nacl.randomBytes(24));
-    //     let hash = await crypto.createHash('sha256').update(`${bridgeToken}`).digest('hex');
-    //     let session_buffer = buffer.from(hash);
-    //     let session_key = new Uint8Array(session_buffer);
-    //     let box = await nacl.secretbox(session_key);
-    //     let ctoken = await box.encrypt(ts.encode('utf-8'), nonce);
-    //     let ctoken_hex = await ctoken.ciphertext.hex();
-
-        // return apendix = `ctoken=${ctoken_hex}&nounce=${nonce}`;
-    // } catch (error) {
-    //     adapter.log.error(error);
-        return apendix = get_htoken();
-    // }
-}
-
-function get_htoken() {
-    let apendix = '';
-
-    let ts = `${new Date().toISOString().substring(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
-    let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
-    let hash = crypto.createHash('sha256').update(`${ts},${rnr},${bridgeToken}`).digest('hex');
-    
-    apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;
-
-    return apendix;
-}
+}*/
 
 function get_devicetype_by_statename(_stateName) {
     let deviceType = 1;
@@ -1651,14 +1615,14 @@ function get_devicetype_by_statename(_stateName) {
     adapter.log.debug(`Searching for sate name ${_stateName}`);
     
     for (let stateName in openerStateNames) {
-        if ( _stateName == openerStateNames[stateName] ) {
+        if ( _stateName === openerStateNames[stateName] ) {
             deviceType = 2;
         }
     }
 
-    if (deviceType == 1) {
+    if (deviceType === 1) {
         for (let stateName in lockStateNames) {
-            if ( _stateName == lockStateNames[stateName] ) {
+            if ( _stateName === lockStateNames[stateName] ) {
                 deviceType = 0;
             }
         }
@@ -1667,38 +1631,8 @@ function get_devicetype_by_statename(_stateName) {
     return deviceType;
 }
 
-function sleep(ms) {
+export function sleep(ms) {
     return sleepTimeOut = new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function main() {
-    bridgeIp = adapter.config.bridge_ip;
-    bridgePort = adapter.config.bridge_port;
-    bridgeType = adapter.config.bridge_type;
-    bridgeToken = adapter.config.token;
-    forcePlainToken = adapter.config.fp_token;
-    bridgeName = (adapter.config.bridge_name === "") ? bridgeIp.replace(/\./g, '_') : adapter.config.bridge_name.replace(/\./g, '_');
-    interval = adapter.config.interval * 60000;
-    hostPort = adapter.config.host_port;
-    hostCb = adapter.config.host_cb;
-
-    if (bridgeIp != '') {
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // adapter.config:
-        adapter.log.debug(`config Nuki bridge name: ${bridgeName}`);
-        adapter.log.debug(`config IP address: ${bridgeIp}`);
-        adapter.log.debug(`config port: ${bridgePort}`);
-        adapter.log.debug(`config token: ${bridgeToken}`);
-
-        // get all Nuki devices on bridge
-        getLockList(true);
-
-        if (adapter.config.autoupd) {
-            adapter.log.debug(`timer set: ${interval} milliseconds`);
-            // update all states every x milliseconds
-            timer = setInterval(getLockList, interval);
-        }
-    }
 }
 
 // If started as allInOne/compact mode => return function to create instance
