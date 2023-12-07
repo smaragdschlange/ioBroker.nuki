@@ -37,7 +37,7 @@
     "gulp": "^4.0.2",
     "mocha": "^6.2.0",
     "chai": "^4.2.0",
-    "axios": "^0.21.1",
+    "axios": "^1.16.0",
     "@iobroker/testing": "^1.2.5"
   },
   "main": "main.js",
