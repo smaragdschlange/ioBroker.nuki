@@ -85,6 +85,16 @@ When updating from 1.0.x to 1.1.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
+<!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+* (simatec) jsonConfig added
+* (simatec) dependency updated
+* (simatec) devdependency updated
+* (simatec) translate added
+* (simatec) test and release added
+* (simatec) Release Script added
+* (simatec) Remove Travis
+
 ### 1.7.0
 * (smaragdschlange) update: implementation of latest bridge API changes (battery charge state)
 

@@ -63,7 +63,7 @@
                 "pl": "Kompatybilność z jscontrollerem 3.3.13",
                 "zh-cn": "与 jscontroller 3.3.13 的兼容性"
             },
-            "1.6.0":{
+            "1.6.0": {
                 "en": "Added support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)",
                 "de": "Unterstützung für Nuki Smart Door und Nuki Smart Lock 3.0 (Pro) hinzugefügt",
                 "ru": "Добавлена поддержка Nuki Smart Door и Nuki Smart Lock 3.0 (Pro).",
@@ -87,9 +87,8 @@
                 "pl": "wdrożenie najnowszych zmian mostu",
                 "uk": "впровадження останніх змін МВА",
                 "zh-cn": "实施最新桥梁测量变化"
-              }
+            }
         },
-        "title": "Nuki Smart Lock",
         "titleLang": {
             "en": "Nuki Smart Lock",
             "de": "Nuki Smart Lock",
@@ -117,7 +116,10 @@
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>"
         ],
-        "license": "MIT",
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "compact": true,
@@ -134,8 +136,22 @@
         "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
+        "tier": 2,
         "dataSource": "push",
-        "connectionType": "local"
+        "connectionType": "local",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=4.0.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.0.0"
+            }
+        ]
     },
     "native": {
         "bridge_name": "Nuki bridge",
@@ -149,6 +165,8 @@
         "host_cb": false,
         "host_port": "9092"
     },
-    
+    "encryptedNative": [
+        "token"
+      ],
     "objects": []
 }
