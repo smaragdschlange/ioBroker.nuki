@@ -70,7 +70,6 @@
 			"lg": 4,
 			"validator": "data.token",
 			"validatorNoSaveOnError": true,
-			"placeholder": "XXXXXXX",
 			"help": "token",
 			"newLine": true
 		},
