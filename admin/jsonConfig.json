@@ -76,7 +76,6 @@
 		"fp_token": {
             "type": "checkbox",
             "label": "fp_token",
-            "value": false,
             "sm": 12,
             "md": 8,
             "lg": 4
@@ -85,7 +84,6 @@
             "newLine": true,
             "type": "checkbox",
             "label": "host_cb",
-            "value": false,
             "sm": 12,
             "md": 8,
             "lg": 4
@@ -106,7 +104,6 @@
             "newLine": true,
             "type": "checkbox",
             "label": "fp_token",
-            "value": false,
             "sm": 12,
             "md": 8,
             "lg": 4
