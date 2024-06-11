@@ -13,7 +13,8 @@
                 "it": "ottenere il tipo di dispositivo in base al nome dello stato quando non fornito da bridge",
                 "es": "obtener el tipo de dispositivo por nombre de estado cuando no lo proporciona bridge",
                 "pl": "pobierz typ urządzenia według nazwy stanu, jeśli nie jest udostępniony przez most",
-                "zh-cn": "当网桥未提供时，通过状态名称获取设备类型"
+                "zh-cn": "当网桥未提供时，通过状态名称获取设备类型",
+                "uk": "отримати тип пристрою за назвою стану, якщо він не надається мостом"
             },
             "1.3.1": {
                 "en": "support of doorsensor states",
@@ -25,7 +26,8 @@
                 "it": "supporto degli stati del sensore porte",
                 "es": "soporte de estados de sensor de puerta",
                 "pl": "wsparcie stanów Doorensor",
-                "zh-cn": "支持门磁状态"
+                "zh-cn": "支持门磁状态",
+                "uk": "підтримка станів дверного датчика"
             },
             "1.4.3": {
                 "en": "support of Nuki Keypad battery state and Nuki Opener ringaction states",
@@ -37,7 +39,8 @@
                 "it": "supporto dello stato della batteria della tastiera Nuki e degli stati di azione della suoneria Nuki Opener",
                 "es": "compatibilidad con el estado de la batería del teclado Nuki y los estados de acción del anillo Nuki Opener",
                 "pl": "obsługa stanu baterii klawiatury Nuki i stanów dzwonienia Nuki Opener",
-                "zh-cn": "支持Nuki键盘电池状态和Nuki Opener铃声状态"
+                "zh-cn": "支持Nuki键盘电池状态和Nuki Opener铃声状态",
+                "uk": "підтримка стану батареї клавіатури Nuki та стану дзвінка Nuki Opener"
             },
             "1.4.4": {
                 "en": "Changes to comply with admin 5.x.x requirements",
@@ -49,7 +52,8 @@
                 "it": "Modifiche per conformarsi ai requisiti dell'amministratore 5.x.x.",
                 "es": "Cambios para cumplir con los requisitos de admin 5.x.x",
                 "pl": "Zmiany w celu zapewnienia zgodności z wymaganiami administratora 5.x.x.",
-                "zh-cn": "更改以符合admin 5.x.x要求"
+                "zh-cn": "更改以符合admin 5.x.x要求",
+                "uk": "Зміни для відповідності вимогам адміністратора 5.x.x"
             },
             "1.5.0": {
                 "en": "Compatibility with jscontroller 3.3.13",
@@ -61,7 +65,8 @@
                 "it": "Compatibilità con jscontroller 3.3.13",
                 "es": "Compatibilidad con jscontroller 3.3.13",
                 "pl": "Kompatybilność z jscontrollerem 3.3.13",
-                "zh-cn": "与 jscontroller 3.3.13 的兼容性"
+                "zh-cn": "与 jscontroller 3.3.13 的兼容性",
+                "uk": "Сумісність з jscontroller 3.3.13"
             },
             "1.6.0": {
                 "en": "Added support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)",
@@ -73,7 +78,8 @@
                 "it": "Aggiunto supporto per Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
                 "es": "Soporte agregado para Nuki Smart Door y Nuki Smart Lock 3.0 (Pro)",
                 "pl": "Dodano obsługę Nuki Smart Door i Nuki Smart Lock 3.0 (Pro)",
-                "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持"
+                "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持",
+                "uk": "Додано підтримку Nuki Smart Door і Nuki Smart Lock 3.0 (Pro)"
             },
             "1.7.0": {
                 "en": "implementation of latest bridge API changes",
@@ -99,7 +105,8 @@
             "it": "Nuki Smart Lock",
             "es": "Nuki Bloqueo Inteligente",
             "pl": "Нуки Inteligentny Zamek",
-            "zh-cn": "Nuki智能锁定"
+            "zh-cn": "Nuki智能锁定",
+            "uk": "Nuki Smart Lock"
         },
         "desc": {
             "en": "This adapter allows to control and monitor the Nuki Smart Lock",
@@ -111,7 +118,8 @@
             "it": "Questo adattatore permette di controllare e monitorare il Nuki Smart Lock",
             "es": "Este adaptador permite el control y monitoreo de la Nuki Bloqueo Inteligente",
             "pl": "Ten adapter pozwala zarządzać i kontrolować Нуки inteligentny zamek",
-            "zh-cn": "这适配器控制和监视Nuki智能锁定"
+            "zh-cn": "这适配器控制和监视Nuki智能锁定",
+            "uk": "Цей адаптер дозволяє контролювати та контролювати Nuki Smart Lock"
         },
         "authors": [
             "smaragdschlange <smaragdschlange@gmx.de>"
@@ -167,6 +175,6 @@
     },
     "encryptedNative": [
         "token"
-      ],
+    ],
     "objects": []
 }
