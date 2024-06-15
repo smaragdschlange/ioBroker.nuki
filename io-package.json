@@ -94,7 +94,7 @@
                 "uk": "впровадження останніх змін МВА",
                 "zh-cn": "实施最新桥梁测量变化"
             },
-            "2.0.0: {
+            "2.0.0": {
                 "en": "Added compatibility with js-controller 6.0.x",
                 "de": "Kompatibilität mit js-controller 6.0.x hinzugefügt",
                 "ru": "Добавлена совместимость с js-контроллером 6.0.x",
