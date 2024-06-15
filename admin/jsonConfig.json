@@ -1,0 +1,137 @@
+{
+	"i18n": true,
+	"type": "panel",
+	"items": {
+		"_logo": {
+			"type": "staticImage",
+			"src": "nuki-logo.png",
+			"newLine": true
+		},
+		"bridge_name": {
+			"type": "text",
+			"label": "name",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"help": "name",
+			"validatorNoSaveOnError": true,
+			"placeholder": "Nuki bridge",
+			"newLine": true
+		},
+		"bridge_ip": {
+			"type": "text",
+			"label": "ip",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"help": "ipeg",
+			"validator": "data.bridge_ip",
+			"validatorNoSaveOnError": true,
+			"placeholder": "192.168.178.10",
+			"newLine": true
+		},
+		"bridge_port": {
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"min": 1,
+			"max": 65535,
+			"help": "bridge_port",
+			"type": "number",
+			"validator": "data.bridge_port",
+			"validatorNoSaveOnError": true,
+			"placeholder": "8080",
+			"label": "bridge_port"
+		},
+		"bridge_type": {
+			"type": "select",
+			"label": "bridge_type",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"help": "bridge_type",
+			"options": [
+				{
+					"label": "Hardware",
+					"value": "1"
+				},
+				{
+					"label": "Software",
+					"value": "2"
+				}
+			]
+		},
+		"token": {
+			"type": "password",
+			"visible": true,
+			"label": "token",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"validator": "data.token",
+			"validatorNoSaveOnError": true,
+			"help": "token",
+			"newLine": true
+		},
+		"fp_token": {
+            "type": "checkbox",
+            "label": "fp_token",
+            "sm": 12,
+            "md": 8,
+            "lg": 4
+        },
+		"host_cb": {
+            "newLine": true,
+            "type": "checkbox",
+            "label": "host_cb",
+            "sm": 12,
+            "md": 8,
+            "lg": 4
+        },
+		"host_port": {
+			"hidden": "!data.host_cb",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"min": 1,
+			"max": 65535,
+			"help": "host_port",
+			"type": "number",
+			"placeholder": "9092",
+			"label": "host_port"
+		},
+		"autoupd": {
+            "newLine": true,
+            "type": "checkbox",
+            "label": "fp_token",
+            "sm": 12,
+            "md": 8,
+            "lg": 4
+        },
+		"interval": {
+			"hidden": "!data.autoupd",
+			"sm": 12,
+			"md": 8,
+			"lg": 4,
+			"min": 1,
+			"max": 999999,
+			"help": "interval",
+			"type": "number",
+			"placeholder": "10",
+			"label": "interval"
+		},
+		"_helpLine2": {
+			"newLine": true,
+			"type": "divider",
+			"color": "secondary"
+		},
+		"_helptext": {
+			"type": "staticText",
+			"text": "on save adapter restarts with new config immediately",
+			"newLine": true,
+			"style": {
+				"fontSize": 16
+			}
+		}
+	}
+}
