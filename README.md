@@ -85,8 +85,7 @@ When updating from 1.0.x to 1.1.0 or higher it is recommended to delete all inst
 
 ## Changelog
 
-<!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 2.0.0
 * (simatec) jsonConfig added
 * (simatec) dependency updated
 * (simatec) devdependency updated
