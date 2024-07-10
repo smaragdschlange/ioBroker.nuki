@@ -81,19 +81,6 @@
                 "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持",
                 "uk": "Додано підтримку Nuki Smart Door і Nuki Smart Lock 3.0 (Pro)"
             },
-            "1.7.0": {
-                "en": "implementation of latest bridge API changes",
-                "de": "implementierung neuer Bridge API-Änderungen",
-                "ru": "реализация последних изменений Мост API",
-                "pt": "implementação de mudanças de API de ponte mais recentes",
-                "nl": "vertaling:",
-                "fr": "mise en œuvre des derniers changements de l'API de pont",
-                "it": "implementazione delle ultime modifiche API bridge",
-                "es": "implementación de los últimos cambios de API de puente",
-                "pl": "wdrożenie najnowszych zmian mostu",
-                "uk": "впровадження останніх змін МВА",
-                "zh-cn": "实施最新桥梁测量变化"
-            },
             "2.0.0": {
                 "en": "Added compatibility with js-controller 6.0.x",
                 "de": "Kompatibilität mit js-controller 6.0.x hinzugefügt",
