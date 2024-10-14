@@ -132,7 +132,6 @@
         "mode": "daemon",
         "compact": true,
         "icon": "nuki-logo.png",
-        "materialize": true,
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo.png",
         "keywords": [
@@ -152,7 +151,7 @@
         },
         "dependencies": [
             {
-                "js-controller": ">=4.0.0"
+                "js-controller": ">=5.0.0"
             }
         ],
         "globalDependencies": [
@@ -174,6 +173,9 @@
         "host_port": "9092"
     },
     "encryptedNative": [
+        "token"
+    ],
+    "protectedNative": [
         "token"
     ],
     "objects": []
