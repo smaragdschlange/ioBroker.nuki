@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "nuki",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "news": {
             "1.2.3": {
                 "en": "get device type by state name when not provided by bridge",
@@ -93,7 +93,20 @@
                 "pl": "Dodano kompatybilność ze sterownikiem js- 6.0.x",
                 "uk": "Додано сумісність з js-controller 6.0.x",
                 "zh-cn": "与 js 控制器 6. 0. x 添加兼容性"
-            }
+            },
+            "2.0.1": {
+                "en": "Dependencie updates",
+                "de": "Dependencie Updates",
+                "ru": "Обновления зависимостей",
+                "pt": "Atualizações de dependência",
+                "nl": "Afhankelijke updates",
+                "fr": "Mises à jour de la dépendance",
+                "it": "Aggiornamenti",
+                "es": "Actualizaciones de dependencia",
+                "pl": "Aktualizacje zależności",
+                "uk": "Оновлення залежності",
+                "zh-cn": "依赖更新"
+              }
         },
         "titleLang": {
             "en": "Nuki Smart Lock",

@@ -86,6 +86,9 @@ When updating to 2.x the token has to be entered again.
 
 ## Changelog
 
+### 2.0.1
+* (smaragdschlange) update: dependencie updates
+
 ### 2.0.0
 * (simatec) jsonConfig added
 * (simatec) dependency updated
