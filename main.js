@@ -13,7 +13,7 @@ var express     = require('express');        // call express
 var bodyParser  = require("body-parser");
 var request     = require('request');
 var crypto      = require('crypto');
-var xsalsa      = require('com.codahale.xsalsa20ploy1305')
+var xsalsa      = require('xsalsa20');
 var nacl        = require('tweetnacl'); // cryptographic functions
 var buffer      = require("buffer");
 // nacl.utils      = require('tweetnacl-util'); // encoding & decoding 
@@ -1637,24 +1637,27 @@ function get_htoken() {
 
     let ts = `${new Date().toISOString().substring(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
     let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
-    let hash = crypto.createHash('sha256').update(`${ts},${rnr},${bridgeToken}`).digest('hex');
+//    let hash = crypto.createHash('sha256').update(`${ts},${rnr},${bridgeToken}`).digest('hex');
+    let hash = crypto.createHash('sha256').update(`${bridgeToken}`).digest('hex');
+    let ctoken = xsalsa(rnr, hash);
     
-    apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;
+//    apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;
+    apendix = `ctoken=${ctoken}`;
 
     return apendix;
 }
 
-function get_ctoken() {
-    let apendix = '';
-
-    let ts = `${new Date().toISOString().substring(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
-    let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
-    let ctoken = xsalsa.
-    
-    apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;
-
-    return apendix;
-}
+//function get_ctoken() {
+//   let apendix = '';
+//
+//    let ts = `${new Date().toISOString().substring(0, 19)}Z`; // YYY-MM-DDTHH:MM:SSZ
+//    let rnr = Math.floor(Math.random() * (65535-0) + 0); // Math.random() * (max - min) + min; // uint16 up to 65535
+//    let ctoken = xsalsa(ts, rnr, ).
+//    
+//    apendix = `ts=${ts}&rnr=${rnr}&hash=${hash}`;
+//
+//    return apendix;
+//}
 
 function get_devicetype_by_statename(_stateName) {
     let deviceType = 1;
