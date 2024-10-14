@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "request": "^2.88.2",
-    "express": "^4.19.2",
-    "body-parser": "^1.20.2",
+    "express": "^4.21.1",
+    "body-parser": "^1.20.3",
     "ip": "^2.0.1",
     "tweetnacl": "^1.0.3",
     "@iobroker/adapter-core": "^3.1.6"
