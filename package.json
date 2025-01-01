@@ -35,7 +35,7 @@
     "body-parser": "^1.20.2",
     "ip": "^2.0.1",
     "tweetnacl": "^1.0.3",
-    "@iobroker/adapter-core": "^3.2.2"
+    "@iobroker/adapter-core": "^3.2.3"
   },
   "devDependencies": {
     "gulp": "^5.0.0",
