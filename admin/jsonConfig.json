@@ -5,7 +5,12 @@
 		"_logo": {
 			"type": "staticImage",
 			"src": "nuki-logo.png",
-			"newLine": true
+			"newLine": true,
+			"xs": 2,
+          		"sm": 2,
+          		"md": 1,
+          		"lg": 0.33,
+          		"xl": 0.33
 		},
 		"bridge_name": {
 			"type": "text",
