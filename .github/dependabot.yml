@@ -1,22 +1,24 @@
+# Dependabot will run on day 14 of each month at 01:50 (Europe/Berlin timezone)
 version: 2
 updates:
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: monthly
-      time: "04:00"
-      timezone: Europe/Berlin
-    open-pull-requests-limit: 20
-    assignees:
-      - simatec
-    versioning-strategy: increase
 
-  - package-ecosystem: github-actions
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: monthly
-      time: "04:00"
-      timezone: Europe/Berlin
+      interval: "cron"
+      timezone: "Europe/Berlin"
+      cronjob: "50 1 14 * *"
     open-pull-requests-limit: 20
     assignees:
-      - iobroker.nuki
+      - "simatec"
+    versioning-strategy: "increase"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "cron"
+      timezone: "Europe/Berlin"
+      cronjob: "50 1 14 * *"
+    open-pull-requests-limit: 20
+    assignees:
+      - "iobroker.nuki"
