@@ -220,7 +220,7 @@ When updating to 2.x the token has to be entered again.
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2018-2024 Smaragdschlange <smaragdschlange@gmx.de>
+Copyright (c) 2018-2025 Smaragdschlange <smaragdschlange@gmx.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
