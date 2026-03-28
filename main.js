@@ -12,10 +12,10 @@ var utils       = require('@iobroker/adapter-core'); // Get common adapter utils
 var express     = require('express');        // call express
 var bodyParser  = require("body-parser");
 var request     = require('request');
-var crypto      = require('crypto');
+var crypto      = require('node:crypto');
 var xsalsa      = require('xsalsa20');
 var nacl        = require('tweetnacl'); // cryptographic functions
-var buffer      = require("buffer");
+var buffer      = require("node:buffer");
 // nacl.utils      = require('tweetnacl-util'); // encoding & decoding 
 // var nsecret     = require('tweetnacl.secret');
 
