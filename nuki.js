@@ -12,7 +12,7 @@ const utils         = require('@iobroker/adapter-core'); // Get common adapter u
 const express       = require('express');        // call express
 const bodyParser    = require("body-parser");
 const request       = require('request');
-const crypto        = require('crypto');
+const crypto        = require('node:crypto');
 
 // internal libraries
 const bridgefunc    = require('./bridge');
