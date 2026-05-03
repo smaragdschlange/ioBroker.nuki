@@ -217,6 +217,8 @@ When updating to 2.x the token has to be entered again.
 ### 0.0.1
 * (smaragdschlange) initial release
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 The MIT License (MIT)
 
