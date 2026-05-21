@@ -1,195 +1,195 @@
 {
-    "common": {
-        "name": "nuki",
-        "version": "2.0.1",
-        "news": {
-            "1.2.3": {
-                "en": "get device type by state name when not provided by bridge",
-                "de": "Gerätetyp nach Statusname abrufen, wenn nicht von Bridge bereitgestellt",
-                "ru": "получить тип устройства по имени состояния, если он не предоставлен мостом",
-                "pt": "obtém o tipo de dispositivo pelo nome do estado quando não é fornecido pela ponte",
-                "nl": "apparaattype opvragen op naam van de staat wanneer deze niet wordt geleverd door bridge",
-                "fr": "obtenir le type de périphérique par nom d'état lorsqu'il n'est pas fourni par le pont",
-                "it": "ottenere il tipo di dispositivo in base al nome dello stato quando non fornito da bridge",
-                "es": "obtener el tipo de dispositivo por nombre de estado cuando no lo proporciona bridge",
-                "pl": "pobierz typ urządzenia według nazwy stanu, jeśli nie jest udostępniony przez most",
-                "zh-cn": "当网桥未提供时，通过状态名称获取设备类型",
-                "uk": "отримати тип пристрою за назвою стану, якщо він не надається мостом"
-            },
-            "1.3.1": {
-                "en": "support of doorsensor states",
-                "de": "Unterstützung von Türsensorzuständen",
-                "ru": "поддержка состояний дверного сенсора",
-                "pt": "suporte dos estados do sensor de porta",
-                "nl": "ondersteuning van door sensor staten",
-                "fr": "prise en charge des états des capteurs de portes",
-                "it": "supporto degli stati del sensore porte",
-                "es": "soporte de estados de sensor de puerta",
-                "pl": "wsparcie stanów Doorensor",
-                "zh-cn": "支持门磁状态",
-                "uk": "підтримка станів дверного датчика"
-            },
-            "1.4.3": {
-                "en": "support of Nuki Keypad battery state and Nuki Opener ringaction states",
-                "de": "Unterstützung des Nuki Keypad Batteriezustands und der Nuki Opener Klingelzustände",
-                "ru": "поддержка состояния батареи Nuki Keypad и состояний звонка Nuki Opener",
-                "pt": "suporte do estado da bateria do teclado Nuki e estados de ação do Nuki Opener",
-                "nl": "ondersteuning van de batterijstatus van het Nuki Keypad en de actiestatus van de Nuki Opener-ring",
-                "fr": "prise en charge de l'état de la batterie du Nuki Keypad et des états de sonnerie Nuki Opener",
-                "it": "supporto dello stato della batteria della tastiera Nuki e degli stati di azione della suoneria Nuki Opener",
-                "es": "compatibilidad con el estado de la batería del teclado Nuki y los estados de acción del anillo Nuki Opener",
-                "pl": "obsługa stanu baterii klawiatury Nuki i stanów dzwonienia Nuki Opener",
-                "zh-cn": "支持Nuki键盘电池状态和Nuki Opener铃声状态",
-                "uk": "підтримка стану батареї клавіатури Nuki та стану дзвінка Nuki Opener"
-            },
-            "1.4.4": {
-                "en": "Changes to comply with admin 5.x.x requirements",
-                "de": "Änderungen, um den Anforderungen von admin 5.x.x zu entsprechen",
-                "ru": "Изменения в соответствии с требованиями администратора 5.x.x",
-                "pt": "Mudanças para cumprir os requisitos do admin 5.x.x",
-                "nl": "Wijzigingen om te voldoen aan de vereisten van admin 5.x.x",
-                "fr": "Modifications pour se conformer aux exigences de l'administrateur 5.x.x",
-                "it": "Modifiche per conformarsi ai requisiti dell'amministratore 5.x.x.",
-                "es": "Cambios para cumplir con los requisitos de admin 5.x.x",
-                "pl": "Zmiany w celu zapewnienia zgodności z wymaganiami administratora 5.x.x.",
-                "zh-cn": "更改以符合admin 5.x.x要求",
-                "uk": "Зміни для відповідності вимогам адміністратора 5.x.x"
-            },
-            "1.5.0": {
-                "en": "Compatibility with jscontroller 3.3.13",
-                "de": "Kompatibilität mit jscontroller 3.3.13",
-                "ru": "Совместимость с jscontroller 3.3.13",
-                "pt": "Compatibilidade com jscontroller 3.3.13",
-                "nl": "Compatibiliteit met jscontroller 3.3.13",
-                "fr": "Compatibilité avec jscontroller 3.3.13",
-                "it": "Compatibilità con jscontroller 3.3.13",
-                "es": "Compatibilidad con jscontroller 3.3.13",
-                "pl": "Kompatybilność z jscontrollerem 3.3.13",
-                "zh-cn": "与 jscontroller 3.3.13 的兼容性",
-                "uk": "Сумісність з jscontroller 3.3.13"
-            },
-            "1.6.0": {
-                "en": "Added support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)",
-                "de": "Unterstützung für Nuki Smart Door und Nuki Smart Lock 3.0 (Pro) hinzugefügt",
-                "ru": "Добавлена поддержка Nuki Smart Door и Nuki Smart Lock 3.0 (Pro).",
-                "pt": "Adicionado suporte para Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
-                "nl": "Ondersteuning toegevoegd voor Nuki Smart Door en Nuki Smart Lock 3.0 (Pro)",
-                "fr": "Ajout du support pour Nuki Smart Door et Nuki Smart Lock 3.0 (Pro)",
-                "it": "Aggiunto supporto per Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
-                "es": "Soporte agregado para Nuki Smart Door y Nuki Smart Lock 3.0 (Pro)",
-                "pl": "Dodano obsługę Nuki Smart Door i Nuki Smart Lock 3.0 (Pro)",
-                "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持",
-                "uk": "Додано підтримку Nuki Smart Door і Nuki Smart Lock 3.0 (Pro)"
-            },
-            "2.0.0": {
-                "en": "Added compatibility with js-controller 6.0.x",
-                "de": "Kompatibilität mit js-controller 6.0.x hinzugefügt",
-                "ru": "Добавлена совместимость с js-контроллером 6.0.x",
-                "pt": "Adicionado compatibilidade com js-controller 6.0.x",
-                "nl": "Toegevoegde compatibiliteit met js-controller 6.0.x",
-                "fr": "Ajout de la compatibilité avec js-controller 6.0.x",
-                "it": "Aggiunto la compatibilità con js-controller 6.0.x",
-                "es": "Compatibilidad agregada con js-controller 6.0.x",
-                "pl": "Dodano kompatybilność ze sterownikiem js- 6.0.x",
-                "uk": "Додано сумісність з js-controller 6.0.x",
-                "zh-cn": "与 js 控制器 6. 0. x 添加兼容性"
-            },
-            "2.0.1": {
-                "en": "Dependencie updates",
-                "de": "Dependencie Updates",
-                "ru": "Обновления зависимостей",
-                "pt": "Atualizações de dependência",
-                "nl": "Afhankelijke updates",
-                "fr": "Mises à jour de la dépendance",
-                "it": "Aggiornamenti",
-                "es": "Actualizaciones de dependencia",
-                "pl": "Aktualizacje zależności",
-                "uk": "Оновлення залежності",
-                "zh-cn": "依赖更新"
-              }
-        },
-        "titleLang": {
-            "en": "Nuki Smart Lock",
-            "de": "Nuki Smart Lock",
-            "ru": "Нуки Умный Замок",
-            "pt": "Nuki Smart Lock",
-            "nl": "Nuki Smart Lock",
-            "fr": "Nuki De Verrouillage Intelligent",
-            "it": "Nuki Smart Lock",
-            "es": "Nuki Bloqueo Inteligente",
-            "pl": "Нуки Inteligentny Zamek",
-            "zh-cn": "Nuki智能锁定",
-            "uk": "Nuki Smart Lock"
-        },
-        "desc": {
-            "en": "This adapter allows to control and monitor the Nuki Smart Lock",
-            "de": "Dieser Adapter ermöglicht die Steuerung und Überwachung des Nuki Smart Lock",
-            "ru": "Этот адаптер позволяет управлять и контролировать Нуки умный замок",
-            "pt": "Este adaptador permite controlar e monitorar o Nuki Smart Lock",
-            "nl": "Deze adapter maakt het mogelijk om controle en toezicht op de Nuki Smart Lock",
-            "fr": "Cet adaptateur permet de contrôler et de surveiller l'Nuki de Verrouillage Intelligent",
-            "it": "Questo adattatore permette di controllare e monitorare il Nuki Smart Lock",
-            "es": "Este adaptador permite el control y monitoreo de la Nuki Bloqueo Inteligente",
-            "pl": "Ten adapter pozwala zarządzać i kontrolować Нуки inteligentny zamek",
-            "zh-cn": "这适配器控制和监视Nuki智能锁定",
-            "uk": "Цей адаптер дозволяє контролювати та контролювати Nuki Smart Lock"
-        },
-        "authors": [
-            "smaragdschlange <smaragdschlange@gmx.de>"
-        ],
-        "licenseInformation": {
-            "license": "MIT",
-            "type": "free"
-        },
-        "platform": "Javascript/Node.js",
-        "mode": "daemon",
-        "compact": true,
-        "icon": "nuki-logo.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo.png",
-        "keywords": [
-            "nuki",
-            "smart",
-            "lock",
-            "opener"
-        ],
-        "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
-        "loglevel": "info",
-        "type": "hardware",
-        "tier": 2,
-        "dataSource": "push",
-        "connectionType": "local",
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=5.0.0"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=5.0.0"
-            }
-        ]
+  "common": {
+    "name": "nuki",
+    "version": "2.0.1",
+    "news": {
+      "1.2.3": {
+        "en": "get device type by state name when not provided by bridge",
+        "de": "Gerätetyp nach Statusname abrufen, wenn nicht von Bridge bereitgestellt",
+        "ru": "получить тип устройства по имени состояния, если он не предоставлен мостом",
+        "pt": "obtém o tipo de dispositivo pelo nome do estado quando não é fornecido pela ponte",
+        "nl": "apparaattype opvragen op naam van de staat wanneer deze niet wordt geleverd door bridge",
+        "fr": "obtenir le type de périphérique par nom d'état lorsqu'il n'est pas fourni par le pont",
+        "it": "ottenere il tipo di dispositivo in base al nome dello stato quando non fornito da bridge",
+        "es": "obtener el tipo de dispositivo por nombre de estado cuando no lo proporciona bridge",
+        "pl": "pobierz typ urządzenia według nazwy stanu, jeśli nie jest udostępniony przez most",
+        "zh-cn": "当网桥未提供时，通过状态名称获取设备类型",
+        "uk": "отримати тип пристрою за назвою стану, якщо він не надається мостом"
+      },
+      "1.3.1": {
+        "en": "support of doorsensor states",
+        "de": "Unterstützung von Türsensorzuständen",
+        "ru": "поддержка состояний дверного сенсора",
+        "pt": "suporte dos estados do sensor de porta",
+        "nl": "ondersteuning van door sensor staten",
+        "fr": "prise en charge des états des capteurs de portes",
+        "it": "supporto degli stati del sensore porte",
+        "es": "soporte de estados de sensor de puerta",
+        "pl": "wsparcie stanów Doorensor",
+        "zh-cn": "支持门磁状态",
+        "uk": "підтримка станів дверного датчика"
+      },
+      "1.4.3": {
+        "en": "support of Nuki Keypad battery state and Nuki Opener ringaction states",
+        "de": "Unterstützung des Nuki Keypad Batteriezustands und der Nuki Opener Klingelzustände",
+        "ru": "поддержка состояния батареи Nuki Keypad и состояний звонка Nuki Opener",
+        "pt": "suporte do estado da bateria do teclado Nuki e estados de ação do Nuki Opener",
+        "nl": "ondersteuning van de batterijstatus van het Nuki Keypad en de actiestatus van de Nuki Opener-ring",
+        "fr": "prise en charge de l'état de la batterie du Nuki Keypad et des états de sonnerie Nuki Opener",
+        "it": "supporto dello stato della batteria della tastiera Nuki e degli stati di azione della suoneria Nuki Opener",
+        "es": "compatibilidad con el estado de la batería del teclado Nuki y los estados de acción del anillo Nuki Opener",
+        "pl": "obsługa stanu baterii klawiatury Nuki i stanów dzwonienia Nuki Opener",
+        "zh-cn": "支持Nuki键盘电池状态和Nuki Opener铃声状态",
+        "uk": "підтримка стану батареї клавіатури Nuki та стану дзвінка Nuki Opener"
+      },
+      "1.4.4": {
+        "en": "Changes to comply with admin 5.x.x requirements",
+        "de": "Änderungen, um den Anforderungen von admin 5.x.x zu entsprechen",
+        "ru": "Изменения в соответствии с требованиями администратора 5.x.x",
+        "pt": "Mudanças para cumprir os requisitos do admin 5.x.x",
+        "nl": "Wijzigingen om te voldoen aan de vereisten van admin 5.x.x",
+        "fr": "Modifications pour se conformer aux exigences de l'administrateur 5.x.x",
+        "it": "Modifiche per conformarsi ai requisiti dell'amministratore 5.x.x.",
+        "es": "Cambios para cumplir con los requisitos de admin 5.x.x",
+        "pl": "Zmiany w celu zapewnienia zgodności z wymaganiami administratora 5.x.x.",
+        "zh-cn": "更改以符合admin 5.x.x要求",
+        "uk": "Зміни для відповідності вимогам адміністратора 5.x.x"
+      },
+      "1.5.0": {
+        "en": "Compatibility with jscontroller 3.3.13",
+        "de": "Kompatibilität mit jscontroller 3.3.13",
+        "ru": "Совместимость с jscontroller 3.3.13",
+        "pt": "Compatibilidade com jscontroller 3.3.13",
+        "nl": "Compatibiliteit met jscontroller 3.3.13",
+        "fr": "Compatibilité avec jscontroller 3.3.13",
+        "it": "Compatibilità con jscontroller 3.3.13",
+        "es": "Compatibilidad con jscontroller 3.3.13",
+        "pl": "Kompatybilność z jscontrollerem 3.3.13",
+        "zh-cn": "与 jscontroller 3.3.13 的兼容性",
+        "uk": "Сумісність з jscontroller 3.3.13"
+      },
+      "1.6.0": {
+        "en": "Added support for Nuki Smart Door and Nuki Smart Lock 3.0 (Pro)",
+        "de": "Unterstützung für Nuki Smart Door und Nuki Smart Lock 3.0 (Pro) hinzugefügt",
+        "ru": "Добавлена поддержка Nuki Smart Door и Nuki Smart Lock 3.0 (Pro).",
+        "pt": "Adicionado suporte para Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
+        "nl": "Ondersteuning toegevoegd voor Nuki Smart Door en Nuki Smart Lock 3.0 (Pro)",
+        "fr": "Ajout du support pour Nuki Smart Door et Nuki Smart Lock 3.0 (Pro)",
+        "it": "Aggiunto supporto per Nuki Smart Door e Nuki Smart Lock 3.0 (Pro)",
+        "es": "Soporte agregado para Nuki Smart Door y Nuki Smart Lock 3.0 (Pro)",
+        "pl": "Dodano obsługę Nuki Smart Door i Nuki Smart Lock 3.0 (Pro)",
+        "zh-cn": "添加了对 Nuki Smart Door 和 Nuki Smart Lock 3.0 (Pro) 的支持",
+        "uk": "Додано підтримку Nuki Smart Door і Nuki Smart Lock 3.0 (Pro)"
+      },
+      "2.0.0": {
+        "en": "Added compatibility with js-controller 6.0.x",
+        "de": "Kompatibilität mit js-controller 6.0.x hinzugefügt",
+        "ru": "Добавлена совместимость с js-контроллером 6.0.x",
+        "pt": "Adicionado compatibilidade com js-controller 6.0.x",
+        "nl": "Toegevoegde compatibiliteit met js-controller 6.0.x",
+        "fr": "Ajout de la compatibilité avec js-controller 6.0.x",
+        "it": "Aggiunto la compatibilità con js-controller 6.0.x",
+        "es": "Compatibilidad agregada con js-controller 6.0.x",
+        "pl": "Dodano kompatybilność ze sterownikiem js- 6.0.x",
+        "uk": "Додано сумісність з js-controller 6.0.x",
+        "zh-cn": "与 js 控制器 6. 0. x 添加兼容性"
+      },
+      "2.0.1": {
+        "en": "Dependencie updates",
+        "de": "Dependencie Updates",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependência",
+        "nl": "Afhankelijke updates",
+        "fr": "Mises à jour de la dépendance",
+        "it": "Aggiornamenti",
+        "es": "Actualizaciones de dependencia",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежності",
+        "zh-cn": "依赖更新"
+      }
     },
-    "native": {
-        "bridge_name": "Nuki bridge",
-        "bridge_ip": "",
-        "bridge_port": "8080",
-        "bridge_type": "1",
-        "token": "",
-        "fp_token": "",
-        "autoupd": false,
-        "interval": "10",
-        "host_cb": false,
-        "host_port": "9092"
+    "titleLang": {
+      "en": "Nuki Smart Lock",
+      "de": "Nuki Smart Lock",
+      "ru": "Нуки Умный Замок",
+      "pt": "Nuki Smart Lock",
+      "nl": "Nuki Smart Lock",
+      "fr": "Nuki De Verrouillage Intelligent",
+      "it": "Nuki Smart Lock",
+      "es": "Nuki Bloqueo Inteligente",
+      "pl": "Нуки Inteligentny Zamek",
+      "zh-cn": "Nuki智能锁定",
+      "uk": "Nuki Smart Lock"
     },
-    "encryptedNative": [
-        "token"
+    "desc": {
+      "en": "This adapter allows to control and monitor the Nuki Smart Lock",
+      "de": "Dieser Adapter ermöglicht die Steuerung und Überwachung des Nuki Smart Lock",
+      "ru": "Этот адаптер позволяет управлять и контролировать Нуки умный замок",
+      "pt": "Este adaptador permite controlar e monitorar o Nuki Smart Lock",
+      "nl": "Deze adapter maakt het mogelijk om controle en toezicht op de Nuki Smart Lock",
+      "fr": "Cet adaptateur permet de contrôler et de surveiller l'Nuki de Verrouillage Intelligent",
+      "it": "Questo adattatore permette di controllare e monitorare il Nuki Smart Lock",
+      "es": "Este adaptador permite el control y monitoreo de la Nuki Bloqueo Inteligente",
+      "pl": "Ten adapter pozwala zarządzać i kontrolować Нуки inteligentny zamek",
+      "zh-cn": "这适配器控制和监视Nuki智能锁定",
+      "uk": "Цей адаптер дозволяє контролювати та контролювати Nuki Smart Lock"
+    },
+    "authors": [
+      "smaragdschlange <smaragdschlange@gmx.de>"
     ],
-    "protectedNative": [
-        "token"
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "compact": true,
+    "icon": "nuki-logo.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/smaragdschlange/ioBroker.nuki/master/admin/nuki-logo.png",
+    "keywords": [
+      "nuki",
+      "smart",
+      "lock",
+      "opener"
     ],
-    "objects": []
+    "readme": "https://github.com/smaragdschlange/ioBroker.nuki/blob/master/README.md",
+    "loglevel": "info",
+    "type": "hardware",
+    "tier": 2,
+    "dataSource": "push",
+    "connectionType": "local",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.0.0"
+      }
+    ]
+  },
+  "native": {
+    "bridge_name": "Nuki bridge",
+    "bridge_ip": "",
+    "bridge_port": "8080",
+    "bridge_type": "1",
+    "token": "",
+    "fp_token": "",
+    "autoupd": false,
+    "interval": "10",
+    "host_cb": false,
+    "host_port": "9092"
+  },
+  "encryptedNative": [
+    "token"
+  ],
+  "protectedNative": [
+    "token"
+  ],
+  "objects": []
 }
