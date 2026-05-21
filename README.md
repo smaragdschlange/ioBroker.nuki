@@ -86,6 +86,10 @@ When updating to 2.x the token has to be entered again.
 
 ## Changelog
 
+
+### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+
 ### 2.0.1
 * (smaragdschlange) update: dependencie updates
 
