@@ -86,6 +86,9 @@ When updating to 2.x the token has to be entered again.
 
 ## Changelog
 
+### **WORK IN PROGRESS**
+- (iobroker-bot) Adapter requires node.js >= 22 now.
+
 ### 2.0.1
 * (smaragdschlange) update: dependencie updates
 
