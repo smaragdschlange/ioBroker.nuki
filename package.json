@@ -26,7 +26,7 @@
     "url": "https://github.com/smaragdschlange/ioBroker.nuki"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 22"
   },
   "dependencies": {
     "request": "^2.88.2",
